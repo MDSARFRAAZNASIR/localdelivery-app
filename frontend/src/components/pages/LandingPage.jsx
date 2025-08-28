@@ -62,7 +62,7 @@ export default function LandingPage() {
           Fast & Reliable Local Delivery
         </motion.h1>
         <p className="text-lg md:text-xl max-w-2xl mb-8">
-          Send and receive parcels across your city with ease. Trusted by shops, businesses, and customers.
+          Order Food across your city with ease. Trusted by shops, businesses, and customers.
         </p>
         <div className="flex gap-4">
           <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
@@ -111,7 +111,7 @@ export default function LandingPage() {
 
       {/* Call to Action */}
       <section className="py-16 bg-gradient-to-r from-blue-600 to-indigo-700 text-white text-center">
-        <h2 className="text-3xl md:text-4xl font-bold mb-6">Start Sending Smarter Today</h2>
+        <h2 className="text-3xl md:text-4xl font-bold mb-6">Start Order delicious and Testy food Today</h2>
         <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
           Get the App
         </Button>
@@ -120,6 +120,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="py-6 bg-gray-900 text-gray-300 text-center text-sm">
         © {new Date().getFullYear()} Local Delivery. All rights reserved.
+        <p>Design And Developed By SDE Md Sarfraaz Nasir</p>
       </footer>
     </div>
   );
