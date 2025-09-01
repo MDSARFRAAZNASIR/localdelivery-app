@@ -117,7 +117,7 @@ export default function LandingPage() {
         <h2 className="text-3xl md:text-4xl font-bold mb-6">Start Order delicious and Testy food Today</h2>
         <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
           <NavLink>
-           <Link to="signup" >Order Start Now</Link>
+           <Link to="signup" className="link1" >Order Start Now</Link>
           </NavLink>
        
         </Button>
