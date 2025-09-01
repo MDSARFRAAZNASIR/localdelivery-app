@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "../ui/button";
+
 // import { Button } from "./pages/components/ui/button";
 import { Card, CardContent } from "../ui/card";
 // import { Card, CardContent } from "./pages/components/ui/card";
 import { Package, Truck, Smartphone, Star } from "lucide-react";
+import SignupPage from "../authPages/SignupPage";
+import { Link, NavLink } from "react-router-dom";
 
 export default function LandingPage() {
   const [loading, setLoading] = useState(true);
@@ -87,7 +90,7 @@ export default function LandingPage() {
               <CardContent className="flex flex-col items-center text-center p-6">
                 {f.icon}
                 <h3 className="mt-4 text-xl font-semibold">{f.title}</h3>
-                <p className="mt-2 text-gray-600">{f.desc}</p>
+                <p className="mt-2 text-gray-600">{f.desc}</p> 
               </CardContent>
             </Card>
           ))}
@@ -113,7 +116,10 @@ export default function LandingPage() {
       <section className="py-16 bg-gradient-to-r from-blue-600 to-indigo-700 text-white text-center">
         <h2 className="text-3xl md:text-4xl font-bold mb-6">Start Order delicious and Testy food Today</h2>
         <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
-          Get the App
+          <NavLink>
+           <Link to="signup" >Order Start Now</Link>
+          </NavLink>
+       
         </Button>
       </section>
 
