@@ -6,6 +6,7 @@ import SignUpPage from './components/authPages/SignupPage';
 import React from 'react';
 import LogInPage from './components/authPages/LogInPage';
 import UserDashboard from './components/userPages/UserDashboard';
+import ProductPage from './components/pages/ProductPage';
 
 function App() {
   return (
@@ -14,13 +15,14 @@ function App() {
         <Route path='/' element={ <LandingPage/>}></Route>
         <Route  path='signup' element={<SignUpPage/>}></Route>
         <Route  path='signup/login' element={<LogInPage/>}></Route>
+        <Route path='productpage' element={<ProductPage/>}></Route>
         <Route path='userdashboard' element={<UserDashboard/>}></Route>
         {/* <Route path="/forgot" element={<ForgotPasswordPage />} /> */}
 
      </Routes>
      
      <h1 className="text-3xl font-bold underline">
-      Work In Progress
+   
     </h1>
     </div>
   );
