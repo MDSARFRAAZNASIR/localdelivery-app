@@ -2,9 +2,8 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 
-
 export default function SignupPage() {
-const [username, setUsername]=useState("")
+  const [username, setUsername] = useState("");
   const [userphone, setUserphone] = useState("");
   const [useremail, setUseremail] = useState("");
   const [userpassword, setUserpassword] = useState("");
@@ -13,31 +12,37 @@ const [username, setUsername]=useState("")
   const [forgotEmail, setForgotEmail] = useState("");
   const [showForgot, setShowForgot] = useState(false);
 
- 
-const userSignInHandler = async () => {
-  console.log(useremail, userpassword);
-  try {
-    let result = await fetch("https://localdelivery-app-backend.vercel.app/userregister", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, userphone, useremail, userpassword }),
-    });
+  const userSignInHandler = async () => {
+    console.log(useremail, userpassword);
+    try {
+      let result = await fetch(
+        "https://localdelivery-app-backend.vercel.app/userregister",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username,
+            userphone,
+            useremail,
+            userpassword,
+          }),
+        }
+      );
 
-    result = await result.json();
+      result = await result.json();
 
-    if (result._id) {
-      alert("Signup successful 🎉");
-      navigate("/productpage");  
-    } else {
-      alert("Signup failed: " + (result.error || "Unknown error"));
+      if (result._id) {
+        alert("Signup successful 🎉");
+        navigate("/productpage");
+      } else {
+        alert("Signup failed: " + (result.error || "Unknown error"));
+      }
+    } catch (err) {
+      // console.error(err);
+      alert("Something went wrong, please try again");
     }
-  } catch (err) {
-    console.error(err);
-    alert("Something went wrong, please try again");
-  }
-};
+  };
 
-  
   // Forget Password submit
   const handleForgotPassword = (e) => {
     e.preventDefault();
@@ -59,11 +64,11 @@ const userSignInHandler = async () => {
             </h2>
             <div className="space-y-5">
               <input
-               type="text"
-               placeholder="Full name"
-               value={username}
-               onChange={(e)=>setUsername(e.target.value)}
-               required
+                type="text"
+                placeholder="Full name"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
                 className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-orange-400"
               />
               <input
