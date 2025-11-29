@@ -3,7 +3,7 @@ const express = require("express");
 const connectDB = require("./db/configDb");
 const dotenv = require("dotenv");
 const colors = require("colors");
-const cors = require("cors");
+const cors = require('cors');
 const bcrypt=require("bcryptjs")
 
 // const User=require("./db/models/userSchemaDef")
@@ -25,7 +25,7 @@ app.use(cors({
     "http://localhost:3000", // local testing
     // "https://ignite3i-frontend.vercel.app", // your deployed domain
     
-    "https://vercel.com/md-sarfraaz-nasirs-projects/localdelivery-app-frontend" // if frontend lives here instead
+    "https://localdelivery-app-frontend.vercel.app" // if frontend lives here instead
   ],
  
 }));
