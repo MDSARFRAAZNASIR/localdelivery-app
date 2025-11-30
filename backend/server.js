@@ -12,16 +12,9 @@ app.use(express.json());
 
 //configure env
 dotenv.config();
-
-
 //database config
 connectDB();
 // app.use(cors());
-
-
-
-
-
 
 // adding for live
 app.use(cors({
