@@ -18,14 +18,15 @@ export default function SignupPage() {
       let result = await fetch(
         "https://localdelivery-app-backend.vercel.app/userregister",
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+          method: "post",
+           body: JSON.stringify({
             username,
             userphone,
             useremail,
             userpassword,
           }),
+          headers: { "Content-Type": "application/json" }
+         
         }
       );
 

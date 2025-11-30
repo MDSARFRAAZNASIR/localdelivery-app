@@ -4,20 +4,29 @@ const connectDB = require("./db/configDb");
 const dotenv = require("dotenv");
 const colors = require("colors");
 const cors = require('cors');
-const bcrypt=require("bcryptjs")
+// const bcrypt=require("bcryptjs")
 
 // const User=require("./db/models/userSchemaDef")
 const User = require("./db/models/userSchemaDefined");
+//rest object
+const app = express();
 //configure env
 dotenv.config();
 //database config
 connectDB();
-//rest object
-const app = express();
+// app.use(cors());
+
 //middleware
 app.use(express.json());
 
-app.use(cors());
+// configure CORS once
+const allowedOrigins = [
+  'http://localhost:3000',
+  // 'https://ignite3i-frontend.vercel.app',
+  'https://localdelivery-app-frontend.vercel.app'
+];
+
+
 
 // adding for live
 app.use(cors({
@@ -42,7 +51,9 @@ app.post("/userregister", async (req, resp) => {
   let result = await user.save();
   //    resp.send("api is progress")
   resp.send(result);
+  resp.send("Succesfull singUp")
 });
+
 
 //   for LogIn
 app.post("/userlogin", async (req, resp) => {
