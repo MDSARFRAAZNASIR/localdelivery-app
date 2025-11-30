@@ -19,12 +19,6 @@ connectDB();
 //middleware
 app.use(express.json());
 
-// configure CORS once
-const allowedOrigins = [
-  'http://localhost:3000',
-  // 'https://ignite3i-frontend.vercel.app',
-  'https://localdelivery-app-frontend.vercel.app'
-];
 
 
 
