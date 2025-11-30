@@ -23,7 +23,7 @@ export default function SignupPage() {
             username,
             userphone,
             useremail,
-            userpassword,
+            userpassword
           }),
           headers: { "Content-Type": "application/json" }
          
