@@ -14,13 +14,13 @@ app.use(express.json());
 dotenv.config();
 //database config
 connectDB();
-// app.use(cors());
+app.use(cors());
 
 // adding for live
 app.use(cors({
   origin: [
     "http://localhost:3000", // local testing
-    // "https://ignite3i-frontend.vercel.app", // your deployed domain
+
     
     "https://localdelivery-app-frontend.vercel.app" // if frontend lives here instead
   ],
