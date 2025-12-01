@@ -9,13 +9,13 @@ const userSchemaDefined = new mongoose.Schema(
       trim: true,
       maxlength: [15, "Name cannot be more than 15 characters"],
     },
-    userphone: {
-      type: String,
-      required: [true, "Please add a phone number"],
-      unique: true, // Ensures no two users have the same phone number
-      // Regex for a 10-digit phone number
-      match: [/^[0-9]{10}$/, "Please fill a valid 10-digit phone number"],
-    },
+    // userphone: {
+    //   type: String,
+    //   required: [true, "Please add a phone number"],
+    //   unique: true, // Ensures no two users have the same phone number
+    //   // Regex for a 10-digit phone number
+    //   match: [/^[0-9]{10}$/, "Please fill a valid 10-digit phone number"],
+    // },
 
     useremail: {
       type: String,
