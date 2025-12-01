@@ -4,7 +4,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 
 export default function SignupPage() {
   const [username, setUsername] = useState("");
-  const [userphone, setUserphone] = useState("");
+  // const [userphone, setUserphone] = useState("");
   const [useremail, setUseremail] = useState("");
   const [userpassword, setUserpassword] = useState("");
   const navigate = useNavigate();
@@ -13,20 +13,19 @@ export default function SignupPage() {
   const [showForgot, setShowForgot] = useState(false);
 
   const userSignInHandler = async () => {
-    console.log(useremail, userpassword);
+    console.log(username, useremail, userpassword);
     try {
-      let result = await fetch(
-        "https://localdelivery-app-backend.vercel.app/userregister",
+      let result = await fetch("https://localdelivery-app-backend.vercel.app/userregister",
         {
           method: "post",
-           body: JSON.stringify({
+            headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
             username,
-            userphone,
+            // userphone,
             useremail,
-            userpassword
+            userpassword,
           }),
-          headers: { "Content-Type": "application/json" }
-         
+        
         }
       );
 
@@ -72,7 +71,7 @@ export default function SignupPage() {
                 required
                 className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-orange-400"
               />
-              <input
+              {/* <input
                 type="tel"
                 name="userphone"
                 placeholder="Phone Number"
@@ -80,7 +79,7 @@ export default function SignupPage() {
                 onChange={(e) => setUserphone(e.target.value)}
                 required
                 className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-orange-400"
-              />
+              /> */}
               <input
                 type="email"
                 name="useremail"
