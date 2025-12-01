@@ -4,7 +4,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 
 export default function SignupPage() {
   const [username, setUsername] = useState("");
-  // const [userphone, setUserphone] = useState("");
+  const [userphone, setUserphone] = useState("");
   const [useremail, setUseremail] = useState("");
   const [userpassword, setUserpassword] = useState("");
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ export default function SignupPage() {
   const [showForgot, setShowForgot] = useState(false);
 
   const userSignInHandler = async () => {
-    console.log(username, useremail, userpassword);
+    console.log(username, userphone, useremail, userpassword);
     try {
       let result = await fetch("https://localdelivery-app-backend.vercel.app/userregister",
         {
@@ -21,7 +21,7 @@ export default function SignupPage() {
             headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             username,
-            // userphone,
+            userphone,
             useremail,
             userpassword,
           }),
@@ -71,7 +71,7 @@ export default function SignupPage() {
                 required
                 className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-orange-400"
               />
-              {/* <input
+              <input
                 type="tel"
                 name="userphone"
                 placeholder="Phone Number"
@@ -79,7 +79,7 @@ export default function SignupPage() {
                 onChange={(e) => setUserphone(e.target.value)}
                 required
                 className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-orange-400"
-              /> */}
+              />
               <input
                 type="email"
                 name="useremail"
@@ -91,7 +91,7 @@ export default function SignupPage() {
               />
               <input
                 type="password"
-                name="password"
+                name="userpassword"
                 placeholder="Password"
                 value={userpassword}
                 onChange={(e) => setUserpassword(e.target.value)}
@@ -117,7 +117,6 @@ export default function SignupPage() {
                 </Link>
               </NavLink>
             </p>
-
             <p className="text-sm text-center text-gray-600 mt-4">
               Forgot your password?{" "}
               <button
