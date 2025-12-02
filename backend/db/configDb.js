@@ -19,6 +19,9 @@
 
 // db/configDb.js
 const mongoose = require('mongoose');
+const dotenv = require("dotenv");
+dotenv.config();
+
 
 const connectDB = async () => {
   const uri = process.env.MONGODB_URL;
