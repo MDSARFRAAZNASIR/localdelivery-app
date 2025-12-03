@@ -12,36 +12,84 @@ export default function SignupPage() {
   const [forgotEmail, setForgotEmail] = useState("");
   const [showForgot, setShowForgot] = useState(false);
 
-  const userSignInHandler = async () => {
-    console.log(username, userphone, useremail, userpassword);
-    try {
-      let result = await fetch("https://localdelivery-app-backend.vercel.app/userregister",
-        {
-          method: "post",
-            headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username,
-            userphone,
-            useremail,
-            userpassword,
-          }),
+  // const userSignInHandler = async () => {
+  //   console.log(username, userphone, useremail, userpassword);
+  //   try {
+  //     let result = await fetch("https://localdelivery-app-backend.vercel.app/userregister",
+  //       {
+  //         method: "post",
+  //           headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify({
+  //           username,
+  //           userphone,
+  //           useremail,
+  //           userpassword,
+  //         }),
         
-        }
-      );
+  //       }
+  //     );
 
-      result = await result.json();
+  //     result = await result.json();
 
-      if (result._id) {
-        alert("Signup successful 🎉");
-        navigate("/productpage");
-      } else {
-        alert("Signup failed: " + (result.error || "Unknown error"));
-      }
-    } catch (err) {
-      // console.error(err);
-      alert("Something went wrong, please try again");
+  //     if (result._id) {
+  //       alert("Signup successful 🎉");
+  //       navigate("/productpage");
+  //     } else {
+  //       alert("Signup failed: " + (result.error || "Unknown error"));
+  //     }
+  //   } catch (err) {
+  //     // console.error(err);
+  //     alert("Something went wrong, please try again");
+  //   }
+  // };
+
+
+  // add another
+  const userSignInHandler = async () => {
+  console.log("Signing up:", { username, useremail, userpassword });
+  try {
+    const resp = await fetch("https://localdelivery-app-backend.vercel.app/userregister", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username,
+        // userphone, // omitted if you removed phone
+        useremail,
+        userpassword,
+      }),
+    });
+
+    // read response text first for robust logging
+    const text = await resp.text();
+    let result;
+    try {
+      result = JSON.parse(text);
+    } catch (e) {
+      // Not JSON — show raw text
+      console.error("Signup: non-json response:", text);
+      alert("Signup failed: Unexpected server response");
+      return;
     }
-  };
+
+    console.log("Signup response:", resp.status, result);
+
+    // Success when backend returned success:true and user object (or resp.ok)
+    if ((result && result.success && result.user && result.user._id) || (result && result._id)) {
+      alert("Signup successful 🎉");
+      // optionally store user in state/localStorage before navigating
+      navigate("/productpage");
+      return;
+    }
+
+    // if server provided a message, show it
+    const serverMsg = result && (result.message || result.error || (result.user && result.user.message));
+    alert("Signup failed: " + (serverMsg || JSON.stringify(result) || "Unknown error"));
+  } catch (err) {
+    console.error("Signup network/error:", err);
+    alert("Something went wrong, please try again");
+  }
+};
+
 
   // Forget Password submit
   const handleForgotPassword = (e) => {
