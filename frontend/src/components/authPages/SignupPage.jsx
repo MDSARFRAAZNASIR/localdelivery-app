@@ -15,7 +15,7 @@ export default function SignupPage() {
   const userSignInHandler = async () => {
     console.log(username, userphone, useremail, userpassword);
     try {
-      let result = await fetch("https://localdelivery-app-backend.vercel.app/api/userregister",
+      let result = await fetch("https://localdelivery-app-backend.vercel.app/userregister",
         {
           method: "post",
             headers: { "Content-Type": "application/json" },
