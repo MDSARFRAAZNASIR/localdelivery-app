@@ -12,7 +12,7 @@ export default function LogInPage() {
       console.log("login attempt:", useremail, userpassword);
 
       const res = await fetch(
-        "https://localdelivery-app-backend.vercel.app/api/userlogin",
+        "https://localdelivery-app-backend.vercel.app/userlogin",
         {
           method: "post",
 
