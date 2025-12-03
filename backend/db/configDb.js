@@ -42,8 +42,7 @@ const connectDB = async () => {
     .connect(uri, {
       // modern mongoose does not require these options, but left for compatibility
       useNewUrlParser: true,
-      // useUnifiedTopology: true,
-       serverSelectionTimeoutMS: 30000,
+      useUnifiedTopology: true,
     })
     .then((conn) => {
       console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
