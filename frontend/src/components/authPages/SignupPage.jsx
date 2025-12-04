@@ -46,14 +46,14 @@ export default function SignupPage() {
 
   // add another
   const userSignInHandler = async () => {
-  console.log("Signing up:", { username, useremail, userpassword });
+  console.log("Signing up:", { username, userphone, useremail, userpassword });
   try {
     const resp = await fetch("https://localdelivery-app-backend.vercel.app/userregister", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         username,
-        // userphone, // omitted if you removed phone
+        userphone, // omitted if you removed phone
         useremail,
         userpassword,
       }),
