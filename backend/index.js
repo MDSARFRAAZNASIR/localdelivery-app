@@ -132,6 +132,54 @@ connectDB().catch((err) => {
 app.get('/', (req, res) => res.send('API is running successfully ✅'));
 
 // Register
+// app.post(
+//   '/userregister',
+//   asyncHandler(async (req, res) => {
+//     const { username, useremail, userpassword, userphone } = req.body || {};
+
+//     if (!username || !useremail || !userpassword) {
+//       return res.status(400).json({
+//         success: false,
+//         message: 'username, useremail and userpassword are required',
+//       });
+//     }
+
+//     // normalize email
+//     const normalizedEmail = String(useremail).trim().toLowerCase();
+
+//     // if phone provided, normalize and validate; else leave undefined
+//     let phoneFinal;
+//     if (typeof userphone !== 'undefined' && userphone !== null && String(userphone).trim() !== '') {
+//       let digits = String(userphone).replace(/\D/g, '');
+//       if (digits.length > 10) digits = digits.slice(-10);
+//       if (!/^[0-9]{10}$/.test(digits)) {
+//         return res.status(400).json({ success: false, message: 'Please provide a valid 10-digit phone number' });
+//       }
+//       phoneFinal = digits;
+//     }
+
+//     // create user object
+//     const toSave = {
+//       username,
+//       useremail: normalizedEmail,
+//       userpassword,
+//     };
+//     if (phoneFinal) toSave.userphone = phoneFinal;
+
+//     // ensure DB is connected (serverless will wait here if needed)
+//     await connectDB();
+
+//     const user = new User(toSave);
+//     const saved = await user.save();
+
+//     const safe = saved.toObject();
+//     delete safe.userpassword;
+
+//     return res.status(201).json({ success: true, user: safe });
+//   })
+// );
+
+// Register (replace the previous handler body with this)
 app.post(
   '/userregister',
   asyncHandler(async (req, res) => {
@@ -147,16 +195,22 @@ app.post(
     // normalize email
     const normalizedEmail = String(useremail).trim().toLowerCase();
 
-    // if phone provided, normalize and validate; else leave undefined
+    // === phone normalization (Option A: accept many formats, store last 10 digits) ===
     let phoneFinal;
     if (typeof userphone !== 'undefined' && userphone !== null && String(userphone).trim() !== '') {
-      let digits = String(userphone).replace(/\D/g, '');
-      if (digits.length > 10) digits = digits.slice(-10);
-      if (!/^[0-9]{10}$/.test(digits)) {
-        return res.status(400).json({ success: false, message: 'Please provide a valid 10-digit phone number' });
+      // remove all non-digits
+      const digits = String(userphone).replace(/\D/g, '');
+      if (digits.length >= 10) {
+        // keep last 10 digits (works for +91XXXXXXXXXX and other prefixes)
+        phoneFinal = digits.slice(-10);
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: 'Please provide at least a 10-digit phone number',
+        });
       }
-      phoneFinal = digits;
     }
+    // ===============================================================================
 
     // create user object
     const toSave = {
@@ -165,6 +219,9 @@ app.post(
       userpassword,
     };
     if (phoneFinal) toSave.userphone = phoneFinal;
+
+    // ensure we never persist empty/null phone (protects unique index)
+    if (!toSave.userphone) delete toSave.userphone;
 
     // ensure DB is connected (serverless will wait here if needed)
     await connectDB();
@@ -178,6 +235,7 @@ app.post(
     return res.status(201).json({ success: true, user: safe });
   })
 );
+
 
 // Login
 app.post(
