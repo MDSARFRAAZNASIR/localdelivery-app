@@ -22,7 +22,7 @@
 //     "http://localhost:3000", // local testing
 //     "https://localdelivery-app-frontend.vercel.app" // if frontend lives here instead
 //   ],
- 
+
 // }));
 
 // ✅ Health check
@@ -40,7 +40,6 @@
 //   resp.send("Succesfull singUp")
 // });
 
-
 //   for LogIn
 // app.post("/userlogin", async (req, resp) => {
 //   const { useremail, userpassword } = req.body;
@@ -49,21 +48,21 @@
 //     return resp.status(400).json({ message: "All fields required" });
 //   }
 
-  // 1. Find user only by email
-  // const user = await User.findOne({ useremail });
+// 1. Find user only by email
+// const user = await User.findOne({ useremail });
 
-  // if (!user) {
-  //   return resp.status(404).json({ message: "User Not Found" });
-  // }
+// if (!user) {
+//   return resp.status(404).json({ message: "User Not Found" });
+// }
 
-  // 2. Compare password
-  // const isMatch = await bcrypt.compare(userpassword, user.userpassword);
+// 2. Compare password
+// const isMatch = await bcrypt.compare(userpassword, user.userpassword);
 
-  // if (!isMatch) {
-  //   return resp.status(401).json({ message: "Invalid Password" });
-  // }
+// if (!isMatch) {
+//   return resp.status(401).json({ message: "Invalid Password" });
+// }
 
-  // 3. Remove password before sending
+// 3. Remove password before sending
 //   const userData = user.toObject();
 //   delete userData.userpassword;
 
@@ -72,7 +71,6 @@
 //     user: userData
 //   });
 // });
-
 
 //run listen
 //  for local server
@@ -88,15 +86,14 @@
 // for the vercel
 // module.exports=app
 
-
 // index.js
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const colors = require('colors'); // optional
-const connectDB = require('./db/configDb');
-const User = require('./db/models/userSchemaDefined');
-const bcrypt = require('bcryptjs');
+const express = require("express");
+const cors = require("cors");
+const dotenv = require("dotenv");
+const colors = require("colors"); // optional
+const connectDB = require("./db/configDb");
+const User = require("./db/models/userSchemaDefined");
+const bcrypt = require("bcryptjs");
 
 // load env (important: do this once at entry)
 dotenv.config();
@@ -111,9 +108,9 @@ app.use(express.json());
 app.use(
   cors({
     origin: [
-      'http://localhost:3000',
-      'https://localdelivery-app-frontend.vercel.app',
-      'https://localdelivery-app.vercel.app',
+      "http://localhost:3000",
+      "https://localdelivery-app-frontend.vercel.app",
+      "https://localdelivery-app.vercel.app",
     ],
   })
 );
@@ -125,11 +122,11 @@ const asyncHandler = (fn) => (req, res, next) => {
 
 // connect DB (serverless-safe) — attempt once at startup (local). Serverless handlers also call connectDB before DB ops.
 connectDB().catch((err) => {
-  console.error('Initial DB connect failed:', err && err.message);
+  console.error("Initial DB connect failed:", err && err.message);
 });
 
 // Health
-app.get('/', (req, res) => res.send('API is running successfully ✅'));
+app.get("/", (req, res) => res.send("API is running successfully ✅"));
 
 // Register
 // app.post(
@@ -181,14 +178,14 @@ app.get('/', (req, res) => res.send('API is running successfully ✅'));
 
 // Register (replace the previous handler body with this)
 app.post(
-  '/userregister',
+  "/userregister",
   asyncHandler(async (req, res) => {
     const { username, useremail, userpassword, userphone } = req.body || {};
 
     if (!username || !useremail || !userpassword) {
       return res.status(400).json({
         success: false,
-        message: 'username, useremail and userpassword are required',
+        message: "username, useremail and userpassword are required",
       });
     }
 
@@ -197,16 +194,20 @@ app.post(
 
     // === phone normalization (Option A: accept many formats, store last 10 digits) ===
     let phoneFinal;
-    if (typeof userphone !== 'undefined' && userphone !== null && String(userphone).trim() !== '') {
+    if (
+      typeof userphone !== "undefined" &&
+      userphone !== null &&
+      String(userphone).trim() !== ""
+    ) {
       // remove all non-digits
-      const digits = String(userphone).replace(/\D/g, '');
+      const digits = String(userphone).replace(/\D/g, "");
       if (digits.length >= 10) {
         // keep last 10 digits (works for +91XXXXXXXXXX and other prefixes)
         phoneFinal = digits.slice(-10);
       } else {
         return res.status(400).json({
           success: false,
-          message: 'Please provide at least a 10-digit phone number',
+          message: "Please provide at least a 10-digit phone number",
         });
       }
     }
@@ -236,35 +237,93 @@ app.post(
   })
 );
 
+// Login
+// app.post(
+//   "/userlogin",
+//   asyncHandler(async (req, res) => {
+//     const { useremail, userpassword } = req.body || {};
+//     if (!useremail || !userpassword) {
+//       return res.status(400).json({ message: "All fields required" });
+//     }
 
+//     await connectDB();
+
+//     const user = await User.findOne({
+//       useremail: String(useremail).trim().toLowerCase(),
+//     });
+//     if (!user) return res.status(404).json({ message: "User Not Found" });
+
+//     const isMatch = await bcrypt.compare(userpassword, user.userpassword);
+//     if (!isMatch) return res.status(401).json({ message: "Invalid Password" });
+
+//     const userData = user.toObject();
+//     delete userData.userpassword;
+
+//     return res
+//       .status(200)
+//       .json({ message: "Login Successful", user: userData });
+//   })
+// );
+
+
+// add after jwt
 // Login
 app.post(
   '/userlogin',
   asyncHandler(async (req, res) => {
     const { useremail, userpassword } = req.body || {};
+
     if (!useremail || !userpassword) {
-      return res.status(400).json({ message: 'All fields required' });
+      return res.status(400).json({ success: false, message: 'All fields required' });
     }
 
     await connectDB();
 
-    const user = await User.findOne({ useremail: String(useremail).trim().toLowerCase() });
-    if (!user) return res.status(404).json({ message: 'User Not Found' });
+    // find user
+    const user = await User.findOne({
+      useremail: String(useremail).trim().toLowerCase(),
+    });
 
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User Not Found' });
+    }
+
+    // compare password
     const isMatch = await bcrypt.compare(userpassword, user.userpassword);
-    if (!isMatch) return res.status(401).json({ message: 'Invalid Password' });
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'Invalid Password' });
+    }
 
+    // ---------- ⭐ JWT CREATION ⭐ ----------
+    const jwt = require('jsonwebtoken');
+
+    const token = jwt.sign(
+      { id: user._id },                      // payload
+      process.env.JWT_SECRET || 'devsecret', // secret
+      { expiresIn: '7d' }                    // expiry
+    );
+    // ----------------------------------------
+
+    // create clean user object
     const userData = user.toObject();
     delete userData.userpassword;
 
-    return res.status(200).json({ message: 'Login Successful', user: userData });
+    return res.status(200).json({
+      success: true,
+      message: 'Login Successful',
+      token: token,        // ⭐ send token to frontend
+      user: userData,
+    });
   })
 );
 
+
 // GLOBAL error handler (single, last middleware)
 app.use((err, req, res, next) => {
-  console.error('GLOBAL ERROR:', err && (err.stack || err.message || err));
-  res.status(err.status || 500).json({ success: false, message: err.message || 'Server error' });
+  console.error("GLOBAL ERROR:", err && (err.stack || err.message || err));
+  res
+    .status(err.status || 500)
+    .json({ success: false, message: err.message || "Server error" });
 });
 
 // If running locally (dev), start the server with listen
