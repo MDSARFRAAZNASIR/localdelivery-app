@@ -1,7 +1,7 @@
 // src/pages/UserDashboard.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import Navbar from '../pages/Navbar';
 export default function UserDashboard() {
   const [user, setUser] = useState(null);
   const [orders, setOrders] = useState([]);
@@ -57,6 +57,8 @@ export default function UserDashboard() {
   if (error) return <div className="p-6 text-red-600">Error: {error}</div>;
 
   return (
+    <>
+    <Navbar/>
     <div className="p-6 max-w-4xl mx-auto">
       <div className="bg-white p-6 rounded shadow mb-6">
         <h2 className="text-xl font-bold mb-2">Welcome, {user.username}</h2>
@@ -96,5 +98,6 @@ export default function UserDashboard() {
         )}
       </div>
     </div>
+    </>
   );
 }

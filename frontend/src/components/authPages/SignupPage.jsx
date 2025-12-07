@@ -77,7 +77,7 @@ export default function SignupPage() {
     if ((result && result.success && result.user && result.user._id) || (result && result._id)) {
       alert("Signup successful 🎉");
       // optionally store user in state/localStorage before navigating
-      navigate("/productpage");
+      navigate("/loginpage");
       return;
     }
 
