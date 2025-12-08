@@ -163,37 +163,6 @@ app.post(
 );
 
 
-// add other route
-// inside index.js (or separate router)
-
-// GET profile
-// app.get('/user/profile', auth, async (req, res) => {
-//   // req.user from middleware
-//   const user = req.user;
-//   // remove sensitive if any
-//   delete user.userpassword;
-//   res.json({ success: true, user });
-// });
-
-// // PUT update profile
-// app.put('/user/profile', auth, async (req, res) => {
-//   try {
-//     const updates = {};
-//     const allowed = ['username', 'userphone', 'useremail'];
-//     allowed.forEach(k => {
-//       if (req.body[k] !== undefined) updates[k] = req.body[k];
-//     });
-
-//     // (Optional) validate phone/email here
-//     const updated = await User.findByIdAndUpdate(req.user._id, updates, { new: true, runValidators: true }).lean();
-//     delete updated.userpassword;
-//     res.json({ success: true, user: updated });
-//   } catch (err) {
-//     console.error('/user/profile PUT err', err);
-//     res.status(400).json({ success:false, message: err.message || 'Update failed' });
-//   }
-// });
-
 
 // user profile upadate
 // GET user profile
@@ -272,37 +241,133 @@ app.put(
 );
 
 
-// GET orders (paginated)
-app.get('/user/orders', auth, async (req, res) => {
-  try {
+// // GET orders (paginated)
+// app.get('/user/orders', auth, async (req, res) => {
+//   try {
+//     const page = Math.max(1, parseInt(req.query.page) || 1);
+//     const limit = Math.min(50, parseInt(req.query.limit) || 10);
+//     const skip = (page - 1) * limit;
+
+//     const [orders, total] = await Promise.all([
+//       Order.find({ userId: req.user._id }).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+//       Order.countDocuments({ userId: req.user._id })
+//     ]);
+
+//     res.json({ success: true, page, limit, total, orders });
+//   } catch (err) {
+//     console.error('/user/orders err', err);
+//     res.status(500).json({ success:false, message: 'Failed to fetch orders' });
+//   }
+// });
+
+// // GET single order
+// app.get('/user/orders/:id', auth, async (req, res) => {
+//   try {
+//     const order = await Order.findOne({ _id: req.params.id, userId: req.user._id }).lean();
+//     if (!order) return res.status(404).json({ success:false, message:'Order not found' });
+//     res.json({ success:true, order });
+//   } catch (err) {
+//     console.error('/user/orders/:id err', err);
+//     res.status(500).json({ success:false, message:'Error' });
+//   }
+// });
+
+
+
+// ================== ORDERS ROUTES ==================
+
+// Create new order (for logged-in user)
+app.post(
+  "/orders",
+  auth,
+  asyncHandler(async (req, res) => {
+    const {
+      pickupAddress,
+      pickupPhone,
+      dropAddress,
+      dropPhone,
+      parcelDescription,
+      parcelWeightKg,
+      price,
+      paymentMethod,
+    } = req.body || {};
+
+    if (!pickupAddress || !dropAddress || !parcelDescription) {
+      return res.status(400).json({
+        success: false,
+        message: "pickupAddress, dropAddress and parcelDescription are required",
+      });
+    }
+
+    await connectDB();
+
+    const order = new Order({
+      userId: req.user._id,
+      pickupAddress,
+      pickupPhone,
+      dropAddress,
+      dropPhone,
+      parcelDescription,
+      parcelWeightKg: parcelWeightKg || 0,
+      price: price || 0,
+      paymentMethod: paymentMethod || "COD",
+    });
+
+    const saved = await order.save();
+
+    return res.status(201).json({ success: true, order: saved });
+  })
+);
+
+// Get all orders for logged-in user (with pagination)
+app.get(
+  "/orders",
+  auth,
+  asyncHandler(async (req, res) => {
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(50, parseInt(req.query.limit) || 10);
     const skip = (page - 1) * limit;
 
+    await connectDB();
+
     const [orders, total] = await Promise.all([
-      Order.find({ userId: req.user._id }).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
-      Order.countDocuments({ userId: req.user._id })
+      Order.find({ userId: req.user._id })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Order.countDocuments({ userId: req.user._id }),
     ]);
 
-    res.json({ success: true, page, limit, total, orders });
-  } catch (err) {
-    console.error('/user/orders err', err);
-    res.status(500).json({ success:false, message: 'Failed to fetch orders' });
-  }
-});
+    return res.json({
+      success: true,
+      page,
+      limit,
+      total,
+      orders,
+    });
+  })
+);
 
-// GET single order
-app.get('/user/orders/:id', auth, async (req, res) => {
-  try {
-    const order = await Order.findOne({ _id: req.params.id, userId: req.user._id }).lean();
-    if (!order) return res.status(404).json({ success:false, message:'Order not found' });
-    res.json({ success:true, order });
-  } catch (err) {
-    console.error('/user/orders/:id err', err);
-    res.status(500).json({ success:false, message:'Error' });
-  }
-});
+// Get single order detail
+app.get(
+  "/orders/:id",
+  auth,
+  asyncHandler(async (req, res) => {
+    await connectDB();
 
+    const order = await Order.findOne({
+      _id: req.params.id,
+      userId: req.user._id,
+    }).lean();
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    return res.json({ success: true, order });
+  })
+);
 
 
 // GLOBAL error handler (single, last middleware)
