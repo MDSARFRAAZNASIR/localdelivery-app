@@ -167,32 +167,110 @@ app.post(
 // inside index.js (or separate router)
 
 // GET profile
-app.get('/user/profile', auth, async (req, res) => {
-  // req.user from middleware
-  const user = req.user;
-  // remove sensitive if any
-  delete user.userpassword;
-  res.json({ success: true, user });
-});
+// app.get('/user/profile', auth, async (req, res) => {
+//   // req.user from middleware
+//   const user = req.user;
+//   // remove sensitive if any
+//   delete user.userpassword;
+//   res.json({ success: true, user });
+// });
 
-// PUT update profile
-app.put('/user/profile', auth, async (req, res) => {
-  try {
+// // PUT update profile
+// app.put('/user/profile', auth, async (req, res) => {
+//   try {
+//     const updates = {};
+//     const allowed = ['username', 'userphone', 'useremail'];
+//     allowed.forEach(k => {
+//       if (req.body[k] !== undefined) updates[k] = req.body[k];
+//     });
+
+//     // (Optional) validate phone/email here
+//     const updated = await User.findByIdAndUpdate(req.user._id, updates, { new: true, runValidators: true }).lean();
+//     delete updated.userpassword;
+//     res.json({ success: true, user: updated });
+//   } catch (err) {
+//     console.error('/user/profile PUT err', err);
+//     res.status(400).json({ success:false, message: err.message || 'Update failed' });
+//   }
+// });
+
+
+// user profile upadate
+// GET user profile
+app.get(
+  "/user/profile",
+  auth,
+  asyncHandler(async (req, res) => {
+    const user = { ...req.user };
+    delete user.userpassword;
+    return res.json({ success: true, user });
+  })
+);
+
+// PUT update profile (name / phone / email)
+app.put(
+  "/user/profile",
+  auth,
+  asyncHandler(async (req, res) => {
+    const { username, useremail, userphone } = req.body || {};
     const updates = {};
-    const allowed = ['username', 'userphone', 'useremail'];
-    allowed.forEach(k => {
-      if (req.body[k] !== undefined) updates[k] = req.body[k];
-    });
 
-    // (Optional) validate phone/email here
-    const updated = await User.findByIdAndUpdate(req.user._id, updates, { new: true, runValidators: true }).lean();
-    delete updated.userpassword;
-    res.json({ success: true, user: updated });
-  } catch (err) {
-    console.error('/user/profile PUT err', err);
-    res.status(400).json({ success:false, message: err.message || 'Update failed' });
-  }
-});
+    if (username) updates.username = username.trim();
+    if (useremail) updates.useremail = String(useremail).trim().toLowerCase();
+
+    // phone normalization — same logic as signup (last 10 digits, India-style)
+    if (typeof userphone !== "undefined" && userphone !== null && String(userphone).trim() !== "") {
+      const digits = String(userphone).replace(/\D/g, "");
+      if (digits.length >= 10) {
+        updates.userphone = digits.slice(-10);
+      } else {
+        return res
+          .status(400)
+          .json({ success: false, message: "Please provide at least a 10-digit phone number" });
+      }
+    }
+
+    if (!updates.username && !updates.useremail && !updates.userphone) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No valid fields to update" });
+    }
+
+    try {
+      const updated = await User.findByIdAndUpdate(req.user._id, updates, {
+        new: true,
+        runValidators: true,
+      }).lean();
+
+      if (!updated) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+
+      delete updated.userpassword;
+
+      return res.json({
+        success: true,
+        message: "Profile updated successfully",
+        user: updated,
+      });
+    } catch (err) {
+      console.error("/user/profile PUT error ->", err);
+
+      // handle duplicate email / phone
+      if (err && err.code === 11000) {
+        const field = Object.keys(err.keyValue || {})[0] || "field";
+        return res
+          .status(409)
+          .json({ success: false, message: `${field} already exists` });
+      }
+
+      return res
+        .status(500)
+        .json({ success: false, message: err.message || "Update failed" });
+    }
+  })
+);
+
 
 // GET orders (paginated)
 app.get('/user/orders', auth, async (req, res) => {
