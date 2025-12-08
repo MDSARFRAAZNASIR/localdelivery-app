@@ -145,7 +145,7 @@ app.post(
     const token = jwt.sign(
       { id: user._id },                      // payload
       process.env.JWT_SECRET || 'devsecret', // secret
-      { expiresIn: '20s' }                    // expiry
+      { expiresIn: '7d' }                    // expiry
     );
     // ----------------------------------------
 
