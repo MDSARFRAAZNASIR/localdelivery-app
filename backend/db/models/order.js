@@ -1,62 +1,43 @@
-// // db/models/order.js
-// const mongoose = require('mongoose');
+// backend/db/models/order.js
+const mongoose = require("mongoose");
 
-// const orderSchema = new mongoose.Schema({
-//   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'Userdata', required: true },
-//   storeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Store' }, // optional
-//   pickup: {
-//     address: String,
-//     lat: Number,
-//     lng: Number
-//   },
-//   drop: {
-//     address: String,
-//     lat: Number,
-//     lng: Number
-//   },
-//   parcel: {
-//     weightKg: Number,
-//     description: String,
-//     value: Number
-//   },
-//   price: { type: Number, default: 0 },
-//   paymentMethod: { type: String, enum: ['COD','ONLINE'], default: 'COD' },
-//   status: { type: String, enum: ['CREATED','ACCEPTED','PICKED','ONWAY','DELIVERED','CANCELLED'], default: 'CREATED' },
-//   assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'DeliveryPartner' },
-//   createdAt: { type: Date, default: Date.now },
-//   updatedAt: { type: Date, default: Date.now }
-// }, { timestamps: true });
-
-// module.exports = mongoose.models.Order || mongoose.model('Order', orderSchema);
-
-
-// db/models/order.js
-const mongoose = require('mongoose');
-
-const orderSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'Userdata', required: true },
-  storeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Store' }, // optional
-  pickup: {
-    address: String,
-    lat: Number,
-    lng: Number
+const orderItemSchema = new mongoose.Schema(
+  {
+    productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
+    name: { type: String, required: true },          // snapshot of product name
+    price: { type: Number, required: true },         // price at time of order
+    quantity: { type: Number, required: true, min: 1 },
+    subtotal: { type: Number, required: true, min: 0 },
   },
-  drop: {
-    address: String,
-    lat: Number,
-    lng: Number
-  },
-  parcel: {
-    weightKg: Number,
-    description: String,
-    value: Number
-  },
-  price: { type: Number, default: 0 },
-  paymentMethod: { type: String, enum: ['COD','ONLINE'], default: 'COD' },
-  status: { type: String, enum: ['CREATED','ACCEPTED','PICKED','ONWAY','DELIVERED','CANCELLED'], default: 'CREATED' },
-  assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'DeliveryPartner' },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-}, { timestamps: true });
+  { _id: false }
+);
 
-module.exports = mongoose.models.Order || mongoose.model('Order', orderSchema);
+const orderSchema = new mongoose.Schema(
+  {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "Userdata", required: true },
+
+    items: {
+      type: [orderItemSchema],
+      validate: [arr => arr.length > 0, "Order must have at least one item"],
+    },
+
+    totalAmount: { type: Number, required: true, min: 0 },
+
+    deliveryAddress: { type: String, required: true },
+    paymentMethod: {
+      type: String,
+      enum: ["COD", "ONLINE"],
+      default: "COD",
+    },
+
+    status: {
+      type: String,
+      enum: ["CREATED", "CONFIRMED", "DISPATCHED", "DELIVERED", "CANCELLED"],
+      default: "CREATED",
+    },
+  },
+  { timestamps: true }
+);
+
+module.exports =
+  mongoose.models.Order || mongoose.model("Order", orderSchema);

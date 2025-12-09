@@ -8,6 +8,7 @@ const colors = require("colors"); // optional
 const connectDB = require("./db/configDb");
 const User = require("./db/models/userSchemaDefined");
 const Order = require('./db/models/order');
+const Product=require('./db/models/product')
 const auth = require('./middleware/auth');
 
 const bcrypt = require("bcryptjs");
@@ -276,96 +277,240 @@ app.put(
 
 // ================== ORDERS ROUTES ==================
 
-// Create new order (for logged-in user)
+// Create new order (for logged-in user like porter)
+// app.post(
+//   "/orders",
+//   auth,
+//   asyncHandler(async (req, res) => {
+//     const {
+//       pickupAddress,
+//       pickupPhone,
+//       dropAddress,
+//       dropPhone,
+//       parcelDescription,
+//       parcelWeightKg,
+//       price,
+//       paymentMethod,
+//     } = req.body || {};
+
+//     if (!pickupAddress || !dropAddress || !parcelDescription) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "pickupAddress, dropAddress and parcelDescription are required",
+//       });
+//     }
+
+//     await connectDB();
+
+//     const order = new Order({
+//       userId: req.user._id,
+//       pickupAddress,
+//       pickupPhone,
+//       dropAddress,
+//       dropPhone,
+//       parcelDescription,
+//       parcelWeightKg: parcelWeightKg || 0,
+//       price: price || 0,
+//       paymentMethod: paymentMethod || "COD",
+//     });
+
+//     const saved = await order.save();
+
+//     return res.status(201).json({ success: true, order: saved });
+//   })
+// );
+
+// // Get all orders for logged-in user (with pagination for order create by user like porter)
+// app.get(
+//   "/orders",
+//   auth,
+//   asyncHandler(async (req, res) => {
+//     const page = Math.max(1, parseInt(req.query.page) || 1);
+//     const limit = Math.min(50, parseInt(req.query.limit) || 10);
+//     const skip = (page - 1) * limit;
+
+//     await connectDB();
+
+//     const [orders, total] = await Promise.all([
+//       Order.find({ userId: req.user._id })
+//         .sort({ createdAt: -1 })
+//         .skip(skip)
+//         .limit(limit)
+//         .lean(),
+//       Order.countDocuments({ userId: req.user._id }),
+//     ]);
+
+//     return res.json({
+//       success: true,
+//       page,
+//       limit,
+//       total,
+//       orders,
+//     });
+//   })
+// );
+
+// // Get single order detail
+// app.get(
+//   "/orders/:id",
+//   auth,
+//   asyncHandler(async (req, res) => {
+//     await connectDB();
+
+//     const order = await Order.findOne({
+//       _id: req.params.id,
+//       userId: req.user._id,
+//     }).lean();
+
+//     if (!order) {
+//       return res.status(404).json({ success: false, message: "Order not found" });
+//     }
+
+//     return res.json({ success: true, order });
+//   })
+// );
+
+// Create product (admin use via Postman for now)
+app.post(
+  "/admin/products",
+  auth,
+  asyncHandler(async (req, res) => {
+    const { name, description, price, imageUrl, category, stock } = req.body || {};
+
+    if (!name || typeof price === "undefined") {
+      return res
+        .status(400)
+        .json({ success: false, message: "name and price are required" });
+    }
+
+    await connectDB();
+
+    const product = new Product({
+      name,
+      description: description || "",
+      price: Number(price),
+      imageUrl: imageUrl || "",
+      category: category || "",
+      stock: typeof stock !== "undefined" ? Number(stock) : 0,
+    });
+
+    const saved = await product.save();
+    return res.status(201).json({ success: true, product: saved });
+  })
+);
+
+// Public list of active products
+app.get(
+  "/products",
+  asyncHandler(async (req, res) => {
+    await connectDB();
+
+    const products = await Product.find({ isActive: true }).lean();
+    return res.json({ success: true, products });
+  })
+);
+
+
+
+// Create order from cart items
 app.post(
   "/orders",
   auth,
   asyncHandler(async (req, res) => {
-    const {
-      pickupAddress,
-      pickupPhone,
-      dropAddress,
-      dropPhone,
-      parcelDescription,
-      parcelWeightKg,
-      price,
-      paymentMethod,
-    } = req.body || {};
+    const { items, deliveryAddress, paymentMethod } = req.body || {};
 
-    if (!pickupAddress || !dropAddress || !parcelDescription) {
+    if (!deliveryAddress || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "pickupAddress, dropAddress and parcelDescription are required",
+        message: "items[] and deliveryAddress are required",
+      });
+    }
+
+    // validate items structure
+    const cleanedItems = items
+      .map((it) => ({
+        productId: it.productId,
+        quantity: Number(it.quantity || 0),
+      }))
+      .filter((it) => it.productId && it.quantity > 0);
+
+    if (cleanedItems.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "At least one valid item (productId + quantity > 0) is required",
       });
     }
 
     await connectDB();
 
+    const productIds = cleanedItems.map((it) => it.productId);
+    const products = await Product.find({
+      _id: { $in: productIds },
+      isActive: true,
+    }).lean();
+
+    if (products.length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No valid products found in cart" });
+    }
+
+    const productMap = new Map(products.map((p) => [String(p._id), p]));
+
+    const orderItems = [];
+    let totalAmount = 0;
+
+    for (const it of cleanedItems) {
+      const prod = productMap.get(String(it.productId));
+      if (!prod) continue;
+
+      const subtotal = prod.price * it.quantity;
+      totalAmount += subtotal;
+
+      orderItems.push({
+        productId: prod._id,
+        name: prod.name,
+        price: prod.price,
+        quantity: it.quantity,
+        subtotal,
+      });
+    }
+
+    if (orderItems.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Cart items are invalid or products inactive",
+      });
+    }
+
     const order = new Order({
       userId: req.user._id,
-      pickupAddress,
-      pickupPhone,
-      dropAddress,
-      dropPhone,
-      parcelDescription,
-      parcelWeightKg: parcelWeightKg || 0,
-      price: price || 0,
+      items: orderItems,
+      totalAmount,
+      deliveryAddress,
       paymentMethod: paymentMethod || "COD",
     });
 
     const saved = await order.save();
 
-    return res.status(201).json({ success: true, order: saved });
+    return res
+      .status(201)
+      .json({ success: true, order: saved, message: "Order created" });
   })
 );
 
-// Get all orders for logged-in user (with pagination)
+// Get all orders for logged-in user
 app.get(
   "/orders",
   auth,
   asyncHandler(async (req, res) => {
-    const page = Math.max(1, parseInt(req.query.page) || 1);
-    const limit = Math.min(50, parseInt(req.query.limit) || 10);
-    const skip = (page - 1) * limit;
-
     await connectDB();
 
-    const [orders, total] = await Promise.all([
-      Order.find({ userId: req.user._id })
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean(),
-      Order.countDocuments({ userId: req.user._id }),
-    ]);
+    const orders = await Order.find({ userId: req.user._id })
+      .sort({ createdAt: -1 })
+      .lean();
 
-    return res.json({
-      success: true,
-      page,
-      limit,
-      total,
-      orders,
-    });
-  })
-);
-
-// Get single order detail
-app.get(
-  "/orders/:id",
-  auth,
-  asyncHandler(async (req, res) => {
-    await connectDB();
-
-    const order = await Order.findOne({
-      _id: req.params.id,
-      userId: req.user._id,
-    }).lean();
-
-    if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" });
-    }
-
-    return res.json({ success: true, order });
+    return res.json({ success: true, orders });
   })
 );
 

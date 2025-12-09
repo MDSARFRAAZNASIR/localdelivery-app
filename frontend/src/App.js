@@ -11,7 +11,9 @@ import ProtectedRoute from "./components/authPages/ProtectedRoute";
 import { useEffect } from "react";
 import { isTokenExpired } from "./lib/utlis";
 import SessionExpired from "./components/pages/SessionExpired";
-
+import ProfilePage from "./components/pages/ProfilePage";
+import OrdersPage from "./components/pages/OrdersPage";
+import CreateOrderPage from "./components/pages/CreateOrderPage";
 
 function App() {
   useEffect(() => {
@@ -34,6 +36,11 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="productpage" element={<ProductPage />}></Route>
           <Route path="userdashboard" element={<UserDashboard />}></Route>
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/orders" element={<OrdersPage />} />
+            <Route path="/create-order" element={<CreateOrderPage />} />
+
+
           {/* yahan aur protected routes add kar sakte ho */}
           {/* <Route path="/orders" element={<OrdersPage />} /> */}
         </Route>

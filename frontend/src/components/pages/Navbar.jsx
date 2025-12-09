@@ -59,6 +59,28 @@ export default function Navbar() {
           Dashboard
         </NavLink>
         {/* Add more links later if needed */}
+        <NavLink
+  to="/profile"
+  className={({ isActive }) =>
+    `hover:text-orange-500 ${
+      isActive ? "text-orange-500 font-semibold" : "text-gray-700"
+    }`
+  }
+>
+  Profile
+</NavLink>
+<NavLink
+  to="/orders"
+  className={({ isActive }) =>
+    `hover:text-orange-500 ${
+      isActive ? "text-orange-500 font-semibold" : "text-gray-700"
+    }`
+  }
+>
+  Orders
+</NavLink>
+
+
       </div>
 
       {/* Right: user info + logout */}
