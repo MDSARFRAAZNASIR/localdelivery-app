@@ -12,6 +12,7 @@ const Product=require('./db/models/product')
 const auth = require('./middleware/auth');
 
 const bcrypt = require("bcryptjs");
+const adminOnly=require("./middleware/adminOnly")
 
 
 // load env (important: do this once at entry)
@@ -370,34 +371,34 @@ app.put(
 //   })
 // );
 
-// // Create product (admin use via Postman for now)
-// app.post(
-//   "/admin/products",
-//   auth,
-//   asyncHandler(async (req, res) => {
-//     const { name, description, price, imageUrl, category, stock } = req.body || {};
+// Create product (admin use via Postman for now)
+app.post(
+  "/admin/products",
+  auth, adminOnly,
+  asyncHandler(async (req, res) => {
+    const { name, description, price, imageUrl, category, stock } = req.body || {};
 
-//     if (!name || typeof price === "undefined") {
-//       return res
-//         .status(400)
-//         .json({ success: false, message: "name and price are required" });
-//     }
+    if (!name || typeof price === "undefined") {
+      return res
+        .status(400)
+        .json({ success: false, message: "name and price are required" });
+    }
 
-//     await connectDB();
+    await connectDB();
 
-//     const product = new Product({
-//       name,
-//       description: description || "",
-//       price: Number(price),
-//       imageUrl: imageUrl || "",
-//       category: category || "",
-//       stock: typeof stock !== "undefined" ? Number(stock) : 0,
-//     });
+    const product = new Product({
+      name,
+      description: description || "",
+      price: Number(price),
+      imageUrl: imageUrl || "",
+      category: category || "",
+      stock: typeof stock !== "undefined" ? Number(stock) : 0,
+    });
 
-//     const saved = await product.save();
-//     return res.status(201).json({ success: true, product: saved });
-//   })
-// );
+    const saved = await product.save();
+    return res.status(201).json({ success: true, product: saved });
+  })
+);
 
 // ---------- Admin product management (list/edit/delete) ----------
 /**
@@ -410,7 +411,7 @@ app.put(
 
 app.get(
   "/admin/products",
-  auth,
+  auth, adminOnly,
   asyncHandler(async (req, res) => {
     await connectDB();
     const products = await Product.find().sort({ createdAt: -1 }).lean();
@@ -420,7 +421,7 @@ app.get(
 
 app.put(
   "/admin/products/:id",
-  auth,
+  auth, adminOnly,
   asyncHandler(async (req, res) => {
     const updates = {};
     const fields = ["name", "description", "price", "imageUrl", "category", "stock", "isActive"];
@@ -439,7 +440,7 @@ app.put(
 
 app.delete(
   "/admin/products/:id",
-  auth,
+  auth, adminOnly,
   asyncHandler(async (req, res) => {
     await connectDB();
     const deleted = await Product.findByIdAndDelete(req.params.id).lean();

@@ -65,16 +65,16 @@
 
 //  other chatgpt
 // db/models/userSchemaDefined.js
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 const userSchemaDefined = new mongoose.Schema(
   {
     username: {
       type: String,
-      required: [true, 'Please add a name'],
+      required: [true, "Please add a name"],
       trim: true,
-      maxlength: [15, 'Name cannot be more than 15 characters'],
+      maxlength: [15, "Name cannot be more than 15 characters"],
     },
 
     // phone removed from required (you removed it from form)
@@ -82,29 +82,33 @@ const userSchemaDefined = new mongoose.Schema(
       type: String,
       unique: true,
       sparse: true, // allow multiple docs with no phone
-      match: [/^[0-9]{10}$/, 'Please fill a valid 10-digit phone number'],
+      match: [/^[0-9]{10}$/, "Please fill a valid 10-digit phone number"],
     },
 
     useremail: {
       type: String,
-      unique: [true, 'Email is already present'],
-      required: [true, 'Please add an email'],
+      unique: [true, "Email is already present"],
+      required: [true, "Please add an email"],
       lowercase: true,
       trim: true,
       match: [
         /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-        'Please fill a valid email address',
+        "Please fill a valid email address",
       ],
     },
 
     userpassword: {
       type: String,
-      required: [true, 'Please add a password'],
-      minlength: [6, 'Password must be at least 6 characters'],
+      required: [true, "Please add a password"],
+      minlength: [6, "Password must be at least 6 characters"],
       match: [
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{6,})/,
-        'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (!@#$%^&*).',
+        "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (!@#$%^&*).",
       ],
+    },
+    isAdmin: {
+      type: Boolean,
+      default: false,
     },
   },
   {
@@ -117,18 +121,18 @@ userSchemaDefined.index({ userphone: 1 }, { unique: true, sparse: true });
 userSchemaDefined.index({ useremail: 1 }, { unique: true, sparse: true });
 
 // Pre-save: normalize fields & hash password
-userSchemaDefined.pre('save', async function (next) {
+userSchemaDefined.pre("save", async function (next) {
   try {
-    if (this.isModified('userphone') && this.userphone) {
+    if (this.isModified("userphone") && this.userphone) {
       // remove non-digits and keep last 10 digits
-      this.userphone = String(this.userphone).replace(/\D/g, '').slice(-10);
+      this.userphone = String(this.userphone).replace(/\D/g, "").slice(-10);
     }
 
-    if (this.isModified('useremail') && this.useremail) {
+    if (this.isModified("useremail") && this.useremail) {
       this.useremail = String(this.useremail).trim().toLowerCase();
     }
 
-    if (!this.isModified('userpassword')) return next();
+    if (!this.isModified("userpassword")) return next();
 
     const salt = await bcrypt.genSalt(10);
     this.userpassword = await bcrypt.hash(this.userpassword, salt);
@@ -139,5 +143,6 @@ userSchemaDefined.pre('save', async function (next) {
 });
 
 // Safe export for serverless / HMR
-const Userdata = mongoose.models.User || mongoose.model('Userdata', userSchemaDefined);
+const Userdata =
+  mongoose.models.User || mongoose.model("Userdata", userSchemaDefined);
 module.exports = Userdata;
