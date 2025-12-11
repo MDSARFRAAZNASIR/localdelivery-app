@@ -370,34 +370,84 @@ app.put(
 //   })
 // );
 
-// Create product (admin use via Postman for now)
-app.post(
+// // Create product (admin use via Postman for now)
+// app.post(
+//   "/admin/products",
+//   auth,
+//   asyncHandler(async (req, res) => {
+//     const { name, description, price, imageUrl, category, stock } = req.body || {};
+
+//     if (!name || typeof price === "undefined") {
+//       return res
+//         .status(400)
+//         .json({ success: false, message: "name and price are required" });
+//     }
+
+//     await connectDB();
+
+//     const product = new Product({
+//       name,
+//       description: description || "",
+//       price: Number(price),
+//       imageUrl: imageUrl || "",
+//       category: category || "",
+//       stock: typeof stock !== "undefined" ? Number(stock) : 0,
+//     });
+
+//     const saved = await product.save();
+//     return res.status(201).json({ success: true, product: saved });
+//   })
+// );
+
+// ---------- Admin product management (list/edit/delete) ----------
+/**
+ * GET /admin/products        - list all products (admin view)
+ * PUT /admin/products/:id    - update product
+ * DELETE /admin/products/:id - delete product
+ *
+ * Protected with auth middleware. You can add role-check later.
+ */
+
+app.get(
   "/admin/products",
   auth,
   asyncHandler(async (req, res) => {
-    const { name, description, price, imageUrl, category, stock } = req.body || {};
-
-    if (!name || typeof price === "undefined") {
-      return res
-        .status(400)
-        .json({ success: false, message: "name and price are required" });
-    }
-
     await connectDB();
-
-    const product = new Product({
-      name,
-      description: description || "",
-      price: Number(price),
-      imageUrl: imageUrl || "",
-      category: category || "",
-      stock: typeof stock !== "undefined" ? Number(stock) : 0,
-    });
-
-    const saved = await product.save();
-    return res.status(201).json({ success: true, product: saved });
+    const products = await Product.find().sort({ createdAt: -1 }).lean();
+    return res.json({ success: true, products });
   })
 );
+
+app.put(
+  "/admin/products/:id",
+  auth,
+  asyncHandler(async (req, res) => {
+    const updates = {};
+    const fields = ["name", "description", "price", "imageUrl", "category", "stock", "isActive"];
+    fields.forEach((f) => { if (req.body[f] !== undefined) updates[f] = req.body[f]; });
+
+    await connectDB();
+    const updated = await Product.findByIdAndUpdate(req.params.id, updates, {
+      new: true,
+      runValidators: true,
+    }).lean();
+
+    if (!updated) return res.status(404).json({ success: false, message: "Product not found" });
+    return res.json({ success: true, product: updated });
+  })
+);
+
+app.delete(
+  "/admin/products/:id",
+  auth,
+  asyncHandler(async (req, res) => {
+    await connectDB();
+    const deleted = await Product.findByIdAndDelete(req.params.id).lean();
+    if (!deleted) return res.status(404).json({ success: false, message: "Product not found" });
+    return res.json({ success: true, message: "Product deleted" });
+  })
+);
+
 
 // Public list of active products
 app.get(
