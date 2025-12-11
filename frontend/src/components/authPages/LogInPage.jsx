@@ -120,7 +120,7 @@ export default function LogInPage() {
 
       // redirect to protected route
       // navigate("/productpage"); // or /dashboard
-      navigate("/productpage"); 
+      navigate("/products"); 
 
     } else {
       alert(payload.message || "Login failed: invalid server response");

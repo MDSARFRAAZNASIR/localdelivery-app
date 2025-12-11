@@ -5,15 +5,18 @@ import SignUpPage from "./components/authPages/SignupPage";
 import React from "react";
 import LogInPage from "./components/authPages/LogInPage";
 
-import ProductPage from "./components/pages/ProductPage";
 import UserDashboard from "./components/userPages/UserDashboard";
 import ProtectedRoute from "./components/authPages/ProtectedRoute";
 import { useEffect } from "react";
 import { isTokenExpired } from "./lib/utlis";
 import SessionExpired from "./components/pages/SessionExpired";
 import ProfilePage from "./components/pages/ProfilePage";
-import OrdersPage from "./components/pages/OrdersPage";
 import CreateOrderPage from "./components/pages/CreateOrderPage";
+import ProductsPage from "./components/pages/ProductsPage";
+import CartPage from "./components/pages/CartPage";
+import OrdersPage from "./components/pages/OrdersPage";
+import AdminProductsPage from "./components/adminPages/AdminProductsPage";
+
 
 function App() {
   useEffect(() => {
@@ -34,11 +37,16 @@ function App() {
 
         {/* {protected routes} */}
         <Route element={<ProtectedRoute />}>
-          <Route path="productpage" element={<ProductPage />}></Route>
-          <Route path="userdashboard" element={<UserDashboard />}></Route>
-            <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/products" element={<ProductsPage/>}></Route>
+          <Route path="/cart" element={<CartPage/>}></Route>
             <Route path="/orders" element={<OrdersPage />} />
+
+          {/* <Route path="/orders" element={<OrdersPage/>}></Route> */}
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/create-order" element={<CreateOrderPage />} />
+          <Route path="userdashboard" element={<UserDashboard />}></Route>
+        <Route path="/admin/products" element={<AdminProductsPage />} />
+
 
 
           {/* yahan aur protected routes add kar sakte ho */}

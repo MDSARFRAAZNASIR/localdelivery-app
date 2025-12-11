@@ -39,7 +39,7 @@ export default function Navbar() {
       {/* Center: nav links */}
       <div className="hidden sm:flex gap-4 text-sm">
         <NavLink
-          to="/productpage"
+          to="/products"
           className={({ isActive }) =>
             `hover:text-orange-500 ${
               isActive ? "text-orange-500 font-semibold" : "text-gray-700"
@@ -60,16 +60,29 @@ export default function Navbar() {
         </NavLink>
         {/* Add more links later if needed */}
         <NavLink
-  to="/profile"
-  className={({ isActive }) =>
-    `hover:text-orange-500 ${
-      isActive ? "text-orange-500 font-semibold" : "text-gray-700"
-    }`
-  }
->
-  Profile
-</NavLink>
-<NavLink
+          to="/profile"
+          className={({ isActive }) =>
+            `hover:text-orange-500 ${
+              isActive ? "text-orange-500 font-semibold" : "text-gray-700"
+            }`
+          }
+        >
+          Profile
+        </NavLink>
+     
+        <NavLink
+          to="/products"
+          className={({ isActive }) =>
+            `hover:text-orange-500 ${
+              isActive ? "text-orange-500 font-semibold" : "text-gray-700"
+            }`
+          }
+        >
+          Products
+        </NavLink>
+
+        
+        <NavLink
   to="/orders"
   className={({ isActive }) =>
     `hover:text-orange-500 ${
@@ -79,7 +92,16 @@ export default function Navbar() {
 >
   Orders
 </NavLink>
-
+ <NavLink
+          to="/admin/products"
+          className={({ isActive }) =>
+            `hover:text-orange-500 ${
+              isActive ? "text-orange-500 font-semibold" : "text-gray-700"
+            }`
+          }
+        >
+          add pro
+        </NavLink>
 
       </div>
 
