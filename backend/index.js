@@ -527,8 +527,6 @@ app.get(
   })
 );
 
-
-
 // Create order from cart items
 app.post(
   "/orders",
