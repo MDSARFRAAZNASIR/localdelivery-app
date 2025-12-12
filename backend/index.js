@@ -480,10 +480,11 @@ app.get("/products", asyncHandler(async (req, res) => {
     filter.price = {};
     if (min) filter.price.$gte = Number(min);
     if (max) filter.price.$lte = Number(max);
+
   };
 
   // sorting
-  const sortOption = {};
+  const sortOption = { };
   if (sort === "price_asc") sortOption.price = 1;
   else if (sort === "price_desc") sortOption.price = -1;
   else if (sort === "newest") sortOption.createdAt = -1;
@@ -523,7 +524,6 @@ app.get(
   "/products",
   asyncHandler(async (req, res) => {
     await connectDB();
-
     const products = await Product.find({ isActive: true }).lean();
     return res.json({ success: true, products });
   })
