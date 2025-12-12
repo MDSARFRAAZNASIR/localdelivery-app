@@ -565,7 +565,6 @@ app.post(
       _id: { $in: productIds },
       isActive: true,
     }).lean();
-
     if (products.length === 0) {
       return res
         .status(400)
@@ -630,7 +629,6 @@ app.get(
     return res.json({ success: true, orders });
   })
 );
-
 
 // GLOBAL error handler (single, last middleware)
 app.use((err, req, res, next) => {
