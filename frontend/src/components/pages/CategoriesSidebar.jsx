@@ -41,6 +41,7 @@ export default function CategoriesSidebar({ selected, onSelect }) {
             All
           </button>
         </li>
+        
         {cats.map((c) => (
           <li key={c.category}>
             <button
