@@ -450,10 +450,12 @@ app.delete(
 );
 
 // GET /products?category=Fruits&q=milk&min=10&max=200&page=1&limit=24&sort=price_asc
+
 app.get("/products", asyncHandler(async (req, res) => {
   await connectDB();
 
   const {
+
     category, q, min, max, page = 1, limit = 24, sort
   } = req.query || {};
 
@@ -462,7 +464,7 @@ app.get("/products", asyncHandler(async (req, res) => {
   // category filter
   if (category) {
     filter.category = String(category).trim();
-  }
+  };
 
   // text search on name/description
   if (q && String(q).trim()) {
@@ -478,7 +480,7 @@ app.get("/products", asyncHandler(async (req, res) => {
     filter.price = {};
     if (min) filter.price.$gte = Number(min);
     if (max) filter.price.$lte = Number(max);
-  }
+  };
 
   // sorting
   const sortOption = {};
