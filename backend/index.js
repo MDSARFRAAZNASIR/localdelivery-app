@@ -521,6 +521,7 @@ app.get("/categories", asyncHandler(async (req, res) => {
 
 // Public list of active products
 app.get(
+
   "/products",
   asyncHandler(async (req, res) => {
     await connectDB();
@@ -559,7 +560,6 @@ app.post(
     }
 
     await connectDB();
-
     const productIds = cleanedItems.map((it) => it.productId);
     const products = await Product.find({
       _id: { $in: productIds },
