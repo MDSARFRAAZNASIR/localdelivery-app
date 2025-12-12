@@ -449,6 +449,72 @@ app.delete(
   })
 );
 
+// GET /products?category=Fruits&q=milk&min=10&max=200&page=1&limit=24&sort=price_asc
+app.get("/products", asyncHandler(async (req, res) => {
+  await connectDB();
+
+  const {
+    category, q, min, max, page = 1, limit = 24, sort
+  } = req.query || {};
+
+  const filter = { isActive: true };
+
+  // category filter
+  if (category) {
+    filter.category = String(category).trim();
+  }
+
+  // text search on name/description
+  if (q && String(q).trim()) {
+    const s = String(q).trim();
+    filter.$or = [
+      { name: { $regex: s, $options: "i" } },
+      { description: { $regex: s, $options: "i" } },
+    ];
+  }
+
+  // price range
+  if (min || max) {
+    filter.price = {};
+    if (min) filter.price.$gte = Number(min);
+    if (max) filter.price.$lte = Number(max);
+  }
+
+  // sorting
+  const sortOption = {};
+  if (sort === "price_asc") sortOption.price = 1;
+  else if (sort === "price_desc") sortOption.price = -1;
+  else if (sort === "newest") sortOption.createdAt = -1;
+  else sortOption.createdAt = -1;
+
+  const p = Math.max(1, parseInt(page || 1));
+  const lim = Math.min(200, parseInt(limit || 24));
+  const skip = (p - 1) * lim;
+
+  const [products, total] = await Promise.all([
+    Product.find(filter).sort(sortOption).skip(skip).limit(lim).lean(),
+    Product.countDocuments(filter)
+  ]);
+
+  return res.json({ success: true, page: p, limit: lim, total, products });
+}));
+
+// GET /categories  -> returns list of categories and counts (optional)
+app.get("/categories", asyncHandler(async (req, res) => {
+  await connectDB();
+
+  // use aggregation to get counts per category (only active)
+  const agg = await Product.aggregate([
+    { $match: { isActive: true, category: { $exists: true, $ne: "" } } },
+    { $group: { _id: "$category", count: { $sum: 1 } } },
+    { $project: { _id: 0, category: "$_id", count: 1 } },
+    { $sort: { category: 1 } }
+  ]);
+
+  // fallback: if no categories found return empty array
+  return res.json({ success: true, categories: agg });
+}));
+
 
 // Public list of active products
 app.get(
