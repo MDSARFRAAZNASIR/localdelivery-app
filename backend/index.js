@@ -644,6 +644,5 @@ if (require.main === module) {
     console.log(`Server running on port ${PORT}`.yellow);
   });
 }
-
 // Export app so Vercel can use it as handler
 module.exports = app;
