@@ -632,6 +632,7 @@ app.get(
 // GLOBAL error handler (single, last middleware)
 app.use((err, req, res, next) => {
   console.error("GLOBAL ERROR:", err && (err.stack || err.message || err));
+  
   res
     .status(err.status || 500)
     .json({ success: false, message: err.message || "Server error" });
