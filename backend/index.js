@@ -45,7 +45,7 @@ connectDB().catch((err) => {
   console.error("Initial DB connect failed:", err && err.message);
 });
 
-// Health
+// Health for server chaeck
 app.get("/", (req, res) => res.send("API is running successfully ✅"));
 
 
@@ -440,7 +440,7 @@ app.put(
 
 app.delete(
   "/admin/products/:id",
-  
+
   auth, adminOnly,
   asyncHandler(async (req, res) => {
     await connectDB();
