@@ -12,6 +12,7 @@ export default function AdminProductsPage() {
   const [form, setForm] = useState({
     _id: null,
     name: "",
+    
     description: "",
     price: "",
     imageUrl: "",
@@ -25,6 +26,7 @@ export default function AdminProductsPage() {
 
   useEffect(() => {
     if (!token) { navigate("/login"); return; }
+
     fetchProducts();
     // eslint-disable-next-line
   }, [token]);
@@ -47,8 +49,8 @@ export default function AdminProductsPage() {
       setLoading(false);
     }
   };
-
   const startEdit = (p) => {
+
     setForm({
       _id: p._id,
       name: p.name || "",
@@ -101,6 +103,7 @@ export default function AdminProductsPage() {
       };
 
       let res, data;
+
       if (form._id) {
         res = await fetch(
           `https://localdelivery-app-backend.vercel.app/admin/products/${form._id}`,
