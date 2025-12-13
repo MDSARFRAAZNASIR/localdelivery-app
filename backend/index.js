@@ -440,6 +440,7 @@ app.put(
 
 app.delete(
   "/admin/products/:id",
+  
   auth, adminOnly,
   asyncHandler(async (req, res) => {
     await connectDB();
