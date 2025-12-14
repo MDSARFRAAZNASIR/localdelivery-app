@@ -1,5 +1,4 @@
-
-
+ 
 // index.js
 const express = require("express");
 const cors = require("cors");
@@ -10,7 +9,6 @@ const User = require("./db/models/userSchemaDefined");
 const Order = require('./db/models/order');
 const Product=require('./db/models/product')
 const auth = require('./middleware/auth');
-
 const bcrypt = require("bcryptjs");
 const adminOnly=require("./middleware/adminOnly")
 
