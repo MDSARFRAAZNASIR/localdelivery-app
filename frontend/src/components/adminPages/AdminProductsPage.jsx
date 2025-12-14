@@ -71,21 +71,30 @@ export default function AdminProductsPage() {
     _id: null, name: "", description: "", price: "", imageUrl: "", category: "", stock: "", isActive: true
   });
 
-  const handleDelete = async (id) => {
-    if (!confirm("Delete this product?")) return;
-    try {
-      const res = await fetch(
-        `https://localdelivery-app-backend.vercel.app/admin/products/${id}`,
-        { method: "DELETE", headers: { Authorization: `Bearer ${token}` } }
-      );
-      const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.message || "Delete failed");
-      // remove from UI
-      setProducts((prev) => prev.filter((p) => p._id !== id));
-    } catch (err) {
-      alert(err.message || "Delete error");
+ const handleDelete = async (id) => {
+  if (!window.confirm("Delete this product?")) return;
+
+  try {
+    const res = await fetch(
+      `https://localdelivery-app-backend.vercel.app/admin/products/${id}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || "Delete failed");
     }
-  };
+
+    // remove from UI
+    setProducts((prev) => prev.filter((p) => p._id !== id));
+  } catch (err) {
+    alert(err.message || "Delete error");
+  }
+};
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
