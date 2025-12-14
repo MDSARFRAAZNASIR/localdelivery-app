@@ -10,13 +10,16 @@ export default function AdminProductsPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({
+
     _id: null,
+
     name: "",
     
     description: "",
     price: "",
     imageUrl: "",
     category: "",
+    
     stock: "",
     isActive: true,
   });
