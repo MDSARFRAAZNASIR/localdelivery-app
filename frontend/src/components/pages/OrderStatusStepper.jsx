@@ -8,7 +8,18 @@ const STEPS = [
 ];
 
 export default function OrderStatusStepper({ status }) {
+  if (status === "CANCELLED") {
+    return (
+      <div className="mb-6 p-3 bg-red-100 text-red-700 font-semibold rounded">
+        ❌ Order Cancelled
+      </div>
+    );
+  }
+
   const currentIndex = STEPS.indexOf(status);
+
+
+
 
   return (
     <div className="flex items-center justify-between mb-6">

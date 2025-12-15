@@ -59,6 +59,30 @@ useEffect(() => {
   if (loading) return <div className="p-6">Loading order...</div>;
   if (error) return <div className="p-6 text-red-600">{error}</div>;
 
+  const cancelOrder = async () => {
+  if (!window.confirm("Cancel this order?")) return;
+
+  try {
+    const res = await fetch(
+      `https://localdelivery-app-backend.vercel.app/user/orders/${order._id}/cancel`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message);
+
+    setOrder(data.order);
+  } catch (err) {
+    alert(err.message || "Cancel failed");
+  }
+};
+
+
   return (
     <>
       <Navbar />
@@ -69,6 +93,15 @@ useEffect(() => {
         >
           ← Back
         </button>
+        {order.status === "CREATED" && (
+  <button
+    onClick={cancelOrder}
+    className="mb-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+  >
+    Cancel Order
+  </button>
+)}
+
 
         <div className="bg-white p-6 rounded shadow">
           <h2 className="text-xl font-bold mb-2">
