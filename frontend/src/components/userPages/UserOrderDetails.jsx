@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 
 import { useParams, useNavigate } from "react-router-dom";
+import OrderStatusStepper from "../pages/OrderStatusStepper";
 
 import Navbar from "../pages/Navbar";
 const STATUS_COLORS = {
@@ -73,6 +74,8 @@ useEffect(() => {
           <h2 className="text-xl font-bold mb-2">
             Order #{order._id.slice(-6)}
           </h2>
+          <OrderStatusStepper status={order.status} />
+
 
           <div
             className={`inline-block px-3 py-1 rounded text-sm font-semibold mb-4 ${
