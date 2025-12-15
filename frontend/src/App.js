@@ -16,6 +16,8 @@ import ProductsPage from "./components/pages/ProductsPage";
 import CartPage from "./components/pages/CartPage";
 import OrdersPage from "./components/pages/OrdersPage";
 import AdminProductsPage from "./components/adminPages/AdminProductsPage";
+import AdminOrdersPage from "./components/adminPages/AdminOrdersPage";
+import UserOrderDetails from "./components/userPages/UserOrderDetails";
 
 
 function App() {
@@ -47,6 +49,12 @@ function App() {
             <Route path="/create-order" element={<CreateOrderPage />} />
           <Route path="/userdashboard" element={<UserDashboard />}></Route>
         <Route path="/admin/products" element={<AdminProductsPage />}> </Route>
+        <Route path="/admin/orders" element={<AdminOrdersPage />} />
+
+
+<Route path="/order/:orderId" element={<UserOrderDetails />} />
+
+
 
 
 
