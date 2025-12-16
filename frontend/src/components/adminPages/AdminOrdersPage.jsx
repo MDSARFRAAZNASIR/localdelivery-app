@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback } from "react";
 
 import Navbar from "../pages/Navbar";
 
-
 const STATUS_OPTIONS = [
   "CREATED",
   "CONFIRMED",
@@ -17,35 +16,34 @@ export default function AdminOrdersPage() {
 
   const token = localStorage.getItem("token");
 
- const fetchOrders = useCallback(async () => {
-  try {
-    setLoading(true);
-    const res = await fetch(
-      "https://localdelivery-app-backend.vercel.app/admin/orders",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+  const fetchOrders = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(
+        "https://localdelivery-app-backend.vercel.app/admin/orders",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to load orders");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to load orders");
 
-    setOrders(data.orders || []);
-  } catch (err) {
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
-}, [token]);
+      setOrders(data.orders || []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
 
-
-useEffect(() => {
-  fetchOrders();
-  const interval = setInterval(fetchOrders, 10000);
-  return () => clearInterval(interval);
-}, [fetchOrders]);
+  useEffect(() => {
+    fetchOrders();
+    const interval = setInterval(fetchOrders, 10000);
+    return () => clearInterval(interval);
+  }, [fetchOrders]);
 
   const updateStatus = async (orderId, status) => {
     try {
@@ -66,9 +64,7 @@ useEffect(() => {
 
       // update UI instantly
       setOrders((prev) =>
-        prev.map((o) =>
-          o._id === orderId ? { ...o, status } : o
-        )
+        prev.map((o) => (o._id === orderId ? { ...o, status } : o))
       );
     } catch (err) {
       alert(err.message);
@@ -84,9 +80,7 @@ useEffect(() => {
         {loading && <div>Loading orders...</div>}
         {error && <div className="text-red-600">{error}</div>}
 
-        {!loading && orders.length === 0 && (
-          <div>No orders found.</div>
-        )}
+        {!loading && orders.length === 0 && <div>No orders found.</div>}
 
         {!loading && orders.length > 0 && (
           <div className="overflow-x-auto">
@@ -98,6 +92,7 @@ useEffect(() => {
                   <th className="p-2 border">Amount</th>
                   <th className="p-2 border">Status</th>
                   <th className="p-2 border">Date</th>
+                  <th className="p-2 border">Payment</th>
                 </tr>
               </thead>
               <tbody>
@@ -117,6 +112,21 @@ useEffect(() => {
                     <td className="p-2 border font-semibold">
                       ₹{order.totalAmount}
                     </td>
+                    <td className="p-2 border">
+                      <div className="text-sm font-medium">
+                        {order.paymentMethod}
+                      </div>
+                      <div
+                        className={`text-xs font-semibold ${
+                          order.paymentStatus === "PAID"
+                            ? "text-green-600"
+                            : "text-orange-600"
+                        }`}
+                      >
+                        {order.paymentStatus}
+                      </div>
+                    </td>
+
                     <td className="p-2 border">
                       <select
                         value={order.status}

@@ -20,68 +20,134 @@ export default function UserOrderDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-const fetchOrder = useCallback(async () => {
-  try {
-    setLoading(true);
-    const res = await fetch(
-      `https://localdelivery-app-backend.vercel.app/user/orders/${orderId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+  const fetchOrder = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(
+        `https://localdelivery-app-backend.vercel.app/user/orders/${orderId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to load order");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to load order");
 
-    setOrder(data.order);
-  } catch (err) {
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
-}, [orderId, token]);
+      setOrder(data.order);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [orderId, token]);
 
+  useEffect(() => {
+    if (!token) {
+      navigate("/login");
+      return;
+    }
 
-useEffect(() => {
-  if (!token) {
-    navigate("/login");
-    return;
-  }
-
-  fetchOrder();
-  const interval = setInterval(fetchOrder, 10000);
-  return () => clearInterval(interval);
-}, [fetchOrder, navigate, token]);
-
+    fetchOrder();
+    const interval = setInterval(fetchOrder, 10000);
+    return () => clearInterval(interval);
+  }, [fetchOrder, navigate, token]);
 
   if (loading) return <div className="p-6">Loading order...</div>;
   if (error) return <div className="p-6 text-red-600">{error}</div>;
 
   const cancelOrder = async () => {
-  if (!window.confirm("Cancel this order?")) return;
+    if (!window.confirm("Cancel this order?")) return;
 
+    try {
+      const res = await fetch(
+        `https://localdelivery-app-backend.vercel.app/user/orders/${order._id}/cancel`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      setOrder(data.order);
+    } catch (err) {
+      alert(err.message || "Cancel failed");
+    }
+  };
+ 
+
+  // pay now handler
+  const handleOnlinePayment = async () => {
   try {
+    // 1. Create Razorpay order from backend
     const res = await fetch(
-      `https://localdelivery-app-backend.vercel.app/user/orders/${order._id}/cancel`,
+      "https://localdelivery-app-backend.vercel.app/payments/razorpay/create-order",
       {
-        method: "PUT",
+        method: "POST",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify({ orderId: order._id }),
       }
     );
 
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message);
+    if (!res.ok) throw new Error(data.message || "Failed to create payment");
 
-    setOrder(data.order);
+    // 2. Razorpay options
+    const options = {
+      key: data.key, // Razorpay public key
+      amount: data.razorpayOrder.amount,
+      currency: "INR",
+      name: "Local Delivery App",
+      description: "Order Payment",
+      order_id: data.razorpayOrder.id,
+
+      handler: async function (response) {
+        // 3. Verify payment on backend
+        const verifyRes = await fetch(
+          "https://localdelivery-app-backend.vercel.app/payments/razorpay/verify",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              orderId: order._id,
+            }),
+          }
+        );
+
+        const verifyData = await verifyRes.json();
+        if (!verifyRes.ok)
+          throw new Error(verifyData.message || "Payment verification failed");
+
+        alert("✅ Payment Successful");
+        setOrder(verifyData.order); // refresh UI
+      },
+
+      theme: {
+        color: "#f97316", // orange
+      },
+    };
+
+    // 4. Open Razorpay popup
+    const rzp = new window.Razorpay(options);
+    rzp.open();
   } catch (err) {
-    alert(err.message || "Cancel failed");
+    alert(err.message || "Payment failed");
   }
 };
-
 
   return (
     <>
@@ -94,21 +160,47 @@ useEffect(() => {
           ← Back
         </button>
         {order.status === "CREATED" && (
-  <button
-    onClick={cancelOrder}
-    className="mb-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
-  >
-    Cancel Order
-  </button>
+          <button
+            onClick={cancelOrder}
+            className="mb-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+          >
+            Cancel Order
+          </button>
+        )}
+        <div className="mt-4 p-3 bg-gray-50 rounded text-sm">
+          <div>
+            Payment Method:
+            <span className="font-semibold ml-1">{order.paymentMethod}</span>
+          </div>
+          <div>
+            Payment Status:
+            <span
+              className={`font-semibold ml-1 ${
+                order.paymentStatus === "PAID"
+                  ? "text-green-600"
+                  : "text-orange-600"
+              }`}
+            >
+              {order.paymentStatus}
+            </span>
+          </div>
+          {order.paymentMethod === "ONLINE" &&
+  order.paymentStatus === "PENDING" && (
+    <button
+      onClick={handleOnlinePayment}
+      className="mt-4 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded"
+    >
+      Pay Now
+    </button>
 )}
 
+        </div>
 
         <div className="bg-white p-6 rounded shadow">
           <h2 className="text-xl font-bold mb-2">
             Order #{order._id.slice(-6)}
           </h2>
           <OrderStatusStepper status={order.status} />
-
 
           <div
             className={`inline-block px-3 py-1 rounded text-sm font-semibold mb-4 ${
