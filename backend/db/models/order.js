@@ -24,17 +24,37 @@ const orderSchema = new mongoose.Schema(
     totalAmount: { type: Number, required: true, min: 0 },
 
     deliveryAddress: { type: String, required: true },
-    paymentMethod: {
-      type: String,
-      enum: ["COD", "ONLINE"],
-      default: "COD",
-    },
+  paymentMethod: {
+  type: String,
+  enum: ["COD", "ONLINE"],
+  default: "COD",
+},
 
+paymentStatus: {
+  type: String,
+  enum: ["PENDING", "PAID"],
+  default: "PENDING",
+},
+
+
+    // status: {
+    //   type: String,
+    //   enum: ["CREATED", "CONFIRMED", "DISPATCHED", "DELIVERED", "CANCELLED"],
+    //   default: "CREATED",
+    // },
     status: {
-      type: String,
-      enum: ["CREATED", "CONFIRMED", "DISPATCHED", "DELIVERED", "CANCELLED"],
-      default: "CREATED",
-    },
+  type: String,
+  enum: [
+    "CREATED",
+    "CONFIRMED",
+    "OUT_FOR_DELIVERY",
+    "DELIVERED",
+    "CANCELLED",
+  ],
+  default: "CREATED",
+  },
+  
+
   },
   { timestamps: true }
 );

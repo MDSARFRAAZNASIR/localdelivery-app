@@ -1,4 +1,3 @@
- 
 // index.js
 const express = require("express");
 const cors = require("cors");
@@ -6,12 +5,11 @@ const dotenv = require("dotenv");
 const colors = require("colors"); // optional
 const connectDB = require("./db/configDb");
 const User = require("./db/models/userSchemaDefined");
-const Order = require('./db/models/order');
-const Product=require('./db/models/product')
-const auth = require('./middleware/auth');
+const Order = require("./db/models/order");
+const Product = require("./db/models/product");
+const auth = require("./middleware/auth");
 const bcrypt = require("bcryptjs");
-const adminOnly=require("./middleware/adminOnly")
-
+const adminOnly = require("./middleware/adminOnly");
 
 // load env (important: do this once at entry)
 dotenv.config();
@@ -32,6 +30,13 @@ app.use(
     ],
   })
 );
+const Razorpay = require("razorpay");
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
+
 
 // small async wrapper to catch errors from async route handlers
 const asyncHandler = (fn) => (req, res, next) => {
@@ -45,8 +50,6 @@ connectDB().catch((err) => {
 
 // Health for server chaeck
 app.get("/", (req, res) => res.send("API is running successfully ✅"));
-
-
 
 // Register (replace the previous handler body with this)
 app.post(
@@ -109,17 +112,17 @@ app.post(
   })
 );
 
-
-
 // add after jwt
 // Login
 app.post(
-  '/userlogin',
+  "/userlogin",
   asyncHandler(async (req, res) => {
     const { useremail, userpassword } = req.body || {};
 
     if (!useremail || !userpassword) {
-      return res.status(400).json({ success: false, message: 'All fields required' });
+      return res
+        .status(400)
+        .json({ success: false, message: "All fields required" });
     }
 
     await connectDB();
@@ -130,22 +133,26 @@ app.post(
     });
 
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User Not Found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "User Not Found" });
     }
 
     // compare password
     const isMatch = await bcrypt.compare(userpassword, user.userpassword);
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'Invalid Password' });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid Password" });
     }
 
     // ---------- ⭐ JWT CREATION ⭐ ----------
-    const jwt = require('jsonwebtoken');
+    const jwt = require("jsonwebtoken");
 
     const token = jwt.sign(
-      { id: user._id },                      // payload
-      process.env.JWT_SECRET || 'devsecret', // secret
-      { expiresIn: '7d' }                    // expiry
+      { id: user._id }, // payload
+      process.env.JWT_SECRET || "devsecret", // secret
+      { expiresIn: "7d" } // expiry
     );
     // ----------------------------------------
 
@@ -155,14 +162,12 @@ app.post(
 
     return res.status(200).json({
       success: true,
-      message: 'Login Successful',
-      token: token,        // ⭐ send token to frontend
+      message: "Login Successful",
+      token: token, // ⭐ send token to frontend
       user: userData,
     });
   })
 );
-
-
 
 // user profile upadate
 // GET user profile
@@ -188,14 +193,21 @@ app.put(
     if (useremail) updates.useremail = String(useremail).trim().toLowerCase();
 
     // phone normalization — same logic as signup (last 10 digits, India-style)
-    if (typeof userphone !== "undefined" && userphone !== null && String(userphone).trim() !== "") {
+    if (
+      typeof userphone !== "undefined" &&
+      userphone !== null &&
+      String(userphone).trim() !== ""
+    ) {
       const digits = String(userphone).replace(/\D/g, "");
       if (digits.length >= 10) {
         updates.userphone = digits.slice(-10);
       } else {
         return res
           .status(400)
-          .json({ success: false, message: "Please provide at least a 10-digit phone number" });
+          .json({
+            success: false,
+            message: "Please provide at least a 10-digit phone number",
+          });
       }
     }
 
@@ -212,7 +224,9 @@ app.put(
       }).lean();
 
       if (!updated) {
-        return res.status(404).json({ success: false, message: "User not found" });
+        return res
+          .status(404)
+          .json({ success: false, message: "User not found" });
       }
 
       delete updated.userpassword;
@@ -240,6 +254,69 @@ app.put(
   })
 );
 
+// User: get single order details
+app.get(
+  "/user/orders/:orderId",
+  auth,
+  asyncHandler(async (req, res) => {
+    const { orderId } = req.params;
+
+    await connectDB();
+
+    const order = await Order.findOne({
+      _id: orderId,
+      user: req.user._id,
+    }).populate("items.product");
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    res.json({ success: true, order });
+  })
+);
+
+// User: cancel order (only if CREATED)
+app.put(
+  "/user/orders/:orderId/cancel",
+  auth,
+  asyncHandler(async (req, res) => {
+    const { orderId } = req.params;
+
+    await connectDB();
+
+    const order = await Order.findOne({
+      _id: orderId,
+      user: req.user._id,
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    if (order.status !== "CREATED") {
+      return res.status(400).json({
+        success: false,
+        message: "Order cannot be cancelled now",
+      });
+    }
+
+    order.status = "CANCELLED";
+    await order.save();
+
+    res.json({
+      success: true,
+      message: "Order cancelled successfully",
+      order,
+    });
+  })
+);
 
 // // GET orders (paginated)
 // app.get('/user/orders', auth, async (req, res) => {
@@ -271,8 +348,6 @@ app.put(
 //     res.status(500).json({ success:false, message:'Error' });
 //   }
 // });
-
-
 
 // ================== ORDERS ROUTES ==================
 
@@ -372,9 +447,11 @@ app.put(
 // Create product (admin use via Postman for now)
 app.post(
   "/admin/products",
-  auth, adminOnly,
+  auth,
+  adminOnly,
   asyncHandler(async (req, res) => {
-    const { name, description, price, imageUrl, category, stock } = req.body || {};
+    const { name, description, price, imageUrl, category, stock } =
+      req.body || {};
 
     if (!name || typeof price === "undefined") {
       return res
@@ -409,7 +486,8 @@ app.post(
 
 app.get(
   "/admin/products",
-  auth, adminOnly,
+  auth,
+  adminOnly,
   asyncHandler(async (req, res) => {
     await connectDB();
     const products = await Product.find().sort({ createdAt: -1 }).lean();
@@ -419,11 +497,22 @@ app.get(
 
 app.put(
   "/admin/products/:id",
-  auth, adminOnly,
+  auth,
+  adminOnly,
   asyncHandler(async (req, res) => {
     const updates = {};
-    const fields = ["name", "description", "price", "imageUrl", "category", "stock", "isActive"];
-    fields.forEach((f) => { if (req.body[f] !== undefined) updates[f] = req.body[f]; });
+    const fields = [
+      "name",
+      "description",
+      "price",
+      "imageUrl",
+      "category",
+      "stock",
+      "isActive",
+    ];
+    fields.forEach((f) => {
+      if (req.body[f] !== undefined) updates[f] = req.body[f];
+    });
 
     await connectDB();
     const updated = await Product.findByIdAndUpdate(req.params.id, updates, {
@@ -431,7 +520,10 @@ app.put(
       runValidators: true,
     }).lean();
 
-    if (!updated) return res.status(404).json({ success: false, message: "Product not found" });
+    if (!updated)
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
     return res.json({ success: true, product: updated });
   })
 );
@@ -439,88 +531,100 @@ app.put(
 app.delete(
   "/admin/products/:id",
 
-  auth, adminOnly,
+  auth,
+  adminOnly,
   asyncHandler(async (req, res) => {
     await connectDB();
     const deleted = await Product.findByIdAndDelete(req.params.id).lean();
-    if (!deleted) return res.status(404).json({ success: false, message: "Product not found" });
+    if (!deleted)
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
     return res.json({ success: true, message: "Product deleted" });
   })
 );
 
 // GET /products?category=Fruits&q=milk&min=10&max=200&page=1&limit=24&sort=price_asc
 
-app.get("/products", asyncHandler(async (req, res) => {
-  await connectDB();
+app.get(
+  "/products",
+  asyncHandler(async (req, res) => {
+    await connectDB();
 
-  const {
+    const {
+      category,
+      q,
+      min,
+      max,
+      page = 1,
+      limit = 24,
+      sort,
+    } = req.query || {};
 
-    category, q, min, max, page = 1, limit = 24, sort
-  } = req.query || {};
+    const filter = { isActive: true };
 
-  const filter = { isActive: true };
+    // category filter
+    if (category) {
+      filter.category = String(category).trim();
+    }
 
-  // category filter
-  if (category) {
-    filter.category = String(category).trim();
-  };
+    // text search on name/description
+    if (q && String(q).trim()) {
+      const s = String(q).trim();
+      filter.$or = [
+        { name: { $regex: s, $options: "i" } },
+        { description: { $regex: s, $options: "i" } },
+      ];
+    }
 
-  // text search on name/description
-  if (q && String(q).trim()) {
-    const s = String(q).trim();
-    filter.$or = [
-      { name: { $regex: s, $options: "i" } },
-      { description: { $regex: s, $options: "i" } },
-    ];
-  }
+    // price range
+    if (min || max) {
+      filter.price = {};
+      if (min) filter.price.$gte = Number(min);
+      if (max) filter.price.$lte = Number(max);
+    }
 
-  // price range
-  if (min || max) {
-    filter.price = {};
-    if (min) filter.price.$gte = Number(min);
-    if (max) filter.price.$lte = Number(max);
+    // sorting
+    const sortOption = {};
+    if (sort === "price_asc") sortOption.price = 1;
+    else if (sort === "price_desc") sortOption.price = -1;
+    else if (sort === "newest") sortOption.createdAt = -1;
+    else sortOption.createdAt = -1;
 
-  };
+    const p = Math.max(1, parseInt(page || 1));
+    const lim = Math.min(200, parseInt(limit || 24));
+    const skip = (p - 1) * lim;
 
-  // sorting
-  const sortOption = { };
-  if (sort === "price_asc") sortOption.price = 1;
-  else if (sort === "price_desc") sortOption.price = -1;
-  else if (sort === "newest") sortOption.createdAt = -1;
-  else sortOption.createdAt = -1;
+    const [products, total] = await Promise.all([
+      Product.find(filter).sort(sortOption).skip(skip).limit(lim).lean(),
+      Product.countDocuments(filter),
+    ]);
 
-  const p = Math.max(1, parseInt(page || 1));
-  const lim = Math.min(200, parseInt(limit || 24));
-  const skip = (p - 1) * lim;
-
-  const [products, total] = await Promise.all([
-    Product.find(filter).sort(sortOption).skip(skip).limit(lim).lean(),
-    Product.countDocuments(filter)
-  ]);
-
-  return res.json({ success: true, page: p, limit: lim, total, products });
-}));
+    return res.json({ success: true, page: p, limit: lim, total, products });
+  })
+);
 
 // GET /categories  -> returns list of categories and counts (optional)
-app.get("/categories", asyncHandler(async (req, res) => {
-  await connectDB();
+app.get(
+  "/categories",
+  asyncHandler(async (req, res) => {
+    await connectDB();
 
-  // use aggregation to get counts per category (only active)
-  const agg = await Product.aggregate([
-    { $match: { isActive: true, category: { $exists: true, $ne: "" } } },
-    { $group: { _id: "$category", count: { $sum: 1 } } },
-    { $project: { _id: 0, category: "$_id", count: 1 } },
-    { $sort: { category: 1 } }
-  ]);
+    // use aggregation to get counts per category (only active)
+    const agg = await Product.aggregate([
+      { $match: { isActive: true, category: { $exists: true, $ne: "" } } },
+      { $group: { _id: "$category", count: { $sum: 1 } } },
+      { $project: { _id: 0, category: "$_id", count: 1 } },
+      { $sort: { category: 1 } },
+    ]);
 
-  // fallback: if no categories found return empty array
-  return res.json({ success: true, categories: agg });
-}));
-
+    // fallback: if no categories found return empty array
+    return res.json({ success: true, categories: agg });
+  })
+);
 
 // Public list of active products
 app.get(
-
   "/products",
   asyncHandler(async (req, res) => {
     await connectDB();
@@ -528,6 +632,20 @@ app.get(
     return res.json({ success: true, products });
   })
 );
+
+// // Create order from cart items
+// app.post(
+//   "/orders",
+//   auth,
+//   asyncHandler(async (req, res) => {
+//     const { items, deliveryAddress, paymentMethod } = req.body || {};
+
+//     if (!deliveryAddress || !Array.isArray(items) || items.length === 0) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "items[] and deliveryAddress are required",
+//       });
+//     }
 
 // Create order from cart items
 app.post(
@@ -543,7 +661,123 @@ app.post(
       });
     }
 
-    // validate items structure
+    // ✅ await is INSIDE async function
+    await connectDB();
+
+    const finalPaymentMethod =
+      paymentMethod === "ONLINE" ? "ONLINE" : "COD";
+
+    const paymentStatus =
+      finalPaymentMethod === "ONLINE" ? "PAID" : "PENDING";
+
+    const totalAmount = items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+
+    const order = new Order({
+      user: req.user._id,
+      items,
+      deliveryAddress,
+      totalAmount,
+      paymentMethod: finalPaymentMethod,
+      paymentStatus,
+      status: "CREATED",
+    });
+
+    await order.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Order placed successfully",
+      order,
+    });
+  })
+);
+
+// // validate items structure
+// const cleanedItems = items
+//   .map((it) => ({
+//     productId: it.productId,
+//     quantity: Number(it.quantity || 0),
+//   }))
+//   .filter((it) => it.productId && it.quantity > 0);
+
+// if (cleanedItems.length === 0) {
+//   return res.status(400).json({
+//     success: false,
+//     message: "At least one valid item (productId + quantity > 0) is required",
+//   });
+// }
+
+// await connectDB();
+// const productIds = cleanedItems.map((it) => it.productId);
+// const products = await Product.find({
+//   _id: { $in: productIds },
+//   isActive: true,
+// }).lean();
+// if (products.length === 0) {
+//   return res
+//     .status(400)
+//     .json({ success: false, message: "No valid products found in cart" });
+// }
+
+// const productMap = new Map(products.map((p) => [String(p._id), p]));
+
+// const orderItems = [];
+// let totalAmount = 0;
+
+// for (const it of cleanedItems) {
+//   const prod = productMap.get(String(it.productId));
+//   if (!prod) continue;
+
+//   const subtotal = prod.price * it.quantity;
+//   totalAmount += subtotal;
+
+//   orderItems.push({
+//     productId: prod._id,
+//     name: prod.name,
+//     price: prod.price,
+//     quantity: it.quantity,
+//     subtotal,
+//   });
+// }
+
+// if (orderItems.length === 0) {
+//   return res.status(400).json({
+//     success: false,
+//     message: "Cart items are invalid or products inactive",
+//   });
+// }
+
+// const order = new Order({
+//   userId: req.user._id,
+//   items: orderItems,
+//   totalAmount,
+//   deliveryAddress,
+//   paymentMethod: paymentMethod || "COD",
+// });
+
+// const saved = await order.save();
+
+// return res
+//   .status(201)
+//   .json({ success: true, order: saved, message: "Order created" });
+// Create order from cart items
+app.post(
+  "/orders",
+  auth,
+  asyncHandler(async (req, res) => {
+    const { items, deliveryAddress, paymentMethod } = req.body || {};
+
+    if (!deliveryAddress || !Array.isArray(items)) {
+      return res.status(400).json({
+        success: false,
+        message: "items[] and deliveryAddress are required",
+      });
+    }
+
+    // ✅ validate items structure
     const cleanedItems = items
       .map((it) => ({
         productId: it.productId,
@@ -554,23 +788,30 @@ app.post(
     if (cleanedItems.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "At least one valid item (productId + quantity > 0) is required",
+        message:
+          "At least one valid item (productId + quantity > 0) is required",
       });
     }
 
+    // ✅ await is LEGAL here
     await connectDB();
+
     const productIds = cleanedItems.map((it) => it.productId);
     const products = await Product.find({
       _id: { $in: productIds },
       isActive: true,
     }).lean();
+
     if (products.length === 0) {
-      return res
-        .status(400)
-        .json({ success: false, message: "No valid products found in cart" });
+      return res.status(400).json({
+        success: false,
+        message: "No valid products found in cart",
+      });
     }
 
-    const productMap = new Map(products.map((p) => [String(p._id), p]));
+    const productMap = new Map(
+      products.map((p) => [String(p._id), p])
+    );
 
     const orderItems = [];
     let totalAmount = 0;
@@ -598,21 +839,110 @@ app.post(
       });
     }
 
+    const finalPaymentMethod =
+      paymentMethod === "ONLINE" ? "ONLINE" : "COD";
+
+    const paymentStatus =
+      finalPaymentMethod === "ONLINE" ? "PAID" : "PENDING";
+
     const order = new Order({
-      userId: req.user._id,
+      user: req.user._id,
       items: orderItems,
       totalAmount,
       deliveryAddress,
-      paymentMethod: paymentMethod || "COD",
+      paymentMethod: finalPaymentMethod,
+      paymentStatus,
+      status: "CREATED",
     });
 
     const saved = await order.save();
 
-    return res
-      .status(201)
-      .json({ success: true, order: saved, message: "Order created" });
+    return res.status(201).json({
+      success: true,
+      order: saved,
+      message: "Order created",
+    });
   })
 );
+//  create order with rozpay
+
+app.post(
+  "/payments/razorpay/create-order",
+  auth,
+  asyncHandler(async (req, res) => {
+    const { orderId } = req.body;
+
+    await connectDB();
+
+    const order = await Order.findOne({
+      _id: orderId,
+      user: req.user._id,
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (order.paymentStatus === "PAID") {
+      return res.status(400).json({ message: "Order already paid" });
+    }
+
+    const razorpayOrder = await razorpay.orders.create({
+      amount: order.totalAmount * 100, // paise
+      currency: "INR",
+      receipt: `order_${order._id}`,
+    });
+
+    order.razorpayOrderId = razorpayOrder.id;
+    await order.save();
+
+    res.json({
+      key: process.env.RAZORPAY_KEY_ID,
+      razorpayOrder,
+    });
+  })
+);
+
+// verify rozpay
+const crypto = require("crypto");
+
+app.post(
+  "/payments/razorpay/verify",
+  auth,
+  asyncHandler(async (req, res) => {
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      orderId,
+    } = req.body;
+
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(body.toString())
+      .digest("hex");
+
+    if (expectedSignature !== razorpay_signature) {
+      return res.status(400).json({ message: "Payment verification failed" });
+    }
+
+    await connectDB();
+
+    const order = await Order.findById(orderId);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    order.paymentStatus = "PAID";
+    order.paymentMethod = "ONLINE";
+    order.razorpayPaymentId = razorpay_payment_id;
+
+    await order.save();
+
+    res.json({ success: true, message: "Payment successful", order });
+  })
+);
+
 
 // Get all orders for logged-in user
 app.get(
