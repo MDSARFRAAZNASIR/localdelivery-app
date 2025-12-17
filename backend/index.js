@@ -881,7 +881,6 @@ app.post(
       });
     }
 
-    // 🔹 clean & validate cart items
     const cleanedItems = items
       .map((it) => ({
         productId: it.productId,
@@ -889,7 +888,7 @@ app.post(
       }))
       .filter((it) => it.productId && it.quantity > 0);
 
-    if (cleanedItems.length === 0) {
+    if (!cleanedItems.length) {
       return res.status(400).json({
         success: false,
         message: "No valid cart items",
@@ -898,38 +897,35 @@ app.post(
 
     await connectDB();
 
-    const productIds = cleanedItems.map((i) => i.productId);
     const products = await Product.find({
-      _id: { $in: productIds },
+      _id: { $in: cleanedItems.map((i) => i.productId) },
       isActive: true,
     }).lean();
-
-    if (!products.length) {
-      return res.status(400).json({
-        success: false,
-        message: "Products not found or inactive",
-      });
-    }
 
     const productMap = new Map(
       products.map((p) => [String(p._id), p])
     );
 
-    const orderItems = [];
     let totalAmount = 0;
+    const orderItems = [];
 
     for (const it of cleanedItems) {
       const prod = productMap.get(String(it.productId));
       if (!prod) continue;
 
-      const subtotal = prod.price * it.quantity;
+      const price = Number(prod.price);
+      const qty = Number(it.quantity);
+
+      if (Number.isNaN(price) || Number.isNaN(qty)) continue;
+
+      const subtotal = price * qty;
       totalAmount += subtotal;
 
       orderItems.push({
         productId: prod._id,
         name: prod.name,
-        price: prod.price,
-        quantity: it.quantity,
+        price,
+        quantity: qty,
         subtotal,
       });
     }
@@ -941,19 +937,13 @@ app.post(
       });
     }
 
-    const finalPaymentMethod =
-      paymentMethod === "ONLINE" ? "ONLINE" : "COD";
-
-    const paymentStatus =
-      finalPaymentMethod === "ONLINE" ? "PAID" : "PENDING";
-
     const order = new Order({
-      userId: req.user._id,     // ✅ MATCHES schema
+      userId: req.user._id,
       items: orderItems,
       totalAmount,
       deliveryAddress,
-      paymentMethod: finalPaymentMethod,
-      paymentStatus,
+      paymentMethod: paymentMethod === "ONLINE" ? "ONLINE" : "COD",
+      paymentStatus: paymentMethod === "ONLINE" ? "PAID" : "PENDING",
       status: "CREATED",
     });
 
@@ -963,6 +953,52 @@ app.post(
       success: true,
       order: saved,
       message: "Order created successfully",
+    });
+  })
+);
+
+// Admin: update order status
+app.put(
+  "/admin/orders/:id/status",
+  auth,
+  adminOnly,
+  asyncHandler(async (req, res) => {
+    const { status } = req.body;
+
+    const allowed = [
+      "CREATED",
+      "CONFIRMED",
+      "OUT_FOR_DELIVERY",
+      "DELIVERED",
+      "CANCELLED",
+    ];
+
+    if (!allowed.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid order status",
+      });
+    }
+
+    await connectDB();
+
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Order status updated",
+      order,
     });
   })
 );
