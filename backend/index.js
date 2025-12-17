@@ -552,7 +552,11 @@ app.get(
     await connectDB();
 
     const orders = await Order.find()
-      .populate("userId", "username useremail")
+      .populate({
+        path: "userId",
+        model: "Userdata", // 🔥 FIX
+        select: "username useremail userphone",
+      })
       .sort({ createdAt: -1 });
 
     res.json({ success: true, orders });
