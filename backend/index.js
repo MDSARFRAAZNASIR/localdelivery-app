@@ -543,6 +543,22 @@ app.delete(
     return res.json({ success: true, message: "Product deleted" });
   })
 );
+// Admin: get all orders
+app.get(
+  "/admin/orders",
+  auth,
+  adminOnly,
+  asyncHandler(async (req, res) => {
+    await connectDB();
+
+    const orders = await Order.find()
+      .populate("userId", "username useremail")
+      .sort({ createdAt: -1 });
+
+    res.json({ success: true, orders });
+  })
+);
+
 
 // GET /products?category=Fruits&q=milk&min=10&max=200&page=1&limit=24&sort=price_asc
 
