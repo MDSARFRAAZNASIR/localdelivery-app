@@ -957,15 +957,32 @@ app.post(
       });
     }
 
-    const order = new Order({
-      userId: req.user._id,
-      items: orderItems,
-      totalAmount,
-      deliveryAddress,
-      paymentMethod: paymentMethod === "ONLINE" ? "ONLINE" : "COD",
-      paymentStatus: paymentMethod === "ONLINE" ? "PAID" : "PENDING",
-      status: "CREATED",
-    });
+    // add on paymentMethod
+const finalPaymentMethod =
+  paymentMethod === "ONLINE" ? "ONLINE" : "COD";
+
+const paymentStatus = "PENDING"; // 🔥 ALWAYS pending at creation
+
+      
+
+    // const order = new Order({
+    //   userId: req.user._id,
+    //   items: orderItems,
+    //   totalAmount,
+    //   deliveryAddress,
+    //   paymentMethod: paymentMethod === "ONLINE" ? "ONLINE" : "COD",
+    //   paymentStatus: paymentMethod === "ONLINE" ? "PAID" : "PENDING",
+    //   status: "CREATED",
+    // });
+const order = new Order({
+  userId: req.user._id,
+  items: orderItems,
+  totalAmount,
+  deliveryAddress,
+  paymentMethod: finalPaymentMethod,
+  paymentStatus: "PENDING", // 👈 important
+  status: "CREATED",
+});
 
     const saved = await order.save();
 
