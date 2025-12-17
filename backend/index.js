@@ -648,52 +648,53 @@ app.get(
 //     }
 
 // Create order from cart items
-app.post(
-  "/orders",
-  auth,
-  asyncHandler(async (req, res) => {
-    const { items, deliveryAddress, paymentMethod } = req.body || {};
 
-    if (!deliveryAddress || !Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "items[] and deliveryAddress are required",
-      });
-    }
+// app.post(
+//   "/orders",
+//   auth,
+//   asyncHandler(async (req, res) => {
+//     const { items, deliveryAddress, paymentMethod } = req.body || {};
 
-    // ✅ await is INSIDE async function
-    await connectDB();
+//     if (!deliveryAddress || !Array.isArray(items) || items.length === 0) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "items[] and deliveryAddress are required",
+//       });
+//     }
 
-    const finalPaymentMethod =
-      paymentMethod === "ONLINE" ? "ONLINE" : "COD";
+//     // ✅ await is INSIDE async function
+//     await connectDB();
 
-    const paymentStatus =
-      finalPaymentMethod === "ONLINE" ? "PAID" : "PENDING";
+//     const finalPaymentMethod =
+//       paymentMethod === "ONLINE" ? "ONLINE" : "COD";
 
-    const totalAmount = items.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
+//     const paymentStatus =
+//       finalPaymentMethod === "ONLINE" ? "PAID" : "PENDING";
 
-    const order = new Order({
-      user: req.user._id,
-      items,
-      deliveryAddress,
-      totalAmount,
-      paymentMethod: finalPaymentMethod,
-      paymentStatus,
-      status: "CREATED",
-    });
+//     const totalAmount = items.reduce(
+//       (sum, item) => sum + item.price * item.quantity,
+//       0
+//     );
 
-    await order.save();
+//     const order = new Order({
+//       user: req.user._id,
+//       items,
+//       deliveryAddress,
+//       totalAmount,
+//       paymentMethod: finalPaymentMethod,
+//       paymentStatus,
+//       status: "CREATED",
+//     });
 
-    res.status(201).json({
-      success: true,
-      message: "Order placed successfully",
-      order,
-    });
-  })
-);
+//     await order.save();
+
+//     res.status(201).json({
+//       success: true,
+//       message: "Order placed successfully",
+//       order,
+//     });
+//   })
+// );
 
 // // validate items structure
 // const cleanedItems = items
@@ -764,6 +765,109 @@ app.post(
 //   .status(201)
 //   .json({ success: true, order: saved, message: "Order created" });
 // Create order from cart items
+
+// app.post(
+//   "/orders",
+//   auth,
+//   asyncHandler(async (req, res) => {
+//     const { items, deliveryAddress, paymentMethod } = req.body || {};
+
+//     if (!deliveryAddress || !Array.isArray(items)) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "items[] and deliveryAddress are required",
+//       });
+//     }
+
+//     // ✅ validate items structure
+//     const cleanedItems = items
+//       .map((it) => ({
+//         productId: it.productId,
+//         quantity: Number(it.quantity || 0),
+//       }))
+//       .filter((it) => it.productId && it.quantity > 0);
+
+//     if (cleanedItems.length === 0) {
+//       return res.status(400).json({
+//         success: false,
+//         message:
+//           "At least one valid item (productId + quantity > 0) is required",
+//       });
+//     }
+
+//     // ✅ await is LEGAL here
+//     await connectDB();
+
+//     const productIds = cleanedItems.map((it) => it.productId);
+//     const products = await Product.find({
+//       _id: { $in: productIds },
+//       isActive: true,
+//     }).lean();
+
+//     if (products.length === 0) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "No valid products found in cart",
+//       });
+//     }
+
+//     const productMap = new Map(
+//       products.map((p) => [String(p._id), p])
+//     );
+
+//     const orderItems = [];
+//     let totalAmount = 0;
+
+//     for (const it of cleanedItems) {
+//       const prod = productMap.get(String(it.productId));
+//       if (!prod) continue;
+
+//       const subtotal = prod.price * it.quantity;
+//       totalAmount += subtotal;
+
+//       orderItems.push({
+//         productId: prod._id,
+//         name: prod.name,
+//         price: prod.price,
+//         quantity: it.quantity,
+//         subtotal,
+//       });
+//     }
+
+//     if (orderItems.length === 0) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Cart items are invalid or products inactive",
+//       });
+//     }
+
+//     const finalPaymentMethod =
+//       paymentMethod === "ONLINE" ? "ONLINE" : "COD";
+
+//     const paymentStatus =
+//       finalPaymentMethod === "ONLINE" ? "PAID" : "PENDING";
+
+//     const order = new Order({
+//       user: req.user._id,
+//       items: orderItems,
+//       totalAmount,
+//       deliveryAddress,
+//       paymentMethod: finalPaymentMethod,
+//       paymentStatus,
+//       status: "CREATED",
+//     });
+
+//     const saved = await order.save();
+
+//     return res.status(201).json({
+//       success: true,
+//       order: saved,
+//       message: "Order created",
+//     });
+//   })
+// );
+
+// create item from cart 
 app.post(
   "/orders",
   auth,
@@ -777,7 +881,7 @@ app.post(
       });
     }
 
-    // ✅ validate items structure
+    // 🔹 clean & validate cart items
     const cleanedItems = items
       .map((it) => ({
         productId: it.productId,
@@ -788,24 +892,22 @@ app.post(
     if (cleanedItems.length === 0) {
       return res.status(400).json({
         success: false,
-        message:
-          "At least one valid item (productId + quantity > 0) is required",
+        message: "No valid cart items",
       });
     }
 
-    // ✅ await is LEGAL here
     await connectDB();
 
-    const productIds = cleanedItems.map((it) => it.productId);
+    const productIds = cleanedItems.map((i) => i.productId);
     const products = await Product.find({
       _id: { $in: productIds },
       isActive: true,
     }).lean();
 
-    if (products.length === 0) {
+    if (!products.length) {
       return res.status(400).json({
         success: false,
-        message: "No valid products found in cart",
+        message: "Products not found or inactive",
       });
     }
 
@@ -832,10 +934,10 @@ app.post(
       });
     }
 
-    if (orderItems.length === 0) {
+    if (!orderItems.length || totalAmount <= 0) {
       return res.status(400).json({
         success: false,
-        message: "Cart items are invalid or products inactive",
+        message: "Invalid order items",
       });
     }
 
@@ -846,7 +948,7 @@ app.post(
       finalPaymentMethod === "ONLINE" ? "PAID" : "PENDING";
 
     const order = new Order({
-      user: req.user._id,
+      userId: req.user._id,     // ✅ MATCHES schema
       items: orderItems,
       totalAmount,
       deliveryAddress,
@@ -857,13 +959,16 @@ app.post(
 
     const saved = await order.save();
 
-    return res.status(201).json({
+    res.status(201).json({
       success: true,
       order: saved,
-      message: "Order created",
+      message: "Order created successfully",
     });
   })
 );
+
+
+ 
 //  create order with rozpay
 
 app.post(
