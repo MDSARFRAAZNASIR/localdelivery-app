@@ -318,8 +318,78 @@ app.put(
   })
 );
 
+
+// get all address of user
+app.get("/user/addresses", auth, asyncHandler(async (req, res) => {
+  await connectDB();
+  const user = await User.findById(req.user._id).select("addresses");
+  res.json({ success: true, addresses: user.addresses || [] });
+}));
+ 
+
+// add new address of user
+app.post("/user/addresses", auth, asyncHandler(async (req, res) => {
+  const address = req.body;
+
+  if (!address.addressLine) {
+    return res.status(400).json({ success: false, message: "Address required" });
+  }
+
+  await connectDB();
+  const user = await User.findById(req.user._id);
+
+  // first address becomes default
+  if (!user.addresses.some(a => a.isDefault)) {
+    address.isDefault = true;
+  }
+
+  user.addresses.push(address);
+  await user.save();
+
+  res.status(201).json({ success: true, addresses: user.addresses });
+}));
+
+
+//  set defautl user addres
+app.put("/user/addresses/:id/default", auth, asyncHandler(async (req, res) => {
+  await connectDB();
+  const user = await User.findById(req.user._id);
+
+  user.addresses.forEach(addr => {
+    addr.isDefault = addr._id.toString() === req.params.id;
+  });
+
+  await user.save();
+  res.json({ success: true, addresses: user.addresses });
+}));
+
+
+
+
+// delete address of user
+app.delete("/user/addresses/:id", auth, asyncHandler(async (req, res) => {
+  await connectDB();
+  const user = await User.findById(req.user._id);
+
+  user.addresses = user.addresses.filter(
+    a => a._id.toString() !== req.params.id
+  );
+
+  // ensure one default remains
+  if (!user.addresses.some(a => a.isDefault) && user.addresses.length > 0) {
+    user.addresses[0].isDefault = true;
+  }
+
+  await user.save();
+  res.json({ success: true, addresses: user.addresses });
+}));
+
+
+
+
 // // GET orders (paginated)
-// app.get('/user/orders', auth, async (req, res) => {
+// app.get(
+// '/user/orders', auth, async (req, res) => {
 //   try {
 //     const page = Math.max(1, parseInt(req.query.page) || 1);
 //     const limit = Math.min(50, parseInt(req.query.limit) || 10);
@@ -892,15 +962,25 @@ app.post(
   "/orders",
   auth,
   asyncHandler(async (req, res) => {
-    const { items, deliveryAddress, paymentMethod } = req.body || {};
+    // const { items, deliveryAddress, paymentMethod } = req.body || {};
+    const { items, deliveryAddressId, paymentMethod } = req.body || {};
 
-    if (!deliveryAddress || !Array.isArray(items)) {
-      return res.status(400).json({
-        success: false,
-        message: "items[] and deliveryAddress are required",
-      });
-    }
 
+    // if (!deliveryAddress || !Array.isArray(items)) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "items[] and deliveryAddress are required",
+    //   });
+    // }
+//  Basic Validation
+    if (!deliveryAddressId || !Array.isArray(items)) {
+  return res.status(400).json({
+    success: false,
+    message: "items[] and deliveryAddressId are required",
+  });
+}
+
+// Clean Cart Items
     const cleanedItems = items
       .map((it) => ({
         productId: it.productId,
@@ -914,9 +994,31 @@ app.post(
         message: "No valid cart items",
       });
     }
-
+//  DB Connection
     await connectDB();
 
+    
+    // 🔐 fetch user + address snapshot
+const user = await User.findById(req.user._id);
+if (!user) {
+  return res.status(404).json({
+    success: false,
+    message: "User not found",
+  });
+}
+
+const address = user.addresses.find(
+  (a) => a._id.toString() === deliveryAddressId
+);
+
+if (!address) {
+  return res.status(400).json({
+    success: false,
+    message: "Invalid delivery address",
+  });
+}
+
+  // Fetch Products
     const products = await Product.find({
       _id: { $in: cleanedItems.map((i) => i.productId) },
       isActive: true,
@@ -925,6 +1027,8 @@ app.post(
     const productMap = new Map(
       products.map((p) => [String(p._id), p])
     );
+
+// Build Order Items
 
     let totalAmount = 0;
     const orderItems = [];
@@ -957,13 +1061,15 @@ app.post(
       });
     }
 
-    // add on paymentMethod
+    // add on paymentMethod Logic
 const finalPaymentMethod =
   paymentMethod === "ONLINE" ? "ONLINE" : "COD";
 
-const paymentStatus = "PENDING"; // 🔥 ALWAYS pending at creation
+// const paymentStatus = "PENDING"; // 🔥 ALWAYS pending at creation
+  const paymentStatus =
+      finalPaymentMethod === "ONLINE" ? "PENDING" : "COD";
 
-      
+      // Create Order
 
     // const order = new Order({
     //   userId: req.user._id,
@@ -974,24 +1080,52 @@ const paymentStatus = "PENDING"; // 🔥 ALWAYS pending at creation
     //   paymentStatus: paymentMethod === "ONLINE" ? "PAID" : "PENDING",
     //   status: "CREATED",
     // });
+// const order = new Order({
+//   userId: req.user._id,
+//   items: orderItems,
+//   totalAmount,
+//   deliveryAddress,
+//   paymentMethod: finalPaymentMethod,
+//   paymentStatus: "PENDING", // 👈 important
+//   status: "CREATED",
+// });
+
 const order = new Order({
   userId: req.user._id,
+
   items: orderItems,
   totalAmount,
-  deliveryAddress,
-  paymentMethod: finalPaymentMethod,
-  paymentStatus: "PENDING", // 👈 important
-  status: "CREATED",
+
+  // paymentMethod: paymentMethod || "COD",
+  // paymentStatus: paymentMethod === "ONLINE" ? "PENDING" : "COD",
+  // status: "CREATED",
+    paymentMethod: finalPaymentMethod,
+      paymentStatus,
+      status: "CREATED",
+
+  // 🔥 ADDRESS SNAPSHOT (IMMUTABLE)
+  deliveryAddress: {
+    label: address.label,
+    name: address.name,
+    phone: address.phone,
+    addressLine: address.addressLine,
+    city: address.city,
+    state: address.state,
+    pincode: address.pincode,
+  },
 });
 
-    const saved = await order.save();
 
-    res.status(201).json({
-      success: true,
-      order: saved,
-      message: "Order created successfully",
-    });
+const saved = await order.save();
+// Response
+
+return res.status(201).json({
+  success: true,
+  order: saved,
+  message: "Order created successfully",
+});
   })
+
 );
 
 // Admin: update order status

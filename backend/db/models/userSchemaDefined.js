@@ -110,11 +110,28 @@ const userSchemaDefined = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // address of user
+    addresses: [
+  {
+    label: { type: String, default: "Home" },
+    name: String,
+    phone: String,
+    addressLine: { type: String, required: true },
+    city: String,
+    state: String,
+    pincode: String,
+    isDefault: { type: Boolean, default: false },
+  },
+],
+
   },
   {
     timestamps: true,
   }
 );
+
+
+
 
 // indexes
 userSchemaDefined.index({ userphone: 1 }, { unique: true, sparse: true });

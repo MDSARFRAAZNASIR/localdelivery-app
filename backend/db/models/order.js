@@ -107,10 +107,21 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
 
+    // deliveryAddress: {
+    //   type: String,
+    //   required: true,
+    // },
+
+
     deliveryAddress: {
-      type: String,
-      required: true,
-    },
+  label: String,
+  name: String,
+  phone: String,
+  addressLine: String,
+  city: String,
+  state: String,
+  pincode: String,
+},
 
     status: {
       type: String,
