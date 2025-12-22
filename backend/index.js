@@ -1128,32 +1128,38 @@ const order = new Order({
   // paymentMethod: paymentMethod || "COD",
   // paymentStatus: paymentMethod === "ONLINE" ? "PENDING" : "COD",
   // status: "CREATED",
-    paymentMethod: finalPaymentMethod,
-      paymentStatus,
-      status: "CREATED",
+
+    // paymentMethod: finalPaymentMethod,
+    //   paymentStatus,
+    //   status: "CREATED",
+
+    // add fress
+    paymentMethod: paymentMethod === "ONLINE" ? "ONLINE" : "COD",
+  paymentStatus: "PENDING", // ✅ ALWAYS PENDING at creation
+  status: "CREATED",
 
   // 🔥 ADDRESS SNAPSHOT (IMMUTABLE)
-//   deliveryAddress: {
-//     label: address.label,
-//     name: address.name,
-//     phone: address.phone,
-//     addressLine: address.addressLine,
-//     city: address.city,
-//     state: address.state,
-//     pincode: address.pincode,
-//   },
-addresses: [
-  {
-    label: String,
-    name: String,
-    phone: String,
-    addressLine: String,
-    city: String,
-    state: String,
-    pincode: String,
-    isDefault: { type: Boolean, default: false }
-  }
-],
+  deliveryAddress: {
+    label: address.label,
+    name: address.name,
+    phone: address.phone,
+    addressLine: address.addressLine,
+    city: address.city,
+    state: address.state,
+    pincode: address.pincode,
+  },
+// addresses: [
+//   {
+//     label: String,
+//     name: String,
+//     phone: String,
+//     addressLine: String,
+//     city: String,
+//     state: String,
+//     pincode: String,
+//     isDefault: { type: Boolean, default: false }
+//   }
+// ],
 
 });
 
