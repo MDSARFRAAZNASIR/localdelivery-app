@@ -351,17 +351,46 @@ app.post("/user/addresses", auth, asyncHandler(async (req, res) => {
 
 
 //  set defautl user addres
-app.put("/user/addresses/:id/default", auth, asyncHandler(async (req, res) => {
-  await connectDB();
-  const user = await User.findById(req.user._id);
+// app.put("/user/addresses/:id/default", auth, asyncHandler(async (req, res) => {
+//   await connectDB();
+//   const user = await User.findById(req.user._id);
 
-  user.addresses.forEach(addr => {
-    addr.isDefault = addr._id.toString() === req.params.id;
-  });
+//   user.addresses.forEach(addr => {
+//     addr.isDefault = addr._id.toString() === req.params.id;
+//   });
 
-  await user.save();
-  res.json({ success: true, addresses: user.addresses });
-}));
+//   await user.save();
+//   res.json({ success: true, addresses: user.addresses });
+// }));
+
+// PUT /user/addresses/:id/default
+app.put(
+  "/user/addresses/:id/default",
+  auth,
+  asyncHandler(async (req, res) => {
+    await connectDB();
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // reset all
+    user.addresses.forEach((a) => (a.isDefault = false));
+
+    // set selected
+    const addr = user.addresses.id(req.params.id);
+    if (!addr) {
+      return res.status(404).json({ success: false, message: "Address not found" });
+    }
+
+    addr.isDefault = true;
+    await user.save();
+
+    res.json({ success: true, addresses: user.addresses });
+  })
+);
+
 
 
 

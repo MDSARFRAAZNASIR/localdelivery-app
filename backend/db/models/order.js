@@ -113,15 +113,28 @@ const orderSchema = new mongoose.Schema(
     // },
 
 
-    deliveryAddress: {
-  label: String,
-  name: String,
-  phone: String,
-  addressLine: String,
-  city: String,
-  state: String,
-  pincode: String,
-},
+//     deliveryAddress: {
+//   label: String,
+//   name: String,
+//   phone: String,
+//   addressLine: String,
+//   city: String,
+//   state: String,
+//   pincode: String,
+// },
+addresses: [
+  {
+    label: String,
+    name: String,
+    phone: String,
+    addressLine: String,
+    city: String,
+    state: String,
+    pincode: String,
+    isDefault: { type: Boolean, default: false }
+  }
+],
+
 
     status: {
       type: String,
