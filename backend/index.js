@@ -1149,6 +1149,7 @@ const order = new Order({
     pincode: address.pincode,
 
   },
+
 addresses: [
   {
     label: String,
