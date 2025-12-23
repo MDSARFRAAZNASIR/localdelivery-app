@@ -112,6 +112,17 @@ const orderSchema = new mongoose.Schema(
     //   required: true,
     // },
 
+      deliveryAddress: {
+    label: address.label,
+    name: address.name,
+    phone: address.phone,
+    addressLine: address.addressLine,
+    city: address.city,
+    state: address.state,
+    pincode: address.pincode,
+
+  },
+
 
 
 addresses: [
