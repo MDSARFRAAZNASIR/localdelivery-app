@@ -1139,15 +1139,15 @@ const order = new Order({
   status: "CREATED",
 
   // 🔥 ADDRESS SNAPSHOT (IMMUTABLE)
-  deliveryAddress: {
-    label: address.label,
-    name: address.name,
-    phone: address.phone,
-    addressLine: address.addressLine,
-    city: address.city,
-    state: address.state,
-    pincode: address.pincode,
-  },
+  // deliveryAddress: {
+  //   label: address.label,
+  //   name: address.name,
+  //   phone: address.phone,
+  //   addressLine: address.addressLine,
+  //   city: address.city,
+  //   state: address.state,
+  //   pincode: address.pincode,
+  // },
 addresses: [
   {
     label: String,
