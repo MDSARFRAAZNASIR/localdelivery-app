@@ -113,15 +113,7 @@ const orderSchema = new mongoose.Schema(
     // },
 
 
-//     deliveryAddress: {
-//   label: String,
-//   name: String,
-//   phone: String,
-//   addressLine: String,
-//   city: String,
-//   state: String,
-//   pincode: String,
-// },
+
 addresses: [
   {
     label: String,
