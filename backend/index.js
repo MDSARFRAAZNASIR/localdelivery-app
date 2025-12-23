@@ -1148,18 +1148,18 @@ const order = new Order({
     state: address.state,
     pincode: address.pincode,
   },
-// addresses: [
-//   {
-//     label: String,
-//     name: String,
-//     phone: String,
-//     addressLine: String,
-//     city: String,
-//     state: String,
-//     pincode: String,
-//     isDefault: { type: Boolean, default: false }
-//   }
-// ],
+addresses: [
+  {
+    label: String,
+    name: String,
+    phone: String,
+    addressLine: String,
+    city: String,
+    state: String,
+    pincode: String,
+    isDefault: { type: Boolean, default: false }
+  }
+],
 
 });
 
