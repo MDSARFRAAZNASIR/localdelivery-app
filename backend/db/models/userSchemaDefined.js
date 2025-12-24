@@ -160,6 +160,10 @@ userSchemaDefined.pre("save", async function (next) {
 });
 
 // Safe export for serverless / HMR
-const Userdata =
+// const Userdata =
+//   mongoose.models.User || mongoose.model("Userdata", userSchemaDefined);
+// module.exports = Userdata;
+
+const User =
   mongoose.models.User || mongoose.model("Userdata", userSchemaDefined);
-module.exports = Userdata;
+module.exports = User;
