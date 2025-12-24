@@ -165,5 +165,5 @@ userSchemaDefined.pre("save", async function (next) {
 // module.exports = Userdata;
 
 const User =
-  mongoose.models.User || mongoose.model("Userdata", userSchemaDefined);
+  mongoose.models.User || mongoose.model("User", userSchemaDefined);
 module.exports = User;
