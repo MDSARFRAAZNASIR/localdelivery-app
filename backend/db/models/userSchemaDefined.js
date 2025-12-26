@@ -164,6 +164,6 @@ userSchemaDefined.pre("save", async function (next) {
 //   mongoose.models.User || mongoose.model("Userdata", userSchemaDefined);
 // module.exports = Userdata;
 
-const User =
-  mongoose.models.User || mongoose.model("User", userSchemaDefined);
-module.exports = User;
+const Userdocs =
+  mongoose.models.User || mongoose.model("Userdocs", userSchemaDefined);
+module.exports = Userdocs;
