@@ -102,6 +102,16 @@ export default function Navbar() {
         >
           add pro
         </NavLink>
+         <NavLink
+          to="addresses"
+          className={({ isActive }) =>
+            `hover:text-orange-500 ${
+              isActive ? "text-orange-500 font-semibold" : "text-gray-700"
+            }`
+          }
+        >
+          My Adresses
+        </NavLink>
 
       </div>
 

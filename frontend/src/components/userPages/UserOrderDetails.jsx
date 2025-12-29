@@ -20,39 +20,81 @@ export default function UserOrderDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // const fetchOrder = useCallback(async () => {
+  //   try {
+  //     setLoading(true);
+  //     const res = await fetch(
+  //       `https://localdelivery-app-backend.vercel.app/user/orders/${orderId}`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+
+  //     const data = await res.json();
+  //     if (!res.ok) throw new Error(data.message || "Failed to load order");
+
+  //     setOrder(data.order);
+  //   } catch (err) {
+  //     setError(err.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }, [orderId, token]);
+
+  // another code add in place of above
   const fetchOrder = useCallback(async () => {
-    try {
-      setLoading(true);
-      const res = await fetch(
-        `https://localdelivery-app-backend.vercel.app/user/orders/${orderId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  try {
+    setLoading(true);
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to load order");
+    const res = await fetch(
+      `https://localdelivery-app-backend.vercel.app/user/orders/${orderId}`,
+      {
+        headers: token
+          ? { Authorization: `Bearer ${token}` }
+          : {},
+      }
+    );
 
-      setOrder(data.order);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [orderId, token]);
-
-  useEffect(() => {
-    if (!token) {
-      navigate("/login");
+    if (res.status === 401) {
+      navigate("/login", { replace: true });
       return;
     }
 
-    fetchOrder();
-    const interval = setInterval(fetchOrder, 10000);
-    return () => clearInterval(interval);
-  }, [fetchOrder, navigate, token]);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed to load order");
+
+    setOrder(data.order);
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+}, [orderId, token, navigate]);
+
+
+  // useEffect(() => {
+  //   if (!token) {
+  //     navigate("/login");
+  //     return;
+  //   }
+
+  //   fetchOrder();
+  //   const interval = setInterval(fetchOrder, 10000);
+  //   return () => clearInterval(interval);
+  // }, [fetchOrder, navigate, token]);
+
+  // add another inplace of above code
+
+ useEffect(() => {
+  fetchOrder();
+
+  const interval = setInterval(fetchOrder, 10000);
+  return () => clearInterval(interval);
+}, [fetchOrder]);
+
+
 
   if (loading) return <div className="p-6">Loading order...</div>;
   if (error) return <div className="p-6 text-red-600">{error}</div>;
@@ -79,75 +121,76 @@ export default function UserOrderDetails() {
       alert(err.message || "Cancel failed");
     }
   };
- 
 
   // pay now handler
   const handleOnlinePayment = async () => {
-  try {
-    // 1. Create Razorpay order from backend
-    const res = await fetch(
-      "https://localdelivery-app-backend.vercel.app/payments/razorpay/create-order",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+    try {
+      // 1. Create Razorpay order from backend
+      const res = await fetch(
+        "https://localdelivery-app-backend.vercel.app/payments/razorpay/create-order",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ orderId: order._id }),
+        }
+      );
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to create payment");
+
+      // 2. Razorpay options
+      const options = {
+        key: data.key, // Razorpay public key
+        amount: data.razorpayOrder.amount,
+        currency: "INR",
+        name: "Local Delivery App",
+        description: "Order Payment",
+        order_id: data.razorpayOrder.id,
+
+        handler: async function (response) {
+          // 3. Verify payment on backend
+          const verifyRes = await fetch(
+            "https://localdelivery-app-backend.vercel.app/payments/razorpay/verify",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                orderId: order._id,
+              }),
+            }
+          );
+
+          const verifyData = await verifyRes.json();
+          if (!verifyRes.ok)
+            throw new Error(
+              verifyData.message || "Payment verification failed"
+            );
+
+          alert("✅ Payment Successful");
+          setOrder(verifyData.order); // refresh UI
         },
-        body: JSON.stringify({ orderId: order._id }),
-      }
-    );
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to create payment");
+        theme: {
+          color: "#f97316", // orange
+        },
+      };
 
-    // 2. Razorpay options
-    const options = {
-      key: data.key, // Razorpay public key
-      amount: data.razorpayOrder.amount,
-      currency: "INR",
-      name: "Local Delivery App",
-      description: "Order Payment",
-      order_id: data.razorpayOrder.id,
-
-      handler: async function (response) {
-        // 3. Verify payment on backend
-        const verifyRes = await fetch(
-          "https://localdelivery-app-backend.vercel.app/payments/razorpay/verify",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              orderId: order._id,
-            }),
-          }
-        );
-
-        const verifyData = await verifyRes.json();
-        if (!verifyRes.ok)
-          throw new Error(verifyData.message || "Payment verification failed");
-
-        alert("✅ Payment Successful");
-        setOrder(verifyData.order); // refresh UI
-      },
-
-      theme: {
-        color: "#f97316", // orange
-      },
-    };
-
-    // 4. Open Razorpay popup
-    const rzp = new window.Razorpay(options);
-    rzp.open();
-  } catch (err) {
-    alert(err.message || "Payment failed");
-  }
-};
+      // 4. Open Razorpay popup
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      alert(err.message || "Payment failed");
+    }
+  };
 
   return (
     <>
@@ -185,15 +228,14 @@ export default function UserOrderDetails() {
             </span>
           </div>
           {order.paymentMethod === "ONLINE" &&
-  order.paymentStatus === "PENDING" && (
-    <button
-      onClick={handleOnlinePayment}
-      className="mt-4 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded"
-    >
-      Pay Now
-    </button>
-)}
-
+            order.paymentStatus === "PENDING" && (
+              <button
+                onClick={handleOnlinePayment}
+                className="mt-4 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded"
+              >
+                Pay Now
+              </button>
+            )}
         </div>
 
         <div className="bg-white p-6 rounded shadow">
@@ -216,7 +258,7 @@ export default function UserOrderDetails() {
 
           <h3 className="font-semibold mb-2">Items</h3>
 
-          <ul className="divide-y">
+          {/* <ul className="divide-y">
             {order.items.map((item) => (
               <li key={item._id} className="py-2 flex justify-between">
                 <div>
@@ -232,6 +274,19 @@ export default function UserOrderDetails() {
                 </div>
               </li>
             ))}
+          </ul> */}
+          <ul className="divide-y">
+            {order.items.map((item) => (
+              <li key={item._id} className="py-2 flex justify-between">
+                <div>
+                  <div className="font-medium">{item.name}</div>
+                  <div className="text-xs text-gray-500">
+                    Qty: {item.quantity}
+                  </div>
+                </div>
+                <div className="font-semibold">₹{item.subtotal}</div>
+              </li>
+            ))}
           </ul>
 
           <div className="mt-4 border-t pt-4 flex justify-between font-bold">
@@ -239,6 +294,7 @@ export default function UserOrderDetails() {
             <span>₹{order.totalAmount}</span>
           </div>
         </div>
+        
       </div>
     </>
   );

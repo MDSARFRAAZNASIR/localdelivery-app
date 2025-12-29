@@ -271,14 +271,122 @@ export default function OrdersPage() {
                     </span>
                   </div>
 
-                  <div className="mb-2">
+                  {/* <div className="mb-2">
                     <div className="text-sm font-medium text-gray-700 mb-1">
                       Delivery Address
                     </div>
                     <div className="text-sm text-gray-600">
                       {order.deliveryAddress}
                     </div>
-                  </div>
+                  </div> */}
+                  {/* <div className="mb-2">
+  <div className="text-sm font-medium text-gray-700 mb-1">
+    Delivery Address
+  </div>
+
+  {order.deliveryAddress && (
+    <div className="text-sm text-gray-600">
+      <div className="font-semibold">
+        {order.deliveryAddress.label}
+      </div>
+      <div>
+        {order.deliveryAddress.name} · {order.deliveryAddress.phone}
+      </div>
+      <div>
+        {order.deliveryAddress.addressLine},{" "}
+        {order.deliveryAddress.city},{" "}
+        {order.deliveryAddress.state} -{" "}
+        {order.deliveryAddress.pincode}
+      </div>
+    </div>
+  )}
+</div> */}
+{/* 
+<div className="mb-2">
+  <div className="text-sm font-medium text-gray-700 mb-1">
+    Delivery Address
+  </div>
+
+  {order.deliveryAddress ? (
+    <div className="text-sm text-gray-600 leading-snug">
+      {order.deliveryAddress.label && (
+        <div className="font-semibold">
+          {order.deliveryAddress.label}
+        </div>
+      )}
+
+      <div>
+        {order.deliveryAddress.name}
+        {order.deliveryAddress.phone && (
+          <> · {order.deliveryAddress.phone}</>
+        )}
+      </div>
+
+      <div>
+        {order.deliveryAddress.addressLine}
+      </div>
+
+      <div>
+        {order.deliveryAddress.city}, {order.deliveryAddress.state} –{" "}
+        {order.deliveryAddress.pincode}
+      </div>
+    </div>
+  ) : (
+    <div className="text-sm text-gray-400">
+      Address not available
+    </div>
+  )}
+</div>
+ */}
+
+ {/* <div className="text-sm text-gray-600">
+  {order.deliveryAddress ? (
+    <>
+      <div className="font-medium">
+        {order.deliveryAddress.name} ({order.deliveryAddress.label})
+      </div>
+      <div>
+        {order.deliveryAddress.addressLine}
+      </div>
+      <div>
+        {order.deliveryAddress.city}, {order.deliveryAddress.state} –{" "}
+        {order.deliveryAddress.pincode}
+      </div>
+      <div className="text-xs text-gray-500">
+        📞 {order.deliveryAddress.phone}
+      </div>
+    </>
+  ) : (
+    <span className="italic text-gray-400">Address not available</span>
+  )}
+</div> */}
+
+<div className="text-sm text-gray-600">
+  {order.deliveryAddress && typeof order.deliveryAddress === "object" ? (
+    <>
+      <div className="font-medium">
+        {order.deliveryAddress.name || "Customer"}
+        {order.deliveryAddress.label && ` (${order.deliveryAddress.label})`}
+      </div>
+
+      <div>{order.deliveryAddress.addressLine}</div>
+
+      <div>
+        {order.deliveryAddress.city}, {order.deliveryAddress.state} –{" "}
+        {order.deliveryAddress.pincode}
+      </div>
+
+      <div className="text-xs text-gray-500">
+        📞 {order.deliveryAddress.phone}
+      </div>
+    </>
+  ) : (
+    <span className="italic text-gray-400">Address not available</span>
+  )}
+</div>
+
+
+
 
                   <div className="mt-2">
                     <div className="text-sm font-medium text-gray-700 mb-1">

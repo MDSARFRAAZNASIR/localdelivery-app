@@ -74,6 +74,7 @@ export default function AdminOrdersPage() {
   return (
     <>
       <Navbar />
+
       <div className="p-6 max-w-6xl mx-auto">
         <h1 className="text-2xl font-bold mb-4">📦 Admin Orders</h1>
 
@@ -90,9 +91,11 @@ export default function AdminOrdersPage() {
                   <th className="p-2 border">Order ID</th>
                   <th className="p-2 border">User</th>
                   <th className="p-2 border">Amount</th>
+                   <th className="p-2 border">Payment</th>
+
                   <th className="p-2 border">Status</th>
                   <th className="p-2 border">Date</th>
-                  <th className="p-2 border">Payment</th>
+                 
                 </tr>
               </thead>
               <tbody>
@@ -103,10 +106,10 @@ export default function AdminOrdersPage() {
                     </td>
                     <td className="p-2 border">
                       <div className="font-medium">
-                        {order.user?.username || "User"}
+                        {order.userId?.username || "User"}
                       </div>
                       <div className="text-xs text-gray-500">
-                        {order.user?.useremail}
+                        {order.userId?.useremail}
                       </div>
                     </td>
                     <td className="p-2 border font-semibold">
@@ -141,6 +144,36 @@ export default function AdminOrdersPage() {
                           </option>
                         ))}
                       </select>
+
+
+                      
+                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                     </td>
                     <td className="p-2 border text-sm">
                       {new Date(order.createdAt).toLocaleString()}

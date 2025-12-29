@@ -18,7 +18,7 @@ import OrdersPage from "./components/pages/OrdersPage";
 import AdminProductsPage from "./components/adminPages/AdminProductsPage";
 import AdminOrdersPage from "./components/adminPages/AdminOrdersPage";
 import UserOrderDetails from "./components/userPages/UserOrderDetails";
-
+import AddressBook from "./components/pages/AddressBook";
 
 function App() {
   useEffect(() => {
@@ -35,27 +35,26 @@ function App() {
         <Route path="/" element={<LandingPage />}></Route>
         <Route path="signup" element={<SignUpPage />}></Route>
         <Route path="login" element={<LogInPage />}></Route>
-          <Route path="session-expired" element={<SessionExpired />} />
+        <Route path="session-expired" element={<SessionExpired />} />
 
         {/* {protected routes} */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/products" element={<ProductsPage/>}></Route>
-          <Route path="/cart" element={<CartPage/>}></Route>
-            <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/products" element={<ProductsPage />}></Route>
+          <Route path="/cart" element={<CartPage />}></Route>
+          <Route path="/orders" element={<OrdersPage />} />
 
           {/* <Route path="/orders" element={<OrdersPage/>}></Route> */}
-            <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile" element={<ProfilePage />} />
 
-            <Route path="/create-order" element={<CreateOrderPage />} />
+          <Route path="/create-order" element={<CreateOrderPage />} />
           <Route path="/userdashboard" element={<UserDashboard />}></Route>
-        <Route path="/admin/products" element={<AdminProductsPage />}> </Route>
-        <Route path="/admin/orders" element={<AdminOrdersPage />} />
+          <Route path="/admin/products" element={<AdminProductsPage />}>
+            {" "}
+          </Route>
+          <Route path="/admin/orders" element={<AdminOrdersPage />} />
 
-
-<Route path="/order/:orderId" element={<UserOrderDetails />} />
-
-
-
+          <Route path="/orders/:orderId" element={<UserOrderDetails />} />
+          <Route path="/addresses" element={<AddressBook />} />
 
 
           {/* yahan aur protected routes add kar sakte ho */}
