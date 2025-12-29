@@ -13,7 +13,6 @@ const adminMiddlle=require("./middleware/adminMiddlle")
 const auth = require("./middleware/auth");
 const bcrypt = require("bcryptjs");
 
-
 // load env (important: do this once at entry)
 dotenv.config();
 
@@ -526,7 +525,7 @@ app.get(
     const orders = await Order.find()
       .populate({
         path: "userId",
-        model: "Userdata", // 🔥 FIX
+        model: "Userdetail", // 🔥 FIX
         model: "User", // 🔥 FIX AGAIN
 
         select: "username useremail userphone",
