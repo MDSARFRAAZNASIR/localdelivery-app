@@ -206,7 +206,7 @@
 //                 <label className="block text-sm font-medium mb-1">
 //                   Delivery Address
 //                 </label>
-//                 {/* 
+//                 {/*
 //                 <textarea
 //                   value={deliveryAddress}
 //                   onChange={(e) => setDeliveryAddress(e.target.value)}
@@ -251,8 +251,6 @@
 //   );
 // }
 
-
-
 // add again
 import React, { useEffect, useState } from "react";
 import Navbar from "./Navbar";
@@ -279,13 +277,13 @@ export default function CartPage() {
       setCart([]);
     }
   }, []);
-//  Auto Select default address
-useEffect(() => {
-  const def = addresses.find((a) => a.isDefault);
-  if (def) {
-    setSelectedAddressId(def._id);
-  }
-}, [addresses]);
+  //  Auto Select default address
+  useEffect(() => {
+    const def = addresses.find((a) => a.isDefault);
+    if (def) {
+      setSelectedAddressId(def._id);
+    }
+  }, [addresses]);
 
   // ------------------ LOAD ADDRESSES ------------------
   useEffect(() => {
@@ -301,7 +299,8 @@ useEffect(() => {
         );
 
         const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Failed to load addresses");
+        if (!res.ok)
+          throw new Error(data.message || "Failed to load addresses");
 
         setAddresses(data.addresses || []);
 
@@ -370,10 +369,9 @@ useEffect(() => {
     //   return;
     // }
     if (!selectedAddressId) {
-  setError("Please select a delivery address");
-  return;
-}
-
+      setError("Please select a delivery address");
+      return;
+    }
 
     setLoading(true);
     setError("");
@@ -397,14 +395,13 @@ useEffect(() => {
           //   paymentMethod,
           // }),
           body: JSON.stringify({
-  items: cart.map((item) => ({
-    productId: item.productId,
-    quantity: item.quantity,
-  })),
-  deliveryAddressId: selectedAddressId, // 🔥 IMPORTANT
-  paymentMethod,
-})
-
+            items: cart.map((item) => ({
+              productId: item.productId,
+              quantity: item.quantity,
+            })),
+            deliveryAddressId: selectedAddressId, // 🔥 IMPORTANT
+            paymentMethod,
+          }),
         }
       );
 
@@ -473,9 +470,13 @@ useEffect(() => {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <button onClick={() => decreaseQty(item.productId)}>-</button>
+                      <button onClick={() => decreaseQty(item.productId)}>
+                        -
+                      </button>
                       <span>{item.quantity}</span>
-                      <button onClick={() => increaseQty(item.productId)}>+</button>
+                      <button onClick={() => increaseQty(item.productId)}>
+                        +
+                      </button>
                       <button
                         onClick={() => removeItem(item.productId)}
                         className="text-red-500 text-xs ml-2"
@@ -523,56 +524,55 @@ useEffect(() => {
                   // </select>
 
                   // again
-//                   <select
-//   value={selectedAddressId}
-//   onChange={(e) => setSelectedAddressId(e.target.value)}
-//   className="w-full border rounded-lg px-3 py-2"
-// >
-//   <option value="">Select address</option>
-//   {addresses.map((addr) => (
-//     <option key={addr._id} value={addr._id}>
-//       {addr.label} - {addr.addressLine}
-//     </option>
-//   ))}
-// </select>
+                  //                   <select
+                  //   value={selectedAddressId}
+                  //   onChange={(e) => setSelectedAddressId(e.target.value)}
+                  //   className="w-full border rounded-lg px-3 py-2"
+                  // >
+                  //   <option value="">Select address</option>
+                  //   {addresses.map((addr) => (
+                  //     <option key={addr._id} value={addr._id}>
+                  //       {addr.label} - {addr.addressLine}
+                  //     </option>
+                  //   ))}
+                  // </select>
 
-// for default
-<div className="space-y-3">
-  {addresses.map((addr) => (
-    <div
-      key={addr._id}
-      className={`border rounded-lg p-3 cursor-pointer ${
-        selectedAddressId === addr._id
-          ? "border-orange-500 bg-orange-50"
-          : "border-gray-300"
-      }`}
-      onClick={() => setSelectedAddressId(addr._id)}
-    >
-      <div className="font-semibold">
-        {addr.label}
-        {addr.isDefault && (
-          <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
-            Default
-          </span>
-        )}
-      </div>
-      <div className="text-sm text-gray-600">
-        {addr.name}, {addr.phone}
-      </div>
-      <div className="text-sm text-gray-600">
-        {addr.addressLine}, {addr.city}, {addr.state} – {addr.pincode}
-      </div>
+                  // for default
+                  <div className="space-y-3">
+                    {addresses.map((addr) => (
+                      <div
+                        key={addr._id}
+                        className={`border rounded-lg p-3 cursor-pointer ${
+                          selectedAddressId === addr._id
+                            ? "border-orange-500 bg-orange-50"
+                            : "border-gray-300"
+                        }`}
+                        onClick={() => setSelectedAddressId(addr._id)}
+                      >
+                        <div className="font-semibold">
+                          {addr.label}
+                          {addr.isDefault && (
+                            <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
+                              Default
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {addr.name}, {addr.phone}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {addr.addressLine}, {addr.city}, {addr.state} –{" "}
+                          {addr.pincode}
+                        </div>
 
-      {selectedAddressId === addr._id && (
-        <div className="mt-2 text-sm font-semibold text-orange-600">
-          ✔ Delivering here
-        </div>
-      )}
-    </div>
-  ))}
-</div>
-
-
+                        {selectedAddressId === addr._id && (
+                          <div className="mt-2 text-sm font-semibold text-orange-600">
+                            ✔ Delivering here
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
 
