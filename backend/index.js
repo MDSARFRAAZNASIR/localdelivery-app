@@ -411,6 +411,46 @@ app.delete(
   })
 );
 
+
+// UPDATE address
+app.put(
+  "/user/addresses/:id",
+  auth,
+  asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { label, name, phone, addressLine, city, state, pincode } = req.body;
+
+    await connectDB();
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const address = user.addresses.id(id);
+    if (!address) {
+      return res.status(404).json({ message: "Address not found" });
+    }
+
+    // update fields
+    address.label = label;
+    address.name = name;
+    address.phone = phone;
+    address.addressLine = addressLine;
+    address.city = city;
+    address.state = state;
+    address.pincode = pincode;
+
+    await user.save();
+
+    res.json({
+      success: true,
+      addresses: user.addresses,
+    });
+  })
+);
+
+
 // Create product (admin use via Postman for now)
 app.post(
   "/admin/products",
@@ -528,7 +568,7 @@ app.get(
         path: "userId",
         // model: "Userdata", // 🔥 FIX
         // model: "User", // 🔥 FIX AGAIN
-           model: "Userdata", // 🔥 FIX
+          //  model: "Userdata", // 🔥 FIX
         model: "Userdetail", // 🔥 FIX AGAIN
 
         select: "username useremail userphone",
