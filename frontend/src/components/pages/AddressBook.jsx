@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import Navbar from "../pages/Navbar";
 import { useNavigate } from "react-router-dom";
 
-export default function AddressBook() {
+export default function AddressBook({ mode = "manage", onSelect }) {
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [selectedId, setSelectedId] = useState("");
+  const [editingId, setEditingId] = useState(null);
 
   const [form, setForm] = useState({
     label: "Home",
@@ -55,30 +57,82 @@ export default function AddressBook() {
     fetchAddresses();
   }, []);
 
-  const addAddress = async () => {
+  useEffect(() => {
+    if (mode === "select" && addresses.length > 0) {
+      const def = addresses.find((a) => a.isDefault);
+      if (def) {
+        setSelectedId(def._id);
+        onSelect?.(def);
+      }
+    }
+  }, [addresses, mode, onSelect]);
+
+  // const addAddress = async () => {
+  //   if (!form.addressLine.trim()) {
+  //     alert("Address is required");
+  //     return;
+  //   }
+
+  //   try {
+  //     const res = await fetch(
+  //       "https://localdelivery-app-backend.vercel.app/user/addresses",
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         body: JSON.stringify(form),
+  //       }
+  //     );
+
+  //     const data = await res.json();
+  //     if (!res.ok) throw new Error(data.message || "Add failed");
+
+  //     setAddresses(data.addresses);
+  //     setShowForm(false);
+  //     setForm({
+  //       label: "Home",
+  //       name: "",
+  //       phone: "",
+  //       addressLine: "",
+  //       city: "",
+  //       state: "",
+  //       pincode: "",
+  //     });
+  //   } catch (err) {
+  //     alert(err.message);
+  //   }
+  // };
+
+  const saveAddress = async () => {
     if (!form.addressLine.trim()) {
       alert("Address is required");
       return;
     }
 
     try {
-      const res = await fetch(
-        "https://localdelivery-app-backend.vercel.app/user/addresses",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(form),
-        }
-      );
+      const url = editingId
+        ? `https://localdelivery-app-backend.vercel.app/user/addresses/${editingId}`
+        : "https://localdelivery-app-backend.vercel.app/user/addresses";
+
+      const method = editingId ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(form),
+      });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Add failed");
+      if (!res.ok) throw new Error(data.message || "Save failed");
 
       setAddresses(data.addresses);
       setShowForm(false);
+      setEditingId(null);
       setForm({
         label: "Home",
         name: "",
@@ -142,11 +196,17 @@ export default function AddressBook() {
         {loading && <div>Loading...</div>}
         {error && <div className="text-red-600">{error}</div>}
 
-        {!loading && addresses.length === 0 && (
-          <div>No addresses found.</div>
-        )}
+        {!loading && addresses.length === 0 && <div>No addresses found.</div>}
 
         <div className="space-y-4">
+          {/* {addresses.map((addr) => (
+            <div
+              key={addr._id}
+              className={`border p-4 rounded ${
+                addr.isDefault ? "border-green-500 bg-green-50" : ""
+              }`}
+              
+            > */}
           {addresses.map((addr) => (
             <div
               key={addr._id}
@@ -154,7 +214,91 @@ export default function AddressBook() {
                 addr.isDefault ? "border-green-500 bg-green-50" : ""
               }`}
             >
-              <div className="flex justify-between items-start">
+              {/* add on mode after */}
+              {mode === "select" && (
+                <label className="flex gap-3 items-start cursor-pointer">
+                  <input
+                    type="radio"
+                    checked={selectedId === addr._id}
+                    onChange={() => {
+                      setSelectedId(addr._id);
+                      onSelect?.(addr);
+                    }}
+                  />
+
+                  <div>
+                    <div className="font-semibold">
+                      {addr.label} {addr.isDefault && "(Default)"}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {addr.addressLine}, {addr.city}, {addr.state} -{" "}
+                      {addr.pincode}
+                    </div>
+                    {addr.phone && (
+                      <div className="text-sm">📞 {addr.phone}</div>
+                    )}
+                  </div>
+                </label>
+              )}
+
+              {/* add manage mode */}
+              {mode === "manage" && (
+                <>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div className="font-semibold">
+                        {addr.label} {addr.isDefault && "(Default)"}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {addr.addressLine}, {addr.city}, {addr.state} -{" "}
+                        {addr.pincode}
+                      </div>
+                      {addr.phone && (
+                        <div className="text-sm">📞 {addr.phone}</div>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2">
+                      {/* add new update address */}
+                      <button
+                        onClick={() => {
+                          setEditingId(addr._id);
+                          setShowForm(true);
+                          setForm({
+                            label: addr.label,
+                            name: addr.name,
+                            phone: addr.phone,
+                            addressLine: addr.addressLine,
+                            city: addr.city,
+                            state: addr.state,
+                            pincode: addr.pincode,
+                          });
+                        }}
+                        className="text-xs text-orange-600"
+                      >
+                        Edit
+                      </button>
+
+                      {!addr.isDefault && (
+                        <button
+                          onClick={() => setDefault(addr._id)}
+                          className="text-xs text-blue-600"
+                        >
+                          Set Default
+                        </button>
+                      )}
+                      <button
+                        onClick={() => deleteAddress(addr._id)}
+                        className="text-xs text-red-600"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* <div className="flex justify-between items-start">
                 <div>
                   <div className="font-semibold">
                     {addr.label} {addr.isDefault && "(Default)"}
@@ -163,9 +307,7 @@ export default function AddressBook() {
                     {addr.addressLine}, {addr.city}, {addr.state} -{" "}
                     {addr.pincode}
                   </div>
-                  {addr.phone && (
-                    <div className="text-sm">📞 {addr.phone}</div>
-                  )}
+                  {addr.phone && <div className="text-sm">📞 {addr.phone}</div>}
                 </div>
 
                 <div className="flex gap-2">
@@ -184,7 +326,7 @@ export default function AddressBook() {
                     Delete
                   </button>
                 </div>
-              </div>
+              </div> */}
             </div>
           ))}
         </div>
@@ -252,12 +394,18 @@ export default function AddressBook() {
                 className="border p-2 rounded"
               />
             </div>
-
-            <button
+            {/* <button
               onClick={addAddress}
               className="bg-green-600 text-white px-4 py-2 rounded"
             >
               Save Address
+            </button> */}
+
+            <button
+              onClick={saveAddress}
+              className="bg-green-600 text-white px-4 py-2 rounded"
+            >
+              {editingId ? "Update Address" : "Save Address"}
             </button>
           </div>
         )}

@@ -69,7 +69,7 @@ export default function Navbar() {
         >
           Profile
         </NavLink>
-     
+
         <NavLink
           to="/products"
           className={({ isActive }) =>
@@ -81,18 +81,17 @@ export default function Navbar() {
           Products
         </NavLink>
 
-        
         <NavLink
-  to="/orders"
-  className={({ isActive }) =>
-    `hover:text-orange-500 ${
-      isActive ? "text-orange-500 font-semibold" : "text-gray-700"
-    }`
-  }
->
-  Orders
-</NavLink>
- <NavLink
+          to="/orders"
+          className={({ isActive }) =>
+            `hover:text-orange-500 ${
+              isActive ? "text-orange-500 font-semibold" : "text-gray-700"
+            }`
+          }
+        >
+          Orders
+        </NavLink>
+        <NavLink
           to="/admin/products"
           className={({ isActive }) =>
             `hover:text-orange-500 ${
@@ -102,8 +101,8 @@ export default function Navbar() {
         >
           add pro
         </NavLink>
-         <NavLink
-          to="addresses"
+        <NavLink
+          to="/address"
           className={({ isActive }) =>
             `hover:text-orange-500 ${
               isActive ? "text-orange-500 font-semibold" : "text-gray-700"
@@ -112,7 +111,6 @@ export default function Navbar() {
         >
           My Adresses
         </NavLink>
-
       </div>
 
       {/* Right: user info + logout */}

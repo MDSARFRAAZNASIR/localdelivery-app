@@ -255,6 +255,7 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "./Navbar";
 import { useNavigate } from "react-router-dom";
+// import AddressBook from "./AddressBook";
 
 export default function CartPage() {
   const [cart, setCart] = useState([]);
@@ -434,6 +435,10 @@ export default function CartPage() {
   return (
     <>
       <Navbar />
+
+      {/* add another addres book */}
+
+      
       <div className="min-h-screen bg-gray-100 py-6 px-4 flex justify-center">
         <div className="w-full max-w-3xl bg-white rounded-xl shadow-lg p-6">
           <h2 className="text-2xl font-bold mb-4">Your Cart 🛒</h2>
@@ -536,6 +541,8 @@ export default function CartPage() {
                   //     </option>
                   //   ))}
                   // </select>
+                  // add new function
+                  
 
                   // for default
                   <div className="space-y-3">
@@ -548,7 +555,9 @@ export default function CartPage() {
                             : "border-gray-300"
                         }`}
                         onClick={() => setSelectedAddressId(addr._id)}
+
                       >
+                        
                         <div className="font-semibold">
                           {addr.label}
                           {addr.isDefault && (

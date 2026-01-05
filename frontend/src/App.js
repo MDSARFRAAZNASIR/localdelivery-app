@@ -54,7 +54,7 @@ function App() {
           <Route path="/admin/orders" element={<AdminOrdersPage />} />
 
           <Route path="/orders/:orderId" element={<UserOrderDetails />} />
-          <Route path="/addresses" element={<AddressBook />} />
+          <Route path="/address" element={<AddressBook />} />
 
 
           {/* yahan aur protected routes add kar sakte ho */}
