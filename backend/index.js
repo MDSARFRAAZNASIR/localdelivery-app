@@ -1097,6 +1097,49 @@ app.get(
   })
 );
 
+
+// add code for invoice generation
+app.get(
+  "/orders/:orderId/invoice",
+  auth,
+  asyncHandler(async (req, res) => {
+    await connectDB();
+
+    const order = await Order.findById(req.params.orderId).lean();
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    // User can only access own invoice
+    if (!req.user.isAdmin && String(order.userId) !== String(req.user._id)) {
+      return res.status(403).json({ success: false, message: "Access denied" });
+    }
+
+    // Build invoice object
+    const invoice = {
+      invoiceNumber: `INV-${order._id.slice(-6).toUpperCase()}`,
+      orderId: order._id,
+      orderDate: order.createdAt,
+      paymentMethod: order.paymentMethod,
+      paymentStatus: order.paymentStatus,
+      status: order.status,
+
+      customer: {
+        name: order.deliveryAddress?.name || "Customer",
+        phone: order.deliveryAddress?.phone || "",
+        address: order.deliveryAddress
+          ? `${order.deliveryAddress.addressLine}, ${order.deliveryAddress.city}, ${order.deliveryAddress.state} - ${order.deliveryAddress.pincode}`
+          : "Address not available",
+      },
+
+      items: order.items,
+      totalAmount: order.totalAmount,
+    };
+
+    res.json({ success: true, invoice });
+  })
+);
+
 // GLOBAL error handler (single, last middleware)
 app.use((err, req, res, next) => {
   console.error("GLOBAL ERROR:", err && (err.stack || err.message || err));
