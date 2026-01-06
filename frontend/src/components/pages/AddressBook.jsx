@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../pages/Navbar";
 import { useNavigate } from "react-router-dom";
+import MapPicker from "./MapPicker";
 
 export default function AddressBook({ mode = "manage", onSelect }) {
   const [addresses, setAddresses] = useState([]);
@@ -9,6 +10,7 @@ export default function AddressBook({ mode = "manage", onSelect }) {
   const [showForm, setShowForm] = useState(false);
   const [selectedId, setSelectedId] = useState("");
   const [editingId, setEditingId] = useState(null);
+  const [showMap, setShowMap] = useState(false);
 
   const [form, setForm] = useState({
     label: "Home",
@@ -187,6 +189,24 @@ export default function AddressBook({ mode = "manage", onSelect }) {
     }
   };
 
+  const fetchByPincode = async (pin) => {
+    const res = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
+    const data = await res.json();
+
+    if (data[0].Status !== "Success") {
+      alert("Invalid pincode");
+      return;
+    }
+
+    const postOffice = data[0].PostOffice[0];
+
+    setForm((prev) => ({
+      ...prev,
+      city: postOffice.District,
+      state: postOffice.State,
+    }));
+  };
+
   return (
     <>
       <Navbar />
@@ -225,7 +245,6 @@ export default function AddressBook({ mode = "manage", onSelect }) {
                       onSelect?.(addr);
                     }}
                   />
-
                   <div>
                     <div className="font-semibold">
                       {addr.label} {addr.isDefault && "(Default)"}
@@ -338,6 +357,43 @@ export default function AddressBook({ mode = "manage", onSelect }) {
         >
           + Add New Address
         </button>
+        <button
+          onClick={() => setShowMap(!showMap)}
+          className="text-sm text-blue-600 underline"
+        >
+          📍 Pick from Map
+        </button>
+
+        {/* add for google map */}
+        {showMap && (
+          <MapPicker
+            onSelect={async ({ lat, lng }) => {
+              try {
+                const res = await fetch(
+                  `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${process.env.REACT_APP_GOOGLE_MAPS_KEY}`
+                );
+                const data = await res.json();
+
+                const comp = data.results[0].address_components;
+
+                const get = (type) =>
+                  comp.find((c) => c.types.includes(type))?.long_name || "";
+
+                setForm({
+                  ...form,
+                  addressLine: data.results[0].formatted_address,
+                  city: get("locality"),
+                  state: get("administrative_area_level_1"),
+                  pincode: get("postal_code"),
+                });
+
+                setShowMap(false);
+              } catch (err) {
+                alert("Failed to fetch address");
+              }
+            }}
+          />
+        )}
 
         {showForm && (
           <div className="mt-4 border p-4 rounded bg-gray-50 space-y-3">
@@ -376,23 +432,36 @@ export default function AddressBook({ mode = "manage", onSelect }) {
 
             <div className="grid grid-cols-3 gap-2">
               <input
+                placeholder="Pincode"
+                // value={form.pincode}
+                value={form.pincode}
+                onBlur={() => fetchByPincode(form.pincode)}
+                onChange={(e) => setForm({ ...form, pincode: e.target.value })}
+                className="border p-2 rounded"
+              />
+              <input
                 placeholder="City"
                 value={form.city}
-                onChange={(e) => setForm({ ...form, city: e.target.value })}
+                readOnly
+                onKeyDown={(e) => e.preventDefault()}
+                onPaste={(e) => e.preventDefault()}
+                // onChange={(e) => setForm({ ...form, city: e.target.value })}
                 className="border p-2 rounded"
               />
               <input
                 placeholder="State"
                 value={form.state}
-                onChange={(e) => setForm({ ...form, state: e.target.value })}
+                readOnly
+                onKeyDown={(e) => e.preventDefault()}
+                onPaste={(e) => e.preventDefault()}
+                // onChange={(e) => setForm({ ...form, state: e.target.value })}
                 className="border p-2 rounded"
               />
-              <input
-                placeholder="Pincode"
-                value={form.pincode}
-                onChange={(e) => setForm({ ...form, pincode: e.target.value })}
-                className="border p-2 rounded"
-              />
+
+              {/* <input
+  value={form.pincode}
+  onBlur={() => fetchByPincode(form.pincode)}
+/> */}
             </div>
             {/* <button
               onClick={addAddress}
