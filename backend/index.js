@@ -12,6 +12,7 @@ const adminMiddlle=require("./middleware/adminMiddlle")
 
 const auth = require("./middleware/auth");
 const bcrypt = require("bcryptjs");
+const PDFDocument = require("pdfkit");
 
 
 // load env (important: do this once at entry)
@@ -1084,61 +1085,139 @@ app.post(
 );
 
 // Get all orders for logged-in user
+// app.get(
+//   "/orders",
+//   auth,
+//   asyncHandler(async (req, res) => {
+//     await connectDB();
+
+//     const orders = await Order.find({ userId: req.user._id })
+//       .sort({ createdAt: -1 })
+//       .lean();
+//     return res.json({ success: true, orders });
+//   })
+// );
+
+
+// // add code for invoice generation
+// app.get(
+//   "/orders/:orderId/invoice",
+//   auth,
+//   asyncHandler(async (req, res) => {
+//     await connectDB();
+
+//     const order = await Order.findById(req.params.orderId).lean();
+//     if (!order) {
+//       return res.status(404).json({ success: false, message: "Order not found" });
+//     }
+
+//     // User can only access own invoice
+//     if (!req.user.isAdmin && String(order.userId) !== String(req.user._id)) {
+//       return res.status(403).json({ success: false, message: "Access denied" });
+//     }
+
+//     // Build invoice object
+//     const invoice = {
+//       invoiceNumber: `INV-${order._id.toString().slice(-6).toUpperCase()}`,
+//       orderId: order._id,
+//       orderDate: order.createdAt,
+//       paymentMethod: order.paymentMethod,
+//       paymentStatus: order.paymentStatus,
+//       status: order.status,
+
+//       customer: {
+//         name: order.deliveryAddress?.name || "Customer",
+//         phone: order.deliveryAddress?.phone || "",
+//         address: order.deliveryAddress
+//           ? `${order.deliveryAddress.addressLine}, ${order.deliveryAddress.city}, ${order.deliveryAddress.state} - ${order.deliveryAddress.pincode}`
+//           : "Address not available",
+//       },
+
+//       items: order.items,
+//       totalAmount: order.totalAmount,
+//     };
+
+//     res.json({ success: true, invoice });
+//   })
+// );
+
+
+
+
+
 app.get(
-  "/orders",
+  "/invoice/:orderId",
   auth,
   asyncHandler(async (req, res) => {
     await connectDB();
 
-    const orders = await Order.find({ userId: req.user._id })
-      .sort({ createdAt: -1 })
+    const order = await Order.findById(req.params.orderId)
+      .populate("userId", "username useremail")
       .lean();
-    return res.json({ success: true, orders });
-  })
-);
 
-
-// add code for invoice generation
-app.get(
-  "/orders/:orderId/invoice",
-  auth,
-  asyncHandler(async (req, res) => {
-    await connectDB();
-
-    const order = await Order.findById(req.params.orderId).lean();
     if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" });
+      return res.status(404).send("Order not found");
     }
 
-    // User can only access own invoice
-    if (!req.user.isAdmin && String(order.userId) !== String(req.user._id)) {
-      return res.status(403).json({ success: false, message: "Access denied" });
+    const doc = new PDFDocument({ size: "A4", margin: 50 });
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=invoice-${order._id}.pdf`
+    );
+
+    doc.pipe(res);
+
+    // 🧾 HEADER
+    doc.fontSize(20).text("INVOICE", { align: "center" });
+    doc.moveDown();
+
+    doc.fontSize(10).text(`Invoice ID: ${order._id}`);
+    doc.text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`);
+    doc.moveDown();
+
+    // 👤 CUSTOMER
+    doc.fontSize(12).text("Billed To:");
+    doc.text(order.userId.username);
+    doc.text(order.userId.useremail);
+    doc.moveDown();
+
+    // 📍 ADDRESS
+    if (order.deliveryAddress) {
+      const a = order.deliveryAddress;
+      doc.text("Delivery Address:");
+      doc.text(`${a.name}`);
+      doc.text(`${a.addressLine}`);
+      doc.text(`${a.city}, ${a.state} - ${a.pincode}`);
+      doc.text(`Phone: ${a.phone}`);
+      doc.moveDown();
     }
 
-    // Build invoice object
-    const invoice = {
-      invoiceNumber: `INV-${order._id.toString().slice(-6).toUpperCase()}`,
-      orderId: order._id,
-      orderDate: order.createdAt,
-      paymentMethod: order.paymentMethod,
-      paymentStatus: order.paymentStatus,
-      status: order.status,
+    // 📦 ITEMS
+    doc.text("Items:");
+    doc.moveDown(0.5);
 
-      customer: {
-        name: order.deliveryAddress?.name || "Customer",
-        phone: order.deliveryAddress?.phone || "",
-        address: order.deliveryAddress
-          ? `${order.deliveryAddress.addressLine}, ${order.deliveryAddress.city}, ${order.deliveryAddress.state} - ${order.deliveryAddress.pincode}`
-          : "Address not available",
-      },
+    order.items.forEach((item, i) => {
+      doc.text(
+        `${i + 1}. ${item.name}  |  ₹${item.price} × ${item.quantity} = ₹${item.subtotal}`
+      );
+    });
 
-      items: order.items,
-      totalAmount: order.totalAmount,
-    };
+    doc.moveDown();
+    doc.fontSize(14).text(`Total Amount: ₹${order.totalAmount}`, {
+      align: "right",
+    });
 
-    res.json({ success: true, invoice });
+    doc.moveDown();
+    doc.fontSize(10).text("Thank you for shopping with us!", {
+      align: "center",
+    });
+
+    doc.end();
   })
 );
+
 
 // GLOBAL error handler (single, last middleware)
 app.use((err, req, res, next) => {
