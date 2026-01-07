@@ -19,6 +19,7 @@ import AdminProductsPage from "./components/adminPages/AdminProductsPage";
 import AdminOrdersPage from "./components/adminPages/AdminOrdersPage";
 import UserOrderDetails from "./components/userPages/UserOrderDetails";
 import AddressBook from "./components/pages/AddressBook";
+import InvoicePage from "./components/pages/InvoicePage";
 
 function App() {
   useEffect(() => {
@@ -55,6 +56,8 @@ function App() {
 
           <Route path="/orders/:orderId" element={<UserOrderDetails />} />
           <Route path="/address" element={<AddressBook />} />
+          <Route path="/invoice/:orderId" element={<InvoicePage />} />
+
 
 
           {/* yahan aur protected routes add kar sakte ho */}

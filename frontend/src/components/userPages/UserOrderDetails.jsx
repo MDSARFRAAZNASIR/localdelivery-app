@@ -45,34 +45,31 @@ export default function UserOrderDetails() {
 
   // another code add in place of above
   const fetchOrder = useCallback(async () => {
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const res = await fetch(
-      `https://localdelivery-app-backend.vercel.app/user/orders/${orderId}`,
-      {
-        headers: token
-          ? { Authorization: `Bearer ${token}` }
-          : {},
+      const res = await fetch(
+        `https://localdelivery-app-backend.vercel.app/user/orders/${orderId}`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
+      );
+
+      if (res.status === 401) {
+        navigate("/login", { replace: true });
+        return;
       }
-    );
 
-    if (res.status === 401) {
-      navigate("/login", { replace: true });
-      return;
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to load order");
+
+      setOrder(data.order);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to load order");
-
-    setOrder(data.order);
-  } catch (err) {
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
-}, [orderId, token, navigate]);
-
+  }, [orderId, token, navigate]);
 
   // useEffect(() => {
   //   if (!token) {
@@ -87,14 +84,12 @@ export default function UserOrderDetails() {
 
   // add another inplace of above code
 
- useEffect(() => {
-  fetchOrder();
+  useEffect(() => {
+    fetchOrder();
 
-  const interval = setInterval(fetchOrder, 10000);
-  return () => clearInterval(interval);
-}, [fetchOrder]);
-
-
+    const interval = setInterval(fetchOrder, 10000);
+    return () => clearInterval(interval);
+  }, [fetchOrder]);
 
   if (loading) return <div className="p-6">Loading order...</div>;
   if (error) return <div className="p-6 text-red-600">{error}</div>;
@@ -285,6 +280,13 @@ export default function UserOrderDetails() {
                   </div>
                 </div>
                 <div className="font-semibold">₹{item.subtotal}</div>
+                <button
+  onClick={() => navigate(`/invoice/${order._id}`)}
+  className="mt-4 bg-gray-800 text-white px-4 py-2 rounded"
+>
+  🧾 View Invoice
+</button>
+
               </li>
             ))}
           </ul>
@@ -294,7 +296,6 @@ export default function UserOrderDetails() {
             <span>₹{order.totalAmount}</span>
           </div>
         </div>
-        
       </div>
     </>
   );

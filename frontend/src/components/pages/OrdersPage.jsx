@@ -231,6 +231,10 @@ export default function OrdersPage() {
             >
               + Shop More
             </button>
+
+            {/* add invoice */}
+   
+
           </div>
 
           {loading ? (
@@ -269,6 +273,17 @@ export default function OrdersPage() {
                     >
                       {order.status}
                     </span>
+                 
+                    <span>
+                                                   <button
+  onClick={() => navigate(`/invoice/${order._id}`)}
+  className="text-sm text-blue-600 underline"
+>
+  View Invoice
+</button>
+
+                    </span>
+
                   </div>
 
                   {/* <div className="mb-2">
