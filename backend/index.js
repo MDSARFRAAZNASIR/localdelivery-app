@@ -1117,7 +1117,7 @@ app.get(
 
     // Build invoice object
     const invoice = {
-      invoiceNumber: `INV-${order._id.slice(-6).toUpperCase()}`,
+      invoiceNumber: `INV-${order._id.toString().slice(-6).toUpperCase()}`,
       orderId: order._id,
       orderDate: order.createdAt,
       paymentMethod: order.paymentMethod,
