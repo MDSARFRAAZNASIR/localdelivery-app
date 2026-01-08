@@ -1085,18 +1085,18 @@ app.post(
 );
 
 // Get all orders for logged-in user
-// app.get(
-//   "/orders",
-//   auth,
-//   asyncHandler(async (req, res) => {
-//     await connectDB();
+app.get(
+  "/orders",
+  auth,
+  asyncHandler(async (req, res) => {
+    await connectDB();
 
-//     const orders = await Order.find({ userId: req.user._id })
-//       .sort({ createdAt: -1 })
-//       .lean();
-//     return res.json({ success: true, orders });
-//   })
-// );
+    const orders = await Order.find({ userId: req.user._id })
+      .sort({ createdAt: -1 })
+      .lean();
+    return res.json({ success: true, orders });
+  })
+);
 
 
 // add code for invoice generation
