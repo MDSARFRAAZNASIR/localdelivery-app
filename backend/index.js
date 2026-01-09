@@ -877,6 +877,20 @@ app.post(
       });
     }
 
+    // 🔟 Area / Pincode validation
+const serviceArea = await ServiceArea.findOne({
+  pincode: address.pincode,
+  isActive: true,
+});
+
+if (!serviceArea) {
+  return res.status(400).json({
+    success: false,
+    message: "Sorry, delivery is not available in your area",
+  });
+}
+
+
     // 5️⃣ Fetch products
     const products = await Product.find({
       _id: { $in: cleanedItems.map((i) => i.productId) },
@@ -888,7 +902,13 @@ app.post(
     );
 
     // 6️⃣ Build order items + total
+    // old one
+    // let totalAmount = 0;
+
+    // add delivary charge
     let totalAmount = 0;
+const deliveryFee = serviceArea.deliveryFee || 0;
+
     const orderItems = [];
 
     for (const it of cleanedItems) {
@@ -901,7 +921,9 @@ app.post(
       if (Number.isNaN(price) || Number.isNaN(qty)) continue;
 
       const subtotal = price * qty;
-      totalAmount += subtotal;
+      // totalAmount += subtotal ;
+totalAmount += deliveryFee;
+
 
       orderItems.push({
         productId: prod._id,
