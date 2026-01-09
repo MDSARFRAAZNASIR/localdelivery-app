@@ -9,6 +9,8 @@ const Product = require("./db/models/productModel");
 const Order = require("./db/models/orderModel");
 // const adminMiddle = require("./middleware/adminMiddle");
 const adminMiddlle=require("./middleware/adminMiddlle")
+const ServiceArea = require("./db/models/serviceAreaModel");
+const ServiceArea = require("./db/models/ServiceArea");
 
 const auth = require("./middleware/auth");
 const bcrypt = require("bcryptjs");
@@ -978,6 +980,41 @@ totalAmount += deliveryFee;
     });
   })
 );
+
+
+
+// add add delivary region
+
+// ➕ Add / Update pincode
+app.post("/admin/service-areas", auth, adminOnly, asyncHandler(async (req, res) => {
+  const { pincode, areaName, deliveryFee, isActive } = req.body;
+  if (!pincode) return res.status(400).json({ success:false, message:"pincode required" });
+
+  await connectDB();
+
+  const area = await ServiceArea.findOneAndUpdate(
+    { pincode },
+    { areaName, deliveryFee, isActive },
+    { upsert: true, new: true }
+  );
+
+  res.json({ success:true, area });
+}));
+
+// 📋 List all pincodes
+app.get("/admin/service-areas", auth, adminOnly, asyncHandler(async (req, res) => {
+  await connectDB();
+  const areas = await ServiceArea.find().sort({ pincode: 1 });
+  res.json({ success:true, areas });
+}));
+
+// ❌ Delete pincode
+app.delete("/admin/service-areas/:id", auth, adminOnly, asyncHandler(async (req, res) => {
+  await connectDB();
+  await ServiceArea.findByIdAndDelete(req.params.id);
+  res.json({ success:true });
+}));
+
 
 
 // Admin: update order status
