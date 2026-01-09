@@ -879,18 +879,18 @@ app.post(
       });
     }
 
-    // 🔟 Area / Pincode validation
-const serviceArea = await ServiceArea.findOne({
-  pincode: address.pincode,
-  isActive: true,
-});
+//     // 🔟 Area / Pincode validation
+// const serviceArea = await ServiceArea.findOne({
+//   pincode: address.pincode,
+//   isActive: true,
+// });
 
-if (!serviceArea) {
-  return res.status(400).json({
-    success: false,
-    message: "Sorry, delivery is not available in your area",
-  });
-}
+// if (!serviceArea) {
+//   return res.status(400).json({
+//     success: false,
+//     message: "Sorry, delivery is not available in your area",
+//   });
+// }
 
 
     // 5️⃣ Fetch products
