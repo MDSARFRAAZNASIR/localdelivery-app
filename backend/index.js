@@ -10,7 +10,7 @@ const Order = require("./db/models/orderModel");
 // const adminMiddle = require("./middleware/adminMiddle");
 const adminMiddlle=require("./middleware/adminMiddlle")
 const ServiceArea = require("./db/models/serviceAreaModel");
-const ServiceArea = require("./db/models/ServiceArea");
+// const ServiceArea = require("./db/models/ServiceArea");
 
 const auth = require("./middleware/auth");
 const bcrypt = require("bcryptjs");
