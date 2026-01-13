@@ -23,8 +23,7 @@ dotenv.config();
 // create app
 const app = express();
 
-// middleware
-app.use(express.json());
+
 
 // CORS - keep as open for now; tighten to your frontend origin later
 app.use(
@@ -34,8 +33,15 @@ app.use(
       "https://localdelivery-app-frontend.vercel.app",
       "https://localdelivery-app.vercel.app",
     ],
+     credentials: true,
   })
 );
+
+// middleware
+app.use(express.json());
+// ✅ THIS IS CRITICAL
+app.options("*", cors());
+
 // add new
 app.options("*", (req, res) => {
   res.sendStatus(204);

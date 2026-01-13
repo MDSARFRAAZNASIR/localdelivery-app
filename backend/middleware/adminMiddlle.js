@@ -3,6 +3,10 @@
  * Requires auth middleware to run before this
  */
 module.exports = function adminMiddlle(req, res, next) {
+    // ✅ allow CORS preflight
+  if (req.method === "OPTIONS") {
+    return next();
+  }
   try {
     // auth middleware must attach user to req
     if (!req.user) {
