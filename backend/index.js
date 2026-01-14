@@ -1031,7 +1031,7 @@ totalAmount += deliveryFee;
 
 app.post(
 
-  "/admin/service-areas",
+  "/admin/service-areas/:id",
   auth,
   adminOnly,
   asyncHandler(async (req, res) => {
@@ -1058,7 +1058,7 @@ app.post(
 
 // 📋 List all pincodes
 app.get(
-  "/admin/service-areas",
+  "/admin/service-areas/:id",
   auth,
   adminOnly,
   asyncHandler(async (req, res) => {
