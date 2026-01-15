@@ -42,10 +42,10 @@ const Userdetail = require("../db/models/userModel");
 // 👆 adjust path if your file name differs
 
 const auth = async (req, res, next) => {
-    // ✅ allow CORS preflight
-  if (req.method === "OPTIONS") {
-    return next();
-  }
+  //   // ✅ allow CORS preflight
+  // if (req.method === "OPTIONS") {
+  //   return next();
+  // }
   try {
     // 1️⃣ Read Authorization header
     const authHeader = req.headers.authorization;

@@ -33,19 +33,19 @@ app.use(
       "https://localdelivery-app-frontend.vercel.app",
       "https://localdelivery-app.vercel.app",
     ],
-     credentials: true,
+    //  credentials: true,
   })
 );
 
 // middleware
 app.use(express.json());
 // ✅ THIS IS CRITICAL
-app.options("*", cors());
+// app.options("*", cors());
 
 // add new
-app.options("*", (req, res) => {
-  res.sendStatus(204);
-});
+// app.options("*", (req, res) => {
+//   res.sendStatus(204);
+// });
 
 const Razorpay = require("razorpay");
 
