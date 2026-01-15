@@ -9,7 +9,7 @@ const Product = require("./db/models/productModel");
 const Order = require("./db/models/orderModel");
 // const adminMiddle = require("./middleware/adminMiddle");
 const adminMiddlle=require("./middleware/adminMiddlle")
-const ServiceArea = require("./db/models/serviceAreaModel");
+// const ServiceArea = require("./db/models/serviceAreaModel");
 // const ServiceArea = require("./db/models/ServiceArea");
 
 const auth = require("./middleware/auth");
@@ -1027,58 +1027,76 @@ totalAmount += deliveryFee;
 // }));
 
 
-// ➕ Add / Update pincode
+// // ➕ Add / Update pincode
 
-app.post(
+// app.post(
 
-  "/admin/service-areas/:id",
-  auth,
-  adminOnly,
-  asyncHandler(async (req, res) => {
-    const { pincode, areaName, deliveryFee, isActive } = req.body;
+//   "/admin/service-areas",
+//   auth,
+//   // adminOnly,
+//   adminMiddlle,
+//   asyncHandler(async (req, res) => {
+//     const { pincode, areaName, deliveryFee, isActive } = req.body;
 
-    if (!pincode) {
-      return res.status(400).json({
-        success: false,
-        message: "pincode required",
-      });
-    }
+//     if (!pincode) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "pincode required",
+//       });
+//     }
 
-    await connectDB();
+//     await connectDB();
 
-    const area = await ServiceArea.findOneAndUpdate(
-      { pincode },
-      { areaName, deliveryFee, isActive },
-      { upsert: true, new: true }
-    );
+//     // const area = await ServiceArea.findOneAndUpdate(
+//     //   { pincode },
+//     //   { areaName, deliveryFee, isActive },
+//     //   { upsert: true, new: true }
+//     // );
 
-    res.json({ success: true, area });
-  })
-);
+//     // res.json({ success: true, area });
 
-// 📋 List all pincodes
-app.get(
-  "/admin/service-areas/:id",
-  auth,
-  adminOnly,
-  asyncHandler(async (req, res) => {
-    await connectDB();
-    const areas = await ServiceArea.find().sort({ pincode: 1 });
-    res.json({ success: true, areas });
-  })
-);
+//     const serviceArea = await ServiceArea.findOne({
+//   pincode: address.pincode,
+//   isActive: true,
+// });
 
-// ❌ Delete pincode
-app.delete(
-  "/admin/service-areas/:id",
-  auth,
-  adminOnly,
-  asyncHandler(async (req, res) => {
-    await connectDB();
-    await ServiceArea.findByIdAndDelete(req.params.id);
-    res.json({ success: true });
-  })
-);
+// if (!serviceArea) {
+//   return res.status(400).json({
+//     success: false,
+//     message: "Delivery not available in your area",
+//   });
+// }
+
+
+//   })
+  
+// );
+
+// // 📋 List all pincodes
+// app.get(
+//   "/admin/service-areas",
+//   auth,
+//   // adminOnly,
+//   adminMiddlle,
+//   asyncHandler(async (req, res) => {
+//     await connectDB();
+//     const areas = await ServiceArea.find().sort({ pincode: 1 });
+//     res.json({ success: true, areas });
+//   })
+// );
+
+// // ❌ Delete pincode
+// app.delete(
+//   "/admin/service-areas/:id",
+//   auth,
+//   // adminOnly,
+//   adminMiddlle,
+//   asyncHandler(async (req, res) => {
+//     await connectDB();
+//     await ServiceArea.findByIdAndDelete(req.params.id);
+//     res.json({ success: true });
+//   })
+// );
 
 
 
