@@ -8,7 +8,7 @@ const User = require("./db/models/userModel");
 const Product = require("./db/models/productModel");
 const Order = require("./db/models/orderModel");
 // const adminMiddle = require("./middleware/adminMiddle");
-const adminMiddlle=require("./middleware/adminMiddlle")
+const adminMiddlle = require("./middleware/adminMiddlle");
 // const ServiceArea = require("./db/models/serviceAreaModel");
 // const ServiceArea = require("./db/models/ServiceArea");
 
@@ -16,14 +16,11 @@ const auth = require("./middleware/auth");
 const bcrypt = require("bcryptjs");
 const PDFDocument = require("pdfkit");
 
-
 // load env (important: do this once at entry)
 dotenv.config();
 
 // create app
 const app = express();
-
-
 
 // CORS - keep as open for now; tighten to your frontend origin later
 app.use(
@@ -425,7 +422,6 @@ app.delete(
   })
 );
 
-
 // UPDATE address
 app.put(
   "/user/addresses/:id",
@@ -463,7 +459,6 @@ app.put(
     });
   })
 );
-
 
 // Create product (admin use via Postman for now)
 app.post(
@@ -582,7 +577,7 @@ app.get(
         path: "userId",
         // model: "Userdata", // 🔥 FIX
         // model: "User", // 🔥 FIX AGAIN
-          //  model: "Userdata", // 🔥 FIX
+        //  model: "Userdata", // 🔥 FIX
         model: "Userdetail", // 🔥 FIX AGAIN
 
         select: "username useremail userphone",
@@ -890,19 +885,18 @@ app.post(
       });
     }
 
-//     // 🔟 Area / Pincode validation
-// const serviceArea = await ServiceArea.findOne({
-//   pincode: address.pincode,
-//   isActive: true,
-// });
+    //     // 🔟 Area / Pincode validation
+    // const serviceArea = await ServiceArea.findOne({
+    //   pincode: address.pincode,
+    //   isActive: true,
+    // });
 
-// if (!serviceArea) {
-//   return res.status(400).json({
-//     success: false,
-//     message: "Sorry, delivery is not available in your area",
-//   });
-// }
-
+    // if (!serviceArea) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Sorry, delivery is not available in your area",
+    //   });
+    // }
 
     // 5️⃣ Fetch products
     const products = await Product.find({
@@ -910,9 +904,7 @@ app.post(
       isActive: true,
     }).lean();
 
-    const productMap = new Map(
-      products.map((p) => [String(p._id), p])
-    );
+    const productMap = new Map(products.map((p) => [String(p._id), p]));
 
     // 6️⃣ Build order items + total
     // old one
@@ -920,7 +912,7 @@ app.post(
 
     // add delivary charge
     let totalAmount = 0;
-const deliveryFee = serviceArea.deliveryFee || 0;
+    const deliveryFee = serviceArea.deliveryFee || 0;
 
     const orderItems = [];
 
@@ -935,8 +927,7 @@ const deliveryFee = serviceArea.deliveryFee || 0;
 
       const subtotal = price * qty;
       // totalAmount += subtotal ;
-totalAmount += deliveryFee;
-
+      totalAmount += deliveryFee;
 
       orderItems.push({
         productId: prod._id,
@@ -955,8 +946,7 @@ totalAmount += deliveryFee;
     }
 
     // 7️⃣ Payment logic
-    const finalPaymentMethod =
-      paymentMethod === "ONLINE" ? "ONLINE" : "COD";
+    const finalPaymentMethod = paymentMethod === "ONLINE" ? "ONLINE" : "COD";
 
     // 8️⃣ Create order (NO addresses[] HERE ❌)
     const order = new Order({
@@ -980,7 +970,6 @@ totalAmount += deliveryFee;
       },
     });
 
-    
     const savedOrder = await order.save();
 
     // 9️⃣ Response
@@ -993,112 +982,56 @@ totalAmount += deliveryFee;
 );
 
 
+// ➕ Add / Update pincode
+app.post(
+  "/admin/service-areas",
+  auth,
+  // adminOnly,
+  adminMiddlle,
+  asyncHandler(async (req, res) => {
+    const { pincode, areaName, deliveryFee, isActive } = req.body;
+    if (!pincode)
+      return res
+        .status(400)
+        .json({ success: false, message: "pincode required" });
 
-// // add add delivary region
+    await connectDB();
 
-// // ➕ Add / Update pincode
-// app.post("/admin/service-areas", auth, adminOnly, asyncHandler(async (req, res) => {
-//   const { pincode, areaName, deliveryFee, isActive } = req.body;
-//   if (!pincode) return res.status(400).json({ success:false, message:"pincode required" });
+    const area = await ServiceArea.findOneAndUpdate(
+      { pincode },
+      { areaName, deliveryFee, isActive },
+      { upsert: true, new: true }
+    );
 
-//   await connectDB();
+    res.json({ success: true, area });
+  })
+);
 
-//   const area = await ServiceArea.findOneAndUpdate(
-//     { pincode },
-//     { areaName, deliveryFee, isActive },
-//     { upsert: true, new: true }
-//   );
+// 📋 List all pincodes
+app.get(
+  "/admin/service-areas",
+  auth,
+  // adminOnly,
+  adminMiddlle,
+  asyncHandler(async (req, res) => {
+    await connectDB();
+    const areas = await ServiceArea.find().sort({ pincode: 1 });
+    res.json({ success: true, areas });
+  })
+);
 
-//   res.json({ success:true, area });
-// }));
-
-// // 📋 List all pincodes
-// app.get("/admin/service-areas", auth, adminOnly, asyncHandler(async (req, res) => {
-//   await connectDB();
-//   const areas = await ServiceArea.find().sort({ pincode: 1 });
-//   res.json({ success:true, areas });
-// }));
-
-// // ❌ Delete pincode
-// app.delete("/admin/service-areas/:id", auth, adminOnly, asyncHandler(async (req, res) => {
-//   await connectDB();
-//   await ServiceArea.findByIdAndDelete(req.params.id);
-//   res.json({ success:true });
-// }));
-
-
-// // ➕ Add / Update pincode
-
-// app.post(
-
-//   "/admin/service-areas",
-//   auth,
-//   // adminOnly,
-//   adminMiddlle,
-//   asyncHandler(async (req, res) => {
-//     const { pincode, areaName, deliveryFee, isActive } = req.body;
-
-//     if (!pincode) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "pincode required",
-//       });
-//     }
-
-//     await connectDB();
-
-//     // const area = await ServiceArea.findOneAndUpdate(
-//     //   { pincode },
-//     //   { areaName, deliveryFee, isActive },
-//     //   { upsert: true, new: true }
-//     // );
-
-//     // res.json({ success: true, area });
-
-//     const serviceArea = await ServiceArea.findOne({
-//   pincode: address.pincode,
-//   isActive: true,
-// });
-
-// if (!serviceArea) {
-//   return res.status(400).json({
-//     success: false,
-//     message: "Delivery not available in your area",
-//   });
-// }
-
-
-//   })
-  
-// );
-
-// // 📋 List all pincodes
-// app.get(
-//   "/admin/service-areas",
-//   auth,
-//   // adminOnly,
-//   adminMiddlle,
-//   asyncHandler(async (req, res) => {
-//     await connectDB();
-//     const areas = await ServiceArea.find().sort({ pincode: 1 });
-//     res.json({ success: true, areas });
-//   })
-// );
-
-// // ❌ Delete pincode
-// app.delete(
-//   "/admin/service-areas/:id",
-//   auth,
-//   // adminOnly,
-//   adminMiddlle,
-//   asyncHandler(async (req, res) => {
-//     await connectDB();
-//     await ServiceArea.findByIdAndDelete(req.params.id);
-//     res.json({ success: true });
-//   })
-// );
-
-
+// ❌ Delete pincode
+app.delete(
+  "/admin/service-areas/:id",
+  auth,
+  // adminOnly,
+  adminMiddlle,
+  asyncHandler(async (req, res) => {
+    await connectDB();
+    await ServiceArea.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
+  })
+);
 
 // Admin: update order status
 app.put(
@@ -1240,7 +1173,6 @@ app.get(
   })
 );
 
-
 // add code for invoice generation
 app.get(
   "/orders/:orderId/invoice",
@@ -1250,7 +1182,9 @@ app.get(
 
     const order = await Order.findById(req.params.orderId).lean();
     if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
     }
 
     // User can only access own invoice
@@ -1282,10 +1216,6 @@ app.get(
     res.json({ success: true, invoice });
   })
 );
-
-
-
-
 
 // app.get(
 //   "/invoice/:orderId",
@@ -1359,7 +1289,6 @@ app.get(
 //     doc.end();
 //   })
 // );
-
 
 // GLOBAL error handler (single, last middleware)
 app.use((err, req, res, next) => {
