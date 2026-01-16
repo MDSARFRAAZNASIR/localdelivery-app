@@ -9,7 +9,7 @@ const Product = require("./db/models/productModel");
 const Order = require("./db/models/orderModel");
 // const adminMiddle = require("./middleware/adminMiddle");
 const adminMiddlle = require("./middleware/adminMiddlle");
-// const ServiceArea = require("./db/models/serviceAreaModel");
+const ServiceArea = require("./db/models/serviceAreaModel");
 // const ServiceArea = require("./db/models/ServiceArea");
 
 const auth = require("./middleware/auth");
