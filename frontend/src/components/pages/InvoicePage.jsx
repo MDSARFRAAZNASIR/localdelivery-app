@@ -84,3 +84,24 @@ export default function InvoicePage() {
     </>
   );
 }
+
+
+// import { useParams } from "react-router-dom";
+// import { useEffect } from "react";
+
+// export default function InvoicePage() {
+//   const { orderId } = useParams();
+
+//   useEffect(() => {
+//     // auto-download invoice
+//     window.location.href =
+//       `https://localdelivery-app-backend.vercel.app/invoice/${orderId}`;
+//   }, [orderId]);
+
+//   return (
+//     <div className="p-6 text-center">
+//       <h2 className="text-xl font-bold">Preparing your invoice…</h2>
+//       <p className="text-gray-600">Your download will start automatically.</p>
+//     </div>
+//   );
+// }

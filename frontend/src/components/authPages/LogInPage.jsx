@@ -70,68 +70,66 @@ export default function LogInPage() {
 
   // add token
   const userLogInHandler = async () => {
-  try {
-    console.log("login attempt:", useremail, userpassword);
+    try {
+      console.log("login attempt:", useremail, userpassword);
 
-    const res = await fetch(
-      "https://localdelivery-app-backend.vercel.app/userlogin",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ useremail, userpassword }),
+      const res = await fetch(
+        "https://localdelivery-app-backend.vercel.app/userlogin",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ useremail, userpassword }),
+        }
+      );
+
+      // If not JSON, read text (avoid uncaught SyntaxError)
+      const contentType = res.headers.get("Content-Type") || "";
+      let payload;
+
+      if (contentType.includes("application/json")) {
+        payload = await res.json();
+      } else {
+        const text = await res.text();
+        try {
+          payload = JSON.parse(text);
+        } catch {
+          payload = { message: text || "Unexpected response", ok: res.ok };
+        }
       }
-    );
 
-    // If not JSON, read text (avoid uncaught SyntaxError)
-    const contentType = res.headers.get("Content-Type") || "";
-    let payload;
-
-    if (contentType.includes("application/json")) {
-      payload = await res.json();
-    } else {
-      const text = await res.text();
-      try {
-        payload = JSON.parse(text);
-      } catch {
-        payload = { message: text || "Unexpected response", ok: res.ok };
+      // ❌ Login failed
+      if (!res.ok) {
+        alert(payload.message || `Login failed (status ${res.status})`);
+        console.error("Login failed:", res.status, payload);
+        return;
       }
+
+      console.log("Login success payload:", payload);
+
+      // ✅ SUCCESS CHECK
+      if (payload.success && payload.token && payload.user) {
+        // ⭐ STORE JWT TOKEN (IMPORTANT)
+        localStorage.setItem("token", payload.token);
+
+        // optional: store user data
+        localStorage.setItem("userData", JSON.stringify(payload.user));
+
+        alert("Login successful 🎉");
+
+        // redirect to protected route
+        // navigate("/productpage"); // or /dashboard
+        navigate("/products");
+      } else {
+        alert(payload.message || "Login failed: invalid server response");
+        console.warn("Unexpected login payload:", payload);
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      alert("Network error or server not reachable.");
     }
-
-    // ❌ Login failed
-    if (!res.ok) {
-      alert(payload.message || `Login failed (status ${res.status})`);
-      console.error("Login failed:", res.status, payload);
-      return;
-    }
-
-    console.log("Login success payload:", payload);
-
-    // ✅ SUCCESS CHECK
-    if (payload.success && payload.token && payload.user) {
-      // ⭐ STORE JWT TOKEN (IMPORTANT)
-      localStorage.setItem("token", payload.token);
-
-      // optional: store user data
-      localStorage.setItem("userData", JSON.stringify(payload.user));
-
-      alert("Login successful 🎉");
-
-      // redirect to protected route
-      // navigate("/productpage"); // or /dashboard
-      navigate("/products"); 
-
-    } else {
-      alert(payload.message || "Login failed: invalid server response");
-      console.warn("Unexpected login payload:", payload);
-    }
-  } catch (err) {
-    console.error("Login error:", err);
-    alert("Network error or server not reachable.");
-  }
-};
-
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-100 via-yellow-100 to-orange-200 p-6">

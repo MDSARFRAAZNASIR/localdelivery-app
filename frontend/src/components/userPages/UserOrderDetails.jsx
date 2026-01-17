@@ -281,12 +281,11 @@ export default function UserOrderDetails() {
                 </div>
                 <div className="font-semibold">₹{item.subtotal}</div>
                 <button
-  onClick={() => navigate(`/invoice/${order._id}`)}
-  className="mt-4 bg-gray-800 text-white px-4 py-2 rounded"
->
-  🧾 View Invoice
-</button>
-
+                  onClick={() => navigate(`/invoice/${order._id}`)}
+                  className="mt-4 bg-gray-800 text-white px-4 py-2 rounded"
+                >
+                  🧾 View Invoice
+                </button>
               </li>
             ))}
           </ul>

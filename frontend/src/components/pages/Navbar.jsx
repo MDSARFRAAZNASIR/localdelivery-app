@@ -48,7 +48,8 @@ export default function Navbar() {
           <Link to="/admin/products">Add Product</Link>
 
           <Link to="/address">Addresses</Link>
-          <Link to="/invoice/:orderId">Invoice</Link>
+          <Link to="/admin/service-areas">Area</Link>
+
 
 
         </div>

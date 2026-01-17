@@ -275,12 +275,19 @@ export default function OrdersPage() {
                     </span>
                  
                     <span>
-                                                   <button
+                                                   {/* <button
   onClick={() => navigate(`/invoice/${order._id}`)}
   className="text-sm text-blue-600 underline"
 >
   View Invoice
+</button> */}
+<button
+  onClick={() => navigate(`/invoice/${order._id}`)}
+  className="text-sm text-blue-600 underline mt-2"
+>
+  Download Invoice
 </button>
+
 
                     </span>
 

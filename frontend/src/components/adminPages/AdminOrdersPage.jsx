@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 
 import Navbar from "../pages/Navbar";
 
@@ -13,6 +14,7 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
 
@@ -95,6 +97,8 @@ export default function AdminOrdersPage() {
 
                   <th className="p-2 border">Status</th>
                   <th className="p-2 border">Date</th>
+                   <th className="p-2 border">Invoice</th>
+
                  
                 </tr>
               </thead>
@@ -144,39 +148,18 @@ export default function AdminOrdersPage() {
                           </option>
                         ))}
                       </select>
-
-
-                      
-                      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                     </td>
                     <td className="p-2 border text-sm">
                       {new Date(order.createdAt).toLocaleString()}
+                    </td>
+                     <td className="p-2 border text-sm">
+                    <button
+  onClick={() => navigate(`/invoice/${order._id}`)}
+  className="text-sm text-blue-600 underline mt-2"
+>
+  Download Invoice
+</button>
+
                     </td>
                   </tr>
                 ))}
