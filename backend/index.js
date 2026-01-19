@@ -1297,6 +1297,41 @@ app.delete(
   })
 );
 
+
+// services area check by pincode
+
+app.get(
+  "/service-area/check",
+  asyncHandler(async (req, res) => {
+    const { pincode } = req.query;
+    if (!pincode) {
+      return res.status(400).json({ success: false });
+    }
+
+    await connectDB();
+
+    const area = await ServiceArea.findOne({
+      pincode,
+      isActive: true,
+    }).lean();
+
+    if (!area) {
+      return res.json({
+        success: true,
+        serviceable: false,
+      });
+    }
+
+    res.json({
+      success: true,
+      serviceable: true,
+      deliveryFee: area.deliveryFee,
+      areaName: area.areaName,
+    });
+  })
+);
+
+
 // Admin: update order status
 app.put(
   "/admin/orders/:id/status",
