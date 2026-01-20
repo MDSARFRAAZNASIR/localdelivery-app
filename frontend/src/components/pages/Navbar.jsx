@@ -24,7 +24,6 @@ export default function Navbar() {
 
   return (
     <>
-
     <nav className="bg-white shadow sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
         {/* Logo */}
@@ -49,9 +48,7 @@ export default function Navbar() {
 
           <Link to="/address">Addresses</Link>
           <Link to="/admin/service-areas">Area</Link>
-
-
-
+          <Link to="/admin/orders">Orders List</Link>
         </div>
 
         {/* Mobile Button */}
@@ -65,6 +62,7 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {open && (
+
         <div className="md:hidden bg-white border-t px-4 py-3 space-y-3">
           <Link onClick={() => setOpen(false)} to="/products">Products</Link>
           <Link onClick={() => setOpen(false)} to="/cart">Cart</Link>
@@ -72,8 +70,6 @@ export default function Navbar() {
           <Link onClick={() => setOpen(false)} to="/addressbook">Addresses</Link>
         </div>
       )}
-
-
       {/* Right: user info + logout */}
       <div className="flex items-center gap-3">
         <div className="text-right leading-tight hidden sm:block">
@@ -94,8 +90,6 @@ export default function Navbar() {
         </button>
       </div>
     </nav>
-
-
     {/* <nav className="w-full bg-white shadow-md px-4 py-3 flex items-center justify-between"> */}
       {/* Left: Logo / App name */}
       {/* <div

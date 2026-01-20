@@ -265,6 +265,8 @@ export default function CartPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [serviceArea, setServiceArea] = useState(null);
+  const [checkingArea, setCheckingArea] = useState(false);
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -296,7 +298,7 @@ export default function CartPage() {
           "https://localdelivery-app-backend.vercel.app/user/addresses",
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
 
         const data = await res.json();
@@ -316,6 +318,27 @@ export default function CartPage() {
     fetchAddresses();
   }, [token]);
 
+  // check pin code
+  const selectedAddress = addresses.find((a) => a._id === selectedAddressId);
+
+  useEffect(() => {
+    if (!selectedAddress) return;
+
+    const checkArea = async () => {
+      setCheckingArea(true);
+
+      const res = await fetch(
+        `https://localdelivery-app-backend.vercel.app/service-area/check?pincode=${selectedAddress.pincode}`,
+      );
+      const data = await res.json();
+
+      setServiceArea(data);
+      setCheckingArea(false);
+    };
+
+    checkArea();
+  }, [selectedAddress]);
+
   // ------------------ CART HELPERS ------------------
   const updateCart = (newCart) => {
     setCart(newCart);
@@ -327,8 +350,8 @@ export default function CartPage() {
       cart.map((item) =>
         item.productId === productId
           ? { ...item, quantity: item.quantity + 1 }
-          : item
-      )
+          : item,
+      ),
     );
   };
 
@@ -338,9 +361,9 @@ export default function CartPage() {
         .map((item) =>
           item.productId === productId
             ? { ...item, quantity: item.quantity - 1 }
-            : item
+            : item,
         )
-        .filter((item) => item.quantity > 0)
+        .filter((item) => item.quantity > 0),
     );
   };
 
@@ -350,7 +373,7 @@ export default function CartPage() {
 
   const totalAmount = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
-    0
+    0,
   );
 
   // ------------------ PLACE ORDER ------------------
@@ -403,7 +426,7 @@ export default function CartPage() {
             deliveryAddressId: selectedAddressId, // 🔥 IMPORTANT
             paymentMethod,
           }),
-        }
+        },
       );
 
       const data = await res.json();
@@ -438,7 +461,6 @@ export default function CartPage() {
 
       {/* add another addres book */}
 
-      
       <div className="min-h-screen bg-gray-100 py-6 px-4 flex justify-center">
         <div className="w-full max-w-3xl bg-white rounded-xl shadow-lg p-6">
           <h2 className="text-2xl font-bold mb-4">Your Cart 🛒</h2>
@@ -542,7 +564,6 @@ export default function CartPage() {
                   //   ))}
                   // </select>
                   // add new function
-                  
 
                   // for default
                   <div className="space-y-3">
@@ -555,9 +576,7 @@ export default function CartPage() {
                             : "border-gray-300"
                         }`}
                         onClick={() => setSelectedAddressId(addr._id)}
-
                       >
-                        
                         <div className="font-semibold">
                           {addr.label}
                           {addr.isDefault && (
@@ -600,13 +619,65 @@ export default function CartPage() {
                 </select>
               </div>
 
+              {/* add extra button */}
+
+              {checkingArea && (
+                <div className="text-sm text-gray-500">
+                  Checking delivery area…
+                </div>
+              )}
+
+              {serviceArea && !serviceArea.serviceable && (
+                <div className="bg-red-100 text-red-700 p-3 rounded mt-3">
+                  ❌ Sorry, delivery is not available in your area
+                </div>
+              )}
+
+              {serviceArea?.serviceable && (
+                <div className="bg-green-50 text-green-700 p-3 rounded mt-3">
+                  🚚 Delivering to <b>{serviceArea.areaName || "your area"}</b>
+                  <br />
+                  Delivery Fee: <b>₹{serviceArea.deliveryFee}</b>
+                </div>
+              )}
+
+              {/* Disable Checkout Button ❌ */}
+              {/* 
               <button
+                onClick={handlePlaceOrder}
+
+                disabled={!serviceArea?.serviceable}
+                className={` w-full bg-orange-500 hover:bg-orange-600 ${
+                  serviceArea?.serviceable
+                    ? "bg-orange-500 hover:bg-orange-600"
+                    : "bg-gray-400 cursor-not-allowed"
+                }`}
+              > */}
+              {/* {loading ? "Placing order..." : "Place Order"} */}
+              {/* Place Order
+
+
+              </button> */}
+
+              <button
+                onClick={handlePlaceOrder}
+                disabled={!serviceArea?.serviceable}
+                className={`w-full px-4 py-2 rounded text-white ${
+                  serviceArea?.serviceable
+                    ? "bg-orange-500 hover:bg-orange-600"
+                    : "bg-gray-400 cursor-not-allowed"
+                }`}
+              >
+                Place Order
+              </button>
+
+              {/* <button
                 onClick={handlePlaceOrder}
                 disabled={loading}
                 className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded"
               >
                 {loading ? "Placing order..." : "Place Order"}
-              </button>
+              </button> */}
             </>
           )}
         </div>

@@ -93,13 +93,11 @@ export default function AdminOrdersPage() {
                   <th className="p-2 border">Order ID</th>
                   <th className="p-2 border">User</th>
                   <th className="p-2 border">Amount</th>
-                   <th className="p-2 border">Payment</th>
+                  <th className="p-2 border">Payment</th>
 
                   <th className="p-2 border">Status</th>
                   <th className="p-2 border">Date</th>
-                   <th className="p-2 border">Invoice</th>
-
-                 
+                  <th className="p-2 border">Invoice</th>
                 </tr>
               </thead>
               <tbody>
@@ -152,14 +150,13 @@ export default function AdminOrdersPage() {
                     <td className="p-2 border text-sm">
                       {new Date(order.createdAt).toLocaleString()}
                     </td>
-                     <td className="p-2 border text-sm">
-                    <button
-  onClick={() => navigate(`/invoice/${order._id}`)}
-  className="text-sm text-blue-600 underline mt-2"
->
-  Download Invoice
-</button>
-
+                    <td className="p-2 border text-sm">
+                      <button
+                        onClick={() => navigate(`/invoice/${order._id}`)}
+                        className="text-sm text-blue-600 underline mt-2"
+                      >
+                        Download Invoice
+                      </button>
                     </td>
                   </tr>
                 ))}

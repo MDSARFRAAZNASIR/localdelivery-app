@@ -60,6 +60,7 @@ function App() {
           <Route path="/invoice/:orderId" element={<InvoicePage />} />
           {/* <Route path="/admin/areaselected" element={<AdminServiceAreas/>}/> */}
           <Route path="/admin/service-areas" element={<AdminServiceAreas />} />
+          <Route path="/admin/orders" element={<AdminOrdersPage/>}></Route>
 
 
 
