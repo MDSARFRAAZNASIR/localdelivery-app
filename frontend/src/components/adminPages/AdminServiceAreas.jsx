@@ -1,11 +1,13 @@
 
 
 
-import { useEffect, useState } from "react";
+import { useEffect, useCallback, useState } from "react";
 import Navbar from "../pages/Navbar";
 
 
+
 export default function AdminServiceAreas() {
+  
   const [areas, setAreas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
@@ -16,8 +18,9 @@ export default function AdminServiceAreas() {
   });
 
   const token = localStorage.getItem("token");
+  
 
-  const fetchAreas = async () => {
+  const fetchAreas =useCallback (async () => {
     try {
       const res = await fetch(
         "https://localdelivery-app-backend.vercel.app/admin/service-areas",
@@ -30,11 +33,11 @@ export default function AdminServiceAreas() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     fetchAreas();
-  }, []);
+  }, [fetchAreas]);
 
   const saveArea = async () => {
     if (!form.pincode) return alert("Pincode required");

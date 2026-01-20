@@ -6,7 +6,6 @@ import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 // import { Card, CardContent } from "./pages/components/ui/card";
 import { Package, Truck, Smartphone, Star } from "lucide-react";
-import SignupPage from "../authPages/SignupPage";
 import { Link, NavLink } from "react-router-dom";
 
 export default function LandingPage() {
@@ -30,7 +29,7 @@ export default function LandingPage() {
       clearInterval(textInterval);
       clearTimeout(timer);
     };
-  }, []);
+  }, [loadingTexts.length]);
 
   if (loading) {
     return (

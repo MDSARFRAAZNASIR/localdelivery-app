@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Navbar from "../pages/Navbar";
 import { useNavigate } from "react-router-dom";
 import MapPicker from "./MapPicker";
@@ -25,7 +25,7 @@ export default function AddressBook({ mode = "manage", onSelect }) {
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
-  const fetchAddresses = async () => {
+  const fetchAddresses = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch(
@@ -49,7 +49,7 @@ export default function AddressBook({ mode = "manage", onSelect }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, navigate]);
 
   useEffect(() => {
     if (!token) {
@@ -57,7 +57,7 @@ export default function AddressBook({ mode = "manage", onSelect }) {
       return;
     }
     fetchAddresses();
-  }, []);
+  }, [fetchAddresses, navigate, token]);
 
   useEffect(() => {
     if (mode === "select" && addresses.length > 0) {
