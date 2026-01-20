@@ -383,7 +383,6 @@ export default function CartPage() {
                     : "bg-gray-400 cursor-not-allowed"
                 }`}
               >
-                {/* Place Order */}
                 {loading ? "Placing order..." : "Place Order"}
 
               </button>
