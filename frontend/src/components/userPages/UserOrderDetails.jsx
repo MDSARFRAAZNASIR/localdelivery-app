@@ -20,28 +20,7 @@ export default function UserOrderDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // const fetchOrder = useCallback(async () => {
-  //   try {
-  //     setLoading(true);
-  //     const res = await fetch(
-  //       `https://localdelivery-app-backend.vercel.app/user/orders/${orderId}`,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
 
-  //     const data = await res.json();
-  //     if (!res.ok) throw new Error(data.message || "Failed to load order");
-
-  //     setOrder(data.order);
-  //   } catch (err) {
-  //     setError(err.message);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }, [orderId, token]);
 
   // another code add in place of above
   const fetchOrder = useCallback(async () => {
@@ -71,16 +50,7 @@ export default function UserOrderDetails() {
     }
   }, [orderId, token, navigate]);
 
-  // useEffect(() => {
-  //   if (!token) {
-  //     navigate("/login");
-  //     return;
-  //   }
-
-  //   fetchOrder();
-  //   const interval = setInterval(fetchOrder, 10000);
-  //   return () => clearInterval(interval);
-  // }, [fetchOrder, navigate, token]);
+  
 
   // add another inplace of above code
 
@@ -253,23 +223,7 @@ export default function UserOrderDetails() {
 
           <h3 className="font-semibold mb-2">Items</h3>
 
-          {/* <ul className="divide-y">
-            {order.items.map((item) => (
-              <li key={item._id} className="py-2 flex justify-between">
-                <div>
-                  <div className="font-medium">
-                    {item.product?.name || "Product"}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    Qty: {item.quantity}
-                  </div>
-                </div>
-                <div className="font-semibold">
-                  ₹{item.price * item.quantity}
-                </div>
-              </li>
-            ))}
-          </ul> */}
+        
           <ul className="divide-y">
             {order.items.map((item) => (
               <li key={item._id} className="py-2 flex justify-between">

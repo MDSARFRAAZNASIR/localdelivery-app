@@ -11,37 +11,7 @@ export default function SignupPage() {
 
   const [forgotEmail, setForgotEmail] = useState("");
   const [showForgot, setShowForgot] = useState(false);
-
-  // const userSignInHandler = async () => {
-  //   console.log(username, userphone, useremail, userpassword);
-  //   try {
-  //     let result = await fetch("https://localdelivery-app-backend.vercel.app/userregister",
-  //       {
-  //         method: "post",
-  //           headers: { "Content-Type": "application/json" },
-  //         body: JSON.stringify({
-  //           username,
-  //           userphone,
-  //           useremail,
-  //           userpassword,
-  //         }),
-        
-  //       }
-  //     );
-
-  //     result = await result.json();
-
-  //     if (result._id) {
-  //       alert("Signup successful 🎉");
-  //       navigate("/productpage");
-  //     } else {
-  //       alert("Signup failed: " + (result.error || "Unknown error"));
-  //     }
-  //   } catch (err) {
-  //     // console.error(err);
-  //     alert("Something went wrong, please try again");
-  //   }
-  // };
+;
 
 
   // add another

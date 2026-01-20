@@ -69,43 +69,7 @@ export default function AddressBook({ mode = "manage", onSelect }) {
     }
   }, [addresses, mode, onSelect]);
 
-  // const addAddress = async () => {
-  //   if (!form.addressLine.trim()) {
-  //     alert("Address is required");
-  //     return;
-  //   }
-
-  //   try {
-  //     const res = await fetch(
-  //       "https://localdelivery-app-backend.vercel.app/user/addresses",
-  //       {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         body: JSON.stringify(form),
-  //       }
-  //     );
-
-  //     const data = await res.json();
-  //     if (!res.ok) throw new Error(data.message || "Add failed");
-
-  //     setAddresses(data.addresses);
-  //     setShowForm(false);
-  //     setForm({
-  //       label: "Home",
-  //       name: "",
-  //       phone: "",
-  //       addressLine: "",
-  //       city: "",
-  //       state: "",
-  //       pincode: "",
-  //     });
-  //   } catch (err) {
-  //     alert(err.message);
-  //   }
-  // };
+ 
 
   const saveAddress = async () => {
     if (!form.addressLine.trim()) {
@@ -317,35 +281,7 @@ export default function AddressBook({ mode = "manage", onSelect }) {
                 </>
               )}
 
-              {/* <div className="flex justify-between items-start">
-                <div>
-                  <div className="font-semibold">
-                    {addr.label} {addr.isDefault && "(Default)"}
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    {addr.addressLine}, {addr.city}, {addr.state} -{" "}
-                    {addr.pincode}
-                  </div>
-                  {addr.phone && <div className="text-sm">📞 {addr.phone}</div>}
-                </div>
-
-                <div className="flex gap-2">
-                  {!addr.isDefault && (
-                    <button
-                      onClick={() => setDefault(addr._id)}
-                      className="text-xs text-blue-600"
-                    >
-                      Set Default
-                    </button>
-                  )}
-                  <button
-                    onClick={() => deleteAddress(addr._id)}
-                    className="text-xs text-red-600"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div> */}
+           
             </div>
           ))}
         </div>
