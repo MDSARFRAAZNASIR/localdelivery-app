@@ -22,6 +22,7 @@ export default function AdminServiceAreas() {
 
   const fetchAreas =useCallback (async () => {
     try {
+      setLoading(true);
       const res = await fetch(
         "https://localdelivery-app-backend.vercel.app/admin/service-areas",
         {

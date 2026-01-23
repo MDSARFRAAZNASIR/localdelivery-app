@@ -3,12 +3,14 @@ import React, { useEffect, useState } from "react";
 // import Navbar from "../components/Navbar";
 import Navbar from "../pages/Navbar";
 import { useNavigate } from "react-router-dom";
+import { useLoading } from "../../context/LoadingContext";
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const {setLoad}=useLoading();
   const [form, setForm] = useState({
 
     _id: null,
@@ -75,6 +77,7 @@ export default function AdminProductsPage() {
   if (!window.confirm("Delete this product?")) return;
 
   try {
+    setLoad(true);
     const res = await fetch(
       `https://localdelivery-app-backend.vercel.app/admin/products/${id}`,
       {
@@ -92,6 +95,8 @@ export default function AdminProductsPage() {
     setProducts((prev) => prev.filter((p) => p._id !== id));
   } catch (err) {
     alert(err.message || "Delete error");
+  } finally{
+    setLoad(false);
   }
 };
 

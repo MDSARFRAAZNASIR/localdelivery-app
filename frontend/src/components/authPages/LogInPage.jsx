@@ -1,18 +1,21 @@
 import { React, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useLoading } from "../../context/LoadingContext";
 
 export default function LogInPage() {
   const [useremail, setUseremail] = useState("");
   const [userpassword, setUserpassword] = useState("");
   const navigate = useNavigate();
+  const { setLoading } = useLoading();
 
 
 
   // add token
   const userLogInHandler = async () => {
     try {
-      console.log("login attempt:", useremail, userpassword);
+      setLoading(true);
+      // console.log("login attempt:", useremail, userpassword);
 
       const res = await fetch(
         "https://localdelivery-app-backend.vercel.app/userlogin",
@@ -66,9 +69,13 @@ export default function LogInPage() {
         alert(payload.message || "Login failed: invalid server response");
         console.warn("Unexpected login payload:", payload);
       }
-    } catch (err) {
+      
+    }
+    catch (err) {
       console.error("Login error:", err);
       alert("Network error or server not reachable.");
+    } finally{
+      setLoading(false)
     }
   };
 

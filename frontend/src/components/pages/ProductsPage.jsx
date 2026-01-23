@@ -3,7 +3,6 @@
 
 // src/pages/ProductsPage.jsx
 import React, { useEffect, useState } from "react";
-// import Navbar from "../components/Navbar";
 import Navbar from "./Navbar"
 import CategoriesSidebar from "./CategoriesSidebar";
 import { useNavigate } from "react-router-dom";
@@ -40,6 +39,7 @@ export default function ProductsPage() {
         if (sort) params.append("sort", sort);
         params.append("page", page);
         params.append("limit", limit);
+        
 
         const url = `https://localdelivery-app-backend.vercel.app/products?${params.toString()}`;
         const res = await fetch(url);

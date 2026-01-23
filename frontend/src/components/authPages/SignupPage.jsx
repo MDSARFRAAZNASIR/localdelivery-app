@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useLoading } from "../../context/LoadingContext";
 
 export default function SignupPage() {
   const [username, setUsername] = useState("");
@@ -11,13 +12,15 @@ export default function SignupPage() {
 
   const [forgotEmail, setForgotEmail] = useState("");
   const [showForgot, setShowForgot] = useState(false);
-;
+const {setLoading}= useLoading();
 
 
   // add another
   const userSignInHandler = async () => {
   console.log("Signing up:", { username, userphone, useremail, userpassword });
   try {
+    setLoading(true);
+
     const resp = await fetch("https://localdelivery-app-backend.vercel.app/userregister", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -57,6 +60,9 @@ export default function SignupPage() {
   } catch (err) {
     console.error("Signup network/error:", err);
     alert("Something went wrong, please try again");
+  }
+  finally{
+    setLoading(false);
   }
 };
 

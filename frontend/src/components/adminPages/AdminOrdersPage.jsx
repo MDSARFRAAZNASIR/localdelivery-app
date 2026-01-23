@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Navbar from "../pages/Navbar";
+import { useLoading } from "../../context/LoadingContext";
 
 const STATUS_OPTIONS = [
   "CREATED",
@@ -14,6 +15,7 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const {setLoad}=useLoading();
   const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
@@ -49,6 +51,7 @@ export default function AdminOrdersPage() {
 
   const updateStatus = async (orderId, status) => {
     try {
+      setLoad(true);
       const res = await fetch(
         `https://localdelivery-app-backend.vercel.app/admin/orders/${orderId}/status`,
         {
@@ -70,6 +73,8 @@ export default function AdminOrdersPage() {
       );
     } catch (err) {
       alert(err.message);
+    } finally{
+      setLoad(false);
     }
   };
 

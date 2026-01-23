@@ -21,6 +21,7 @@ import UserOrderDetails from "./components/userPages/UserOrderDetails";
 import AddressBook from "./components/pages/AddressBook";
 import InvoicePage from "./components/pages/InvoicePage"
 import AdminServiceAreas from "./components/adminPages/AdminServiceAreas";
+import { LoadingProvider } from "./context/LoadingContext";
 
 function App() {
   useEffect(() => {
@@ -32,6 +33,7 @@ function App() {
   }, []);
   return (
     <div className="App">
+      <LoadingProvider>
       <Routes>
         {/* {Public Routes} */}
         <Route path="/" element={<LandingPage />}></Route>
@@ -71,6 +73,7 @@ function App() {
         {/* Default/fallback route */}
         <Route path="*" element={<LogInPage />} />
       </Routes>
+      </LoadingProvider>
     </div>
   );
 }
