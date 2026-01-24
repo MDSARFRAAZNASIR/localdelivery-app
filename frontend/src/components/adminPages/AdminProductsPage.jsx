@@ -151,12 +151,14 @@ export default function AdminProductsPage() {
       }
 
       resetForm();
+
     } catch (err) {
       console.error("save product", err);
       setError(err.message || "Save failed");
     } finally {
       setSaving(false);
     }
+    
   };
 
   return (
