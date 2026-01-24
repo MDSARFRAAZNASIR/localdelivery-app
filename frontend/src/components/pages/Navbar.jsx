@@ -230,6 +230,9 @@ export default function Navbar() {
           </div>
 
           {/* Links */}
+          <Link onClick={() => setOpen(false)} to="/userdashboard" className="block">
+            UserDashboard
+          </Link>
           <Link onClick={() => setOpen(false)} to="/products" className="block">
             Products
           </Link>
