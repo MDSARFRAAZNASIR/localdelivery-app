@@ -3,25 +3,22 @@ import React, { useEffect, useState } from "react";
 // import Navbar from "../components/Navbar";
 import Navbar from "../pages/Navbar";
 import { useNavigate } from "react-router-dom";
-import { useLoading } from "../../context/LoadingContext";
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const {setLoad}=useLoading();
   const [form, setForm] = useState({
-
     _id: null,
 
     name: "",
-    
+
     description: "",
     price: "",
     imageUrl: "",
     category: "",
-    
+
     stock: "",
     isActive: true,
   });
@@ -30,7 +27,10 @@ export default function AdminProductsPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!token) { navigate("/login"); return; }
+    if (!token) {
+      navigate("/login");
+      return;
+    }
 
     fetchProducts();
     // eslint-disable-next-line
@@ -42,7 +42,7 @@ export default function AdminProductsPage() {
       setError("");
       const res = await fetch(
         "https://localdelivery-app-backend.vercel.app/admin/products",
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.message || "Failed");
@@ -55,7 +55,6 @@ export default function AdminProductsPage() {
     }
   };
   const startEdit = (p) => {
-
     setForm({
       _id: p._id,
       name: p.name || "",
@@ -69,42 +68,53 @@ export default function AdminProductsPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const resetForm = () => setForm({
-    _id: null, name: "", description: "", price: "", imageUrl: "", category: "", stock: "", isActive: true
-  });
+  const resetForm = () =>
+    setForm({
+      _id: null,
+      name: "",
+      description: "",
+      price: "",
+      imageUrl: "",
+      category: "",
+      stock: "",
+      isActive: true,
+    });
 
- const handleDelete = async (id) => {
-  if (!window.confirm("Delete this product?")) return;
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this product?")) return;
 
-  try {
-    setLoad(true);
-    const res = await fetch(
-      `https://localdelivery-app-backend.vercel.app/admin/products/${id}`,
-      {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
+    try {
+      setLoading(true);
+      const res = await fetch(
+        `https://localdelivery-app-backend.vercel.app/admin/products/${id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Delete failed");
       }
-    );
 
-    const data = await res.json();
-    if (!res.ok || !data.success) {
-      throw new Error(data.message || "Delete failed");
+      // remove from UI
+      setProducts((prev) => prev.filter((p) => p._id !== id));
+    } catch (err) {
+      alert(err.message || "Delete error");
+    } finally {
+      setLoading(false);
     }
-
-    // remove from UI
-    setProducts((prev) => prev.filter((p) => p._id !== id));
-  } catch (err) {
-    alert(err.message || "Delete error");
-  } finally{
-    setLoad(false);
-  }
-};
-
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name || form.price === "") return alert("Name and price required");
-    if (!token) { navigate("/login"); return; }
+    if (!form.name || form.price === "")
+      return alert("Name and price required");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
 
     try {
       setSaving(true);
@@ -126,39 +136,47 @@ export default function AdminProductsPage() {
           `https://localdelivery-app-backend.vercel.app/admin/products/${form._id}`,
           {
             method: "PUT",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
             body: JSON.stringify(payload),
-          }
+          },
         );
         data = await res.json();
-        if (!res.ok || !data.success) throw new Error(data.message || "Update failed");
+        if (!res.ok || !data.success)
+          throw new Error(data.message || "Update failed");
         // update UI
-        setProducts((prev) => prev.map((p) => (p._id === data.product._id ? data.product : p)));
+        setProducts((prev) =>
+          prev.map((p) => (p._id === data.product._id ? data.product : p)),
+        );
         alert("Product updated");
       } else {
         res = await fetch(
           "https://localdelivery-app-backend.vercel.app/admin/products",
           {
             method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
             body: JSON.stringify(payload),
-          }
+          },
         );
         data = await res.json();
-        if (!res.ok || !data.success) throw new Error(data.message || "Create failed");
+        if (!res.ok || !data.success)
+          throw new Error(data.message || "Create failed");
         setProducts((prev) => [data.product, ...prev]);
         alert("Product created");
       }
 
       resetForm();
-
     } catch (err) {
       console.error("save product", err);
       setError(err.message || "Save failed");
     } finally {
       setSaving(false);
     }
-    
   };
 
   return (
@@ -170,24 +188,77 @@ export default function AdminProductsPage() {
 
           {/* Form */}
           <div className="bg-white p-4 rounded shadow mb-6">
-            <h3 className="font-semibold mb-2">{form._id ? "Edit Product" : "Add Product"}</h3>
+            <h3 className="font-semibold mb-2">
+              {form._id ? "Edit Product" : "Add Product"}
+            </h3>
             {error && <div className="text-sm text-red-600 mb-2">{error}</div>}
             <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-3">
-              <input placeholder="Name" value={form.name} onChange={(e)=>setForm({...form, name:e.target.value})} className="p-2 border rounded" />
-              <input placeholder="Category" value={form.category} onChange={(e)=>setForm({...form, category:e.target.value})} className="p-2 border rounded" />
-              <input placeholder="Image URL" value={form.imageUrl} onChange={(e)=>setForm({...form, imageUrl:e.target.value})} className="p-2 border rounded" />
-              <textarea placeholder="Description" value={form.description} onChange={(e)=>setForm({...form, description:e.target.value})} className="p-2 border rounded" />
+              <input
+                placeholder="Name"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                className="p-2 border rounded"
+              />
+              <input
+                placeholder="Category"
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+                className="p-2 border rounded"
+              />
+              <input
+                placeholder="Image URL"
+                value={form.imageUrl}
+                onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
+                className="p-2 border rounded"
+              />
+              <textarea
+                placeholder="Description"
+                value={form.description}
+                onChange={(e) =>
+                  setForm({ ...form, description: e.target.value })
+                }
+                className="p-2 border rounded"
+              />
               <div className="grid grid-cols-2 gap-2">
-                <input placeholder="Price" type="number" value={form.price} onChange={(e)=>setForm({...form, price:e.target.value})} className="p-2 border rounded" />
-                <input placeholder="Stock" type="number" value={form.stock} onChange={(e)=>setForm({...form, stock:e.target.value})} className="p-2 border rounded" />
+                <input
+                  placeholder="Price"
+                  type="number"
+                  value={form.price}
+                  onChange={(e) => setForm({ ...form, price: e.target.value })}
+                  className="p-2 border rounded"
+                />
+                <input
+                  placeholder="Stock"
+                  type="number"
+                  value={form.stock}
+                  onChange={(e) => setForm({ ...form, stock: e.target.value })}
+                  className="p-2 border rounded"
+                />
               </div>
               <label className="flex items-center gap-2">
-                <input type="checkbox" checked={form.isActive} onChange={(e)=>setForm({...form, isActive:e.target.checked})} />
+                <input
+                  type="checkbox"
+                  checked={form.isActive}
+                  onChange={(e) =>
+                    setForm({ ...form, isActive: e.target.checked })
+                  }
+                />
                 Active
               </label>
               <div className="flex gap-2">
-                <button disabled={saving} className="bg-green-600 text-white px-4 py-2 rounded">{saving ? "Saving..." : (form._id ? "Update" : "Create")}</button>
-                <button type="button" onClick={resetForm} className="bg-gray-200 px-4 py-2 rounded">Reset</button>
+                <button
+                  disabled={saving}
+                  className="bg-green-600 text-white px-4 py-2 rounded"
+                >
+                  {saving ? "Saving..." : form._id ? "Update" : "Create"}
+                </button>
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="bg-gray-200 px-4 py-2 rounded"
+                >
+                  Reset
+                </button>
               </div>
             </form>
           </div>
@@ -207,17 +278,31 @@ export default function AdminProductsPage() {
                     <div className="flex-1">
                       <div className="font-semibold">{p.name}</div>
                       <div className="text-xs text-gray-500">{p.category}</div>
-                      <div className="text-sm text-gray-700 mt-2">{p.description}</div>
+                      <div className="text-sm text-gray-700 mt-2">
+                        {p.description}
+                      </div>
                     </div>
 
                     <div className="mt-3 flex items-center justify-between">
                       <div>
                         <div className="text-sm">₹{p.price}</div>
-                        <div className="text-xs text-gray-500">Stock: {p.stock}</div>
+                        <div className="text-xs text-gray-500">
+                          Stock: {p.stock}
+                        </div>
                       </div>
                       <div className="flex flex-col gap-2">
-                        <button onClick={()=>startEdit(p)} className="text-sm bg-yellow-400 px-3 py-1 rounded">Edit</button>
-                        <button onClick={()=>handleDelete(p._id)} className="text-sm bg-red-500 text-white px-3 py-1 rounded">Delete</button>
+                        <button
+                          onClick={() => startEdit(p)}
+                          className="text-sm bg-yellow-400 px-3 py-1 rounded"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(p._id)}
+                          className="text-sm bg-red-500 text-white px-3 py-1 rounded"
+                        >
+                          Delete
+                        </button>
                       </div>
                     </div>
                   </div>
