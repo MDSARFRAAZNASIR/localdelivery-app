@@ -222,7 +222,7 @@ export default function CartPage() {
           ) : (
             <>
               {/* CART ITEMS */}
-              <div className="space-y-3 mb-4">
+              {/* <div className="space-y-3 mb-4">
                 {cart.map((item) => (
                   <div
                     key={item.productId}
@@ -252,13 +252,65 @@ export default function CartPage() {
                     </div>
                   </div>
                 ))}
-              </div>
+              </div> */}
+
+
+              {/* responsive */}
+
+              <div className="space-y-4 mb-6">
+  {cart.map((item) => (
+    <div
+      key={item.productId}
+      className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border-b pb-4"
+    >
+      {/* Left */}
+      <div>
+        <div className="font-semibold text-base">{item.name}</div>
+        <div className="text-sm text-gray-600">
+          ₹{item.price} × {item.quantity} = ₹{item.price * item.quantity}
+        </div>
+      </div>
+
+      {/* Right */}
+      <div className="flex items-center justify-between md:justify-end gap-4">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => decreaseQty(item.productId)}
+            className="px-3 py-1 border rounded"
+          >
+            −
+          </button>
+
+          <span className="font-semibold">{item.quantity}</span>
+
+          <button
+            onClick={() => increaseQty(item.productId)}
+            className="px-3 py-1 border rounded"
+          >
+            +
+          </button>
+        </div>
+
+        <button
+          onClick={() => removeItem(item.productId)}
+          className="text-red-500 text-sm"
+        >
+          Remove
+        </button>
+      </div>
+    </div>
+  ))}
+</div>
+
 
               {/* TOTAL */}
-              <div className="border-t pt-3 mb-4 flex justify-between font-semibold">
-                <span>Total</span>
-                <span>₹{totalAmount}</span>
-              </div>
+             
+
+              <div className="border-t pt-4 mb-6 flex justify-between font-semibold text-lg">
+  <span>Total</span>
+  <span>₹{totalAmount}</span>
+</div>
+
 
               {/* ADDRESS SELECT */}
               <div className="mb-4">
@@ -281,41 +333,83 @@ export default function CartPage() {
                   // add new function
 
                   // for default
-                  <div className="space-y-3">
-                    {addresses.map((addr) => (
-                      <div
-                        key={addr._id}
-                        className={`border rounded-lg p-3 cursor-pointer ${
-                          selectedAddressId === addr._id
-                            ? "border-orange-500 bg-orange-50"
-                            : "border-gray-300"
-                        }`}
-                        onClick={() => setSelectedAddressId(addr._id)}
-                      >
-                        <div className="font-semibold">
-                          {addr.label}
-                          {addr.isDefault && (
-                            <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
-                              Default
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          {addr.name}, {addr.phone}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          {addr.addressLine}, {addr.city}, {addr.state} –{" "}
-                          {addr.pincode}
-                        </div>
+                  // <div className="space-y-3">
+                  //   {addresses.map((addr) => (
+                  //     <div
+                  //       key={addr._id}
+                  //       className={`border rounded-lg p-3 cursor-pointer ${
+                  //         selectedAddressId === addr._id
+                  //           ? "border-orange-500 bg-orange-50"
+                  //           : "border-gray-300"
+                  //       }`}
+                  //       onClick={() => setSelectedAddressId(addr._id)}
+                  //     >
+                  //       <div className="font-semibold">
+                  //         {addr.label}
+                  //         {addr.isDefault && (
+                  //           <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
+                  //             Default
+                  //           </span>
+                  //         )}
+                  //       </div>
+                  //       <div className="text-sm text-gray-600">
+                  //         {addr.name}, {addr.phone}
+                  //       </div>
+                  //       <div className="text-sm text-gray-600">
+                  //         {addr.addressLine}, {addr.city}, {addr.state} –{" "}
+                  //         {addr.pincode}
+                  //       </div>
 
-                        {selectedAddressId === addr._id && (
-                          <div className="mt-2 text-sm font-semibold text-orange-600">
-                            ✔ Delivering here
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                  //       {selectedAddressId === addr._id && (
+                  //         <div className="mt-2 text-sm font-semibold text-orange-600">
+                  //           ✔ Delivering here
+                  //         </div>
+                  //       )}
+                  //     </div>
+                  //   ))}
+                  // </div>
+
+                  // responsive
+
+                  <div className="space-y-4">
+  {addresses.map((addr) => (
+    <div
+      key={addr._id}
+      onClick={() => setSelectedAddressId(addr._id)}
+      className={`border rounded-lg p-4 cursor-pointer transition ${
+        selectedAddressId === addr._id
+          ? "border-orange-500 bg-orange-50"
+          : "border-gray-300"
+      }`}
+    >
+      <div className="flex justify-between items-center">
+        <div className="font-semibold">
+          {addr.label}
+          {addr.isDefault && (
+            <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
+              Default
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="text-sm text-gray-600 mt-1">
+        {addr.name}, {addr.phone}
+      </div>
+
+      <div className="text-sm text-gray-600">
+        {addr.addressLine}, {addr.city}, {addr.state} – {addr.pincode}
+      </div>
+
+      {selectedAddressId === addr._id && (
+        <div className="mt-2 text-sm font-semibold text-orange-600">
+          ✔ Delivering here
+        </div>
+      )}
+    </div>
+  ))}
+</div>
+
                 )}
               </div>
 
@@ -327,7 +421,7 @@ export default function CartPage() {
                 <select
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full border rounded px-3 py-2"
+                  className="w-full border rounded px-3 py-2 text-sm md:text-base"
                 >
                   <option value="COD">Cash on Delivery</option>
                   <option value="ONLINE">Online Payment</option>
@@ -356,28 +450,12 @@ export default function CartPage() {
                 </div>
               )}
 
-              {/* Disable Checkout Button ❌ */}
-              {/* 
-              <button
-                onClick={handlePlaceOrder}
-
-                disabled={!serviceArea?.serviceable}
-                className={` w-full bg-orange-500 hover:bg-orange-600 ${
-                  serviceArea?.serviceable
-                    ? "bg-orange-500 hover:bg-orange-600"
-                    : "bg-gray-400 cursor-not-allowed"
-                }`}
-              > */}
-              {/* {loading ? "Placing order..." : "Place Order"} */}
-              {/* Place Order
-
-
-              </button> */}
+          
 
               <button
                 onClick={handlePlaceOrder}
                 disabled={!serviceArea?.serviceable}
-                className={`w-full px-4 py-2 rounded text-white ${
+                className={`w-full py-3  rounded text-white text-lg font-semibold ${
                   serviceArea?.serviceable
                     ? "bg-orange-500 hover:bg-orange-600"
                     : "bg-gray-400 cursor-not-allowed"

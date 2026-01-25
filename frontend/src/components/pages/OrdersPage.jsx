@@ -1,8 +1,5 @@
-
-
-
-  // another order page
-  import React, { useEffect, useState } from "react";
+// another order page
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 // import Navbar from "../components/Navbar";
 import Navbar from "./Navbar";
@@ -31,7 +28,7 @@ export default function OrdersPage() {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         const data = await res.json();
@@ -80,28 +77,24 @@ export default function OrdersPage() {
       <Navbar />
       <div className="min-h-screen bg-gray-100 py-8 px-4 flex justify-center">
         <div className="w-full max-w-4xl">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-gray-800">
-              Your Orders 📦
-            </h2>
+          {/* <div className="flex justify-between items-center mb-4"> */}
+          {/* new responsive */}
+          <div className="flex flex-col sm:flex:row sm:justify-between sm:items-center gap-3 mb-6">
+            <h2 className="text-2xl font-bold text-gray-800">Your Orders 📦</h2>
             <button
               onClick={() => navigate("/products")}
-              className="bg-orange-500 hover:bg-orange-600 text-white text-sm px-4 py-2 rounded-lg"
+              className="bg-orange-500 hover:bg-orange-600 text-white text-sm px-4 py-2 rounded-lg w-ful sm:w-auto"
             >
               + Shop More
             </button>
 
             {/* add invoice */}
-   
-
           </div>
 
           {loading ? (
             <div>Loading orders...</div>
           ) : error ? (
-            <div className="text-red-600 bg-red-50 p-3 rounded">
-              {error}
-            </div>
+            <div className="text-red-600 bg-red-50 p-3 rounded">{error}</div>
           ) : orders.length === 0 ? (
             <div className="bg-white p-4 rounded shadow">
               No orders yet. Start shopping from Products! 🛒
@@ -111,110 +104,114 @@ export default function OrdersPage() {
               {orders.map((order) => (
                 <div
                   key={order._id}
-                  className="bg-white p-4 rounded shadow border"
+                  className="bg-white p-4 rounded-lg shadow border space-y-3"
                 >
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <div className="text-sm text-gray-500">
-                        Order ID:{" "}
-                        <span className="font-mono">
-                          {order._id.slice(-8)}
-                        </span>
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        Placed: {formatDate(order.createdAt)}
-                      </div>
-                    </div>
-                    <span
-                      className={`text-xs px-2 py-1 rounded-full ${statusColor(
-                        order.status
-                      )}`}
-                    >
-                      {order.status}
-                    </span>
-                 
-                    <span>
-                                                   {/* <button
-  onClick={() => navigate(`/invoice/${order._id}`)}
-  className="text-sm text-blue-600 underline"
->
-  View Invoice
-</button> */}
-<button
-  onClick={() => navigate(`/invoice/${order._id}`)}
-  className="text-sm text-blue-600 underline mt-2"
->
-  Download Invoice
-</button>
 
+                  {/* new responsive */}
 
-                    </span>
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+  <div>
+    <div className="text-sm text-gray-500">
+      Order ID:{" "}
+      <span className="font-mono">{order._id.slice(-8)}</span>
+    </div>
+    <div className="text-xs text-gray-500">
+      Placed: {formatDate(order.createdAt)}
+    </div>
+  </div>
 
-                  </div>
+  <div className="flex items-center gap-3">
+    <span
+      className={`text-xs px-3 py-1 rounded-full ${statusColor(
+        order.status
+      )}`}
+    >
+      {order.status}
+    </span>
 
-
-<div className="text-sm text-gray-600">
-  {order.deliveryAddress && typeof order.deliveryAddress === "object" ? (
-    <>
-      <div className="font-medium">
-        {order.deliveryAddress.name || "Customer"}
-        {order.deliveryAddress.label && ` (${order.deliveryAddress.label})`}
-      </div>
-
-      <div>{order.deliveryAddress.addressLine}</div>
-
-      <div>
-        {order.deliveryAddress.city}, {order.deliveryAddress.state} –{" "}
-        {order.deliveryAddress.pincode}
-      </div>
-
-      <div className="text-xs text-gray-500">
-        📞 {order.deliveryAddress.phone}
-      </div>
-    </>
-  ) : (
-    <span className="italic text-gray-400">Address not available</span>
-  )}
+    <button
+      onClick={() => navigate(`/invoice/${order._id}`)}
+      className="text-sm text-blue-600 underline"
+    >
+      Invoice
+    </button>
+  </div>
 </div>
 
 
+                  <div className="text-sm text-gray-600 space-y-1">
+                    {order.deliveryAddress &&
+                    typeof order.deliveryAddress === "object" ? (
+                      <>
+                        <div className="font-medium">
+                          {order.deliveryAddress.name || "Customer"}
+                          {order.deliveryAddress.label &&
+                            ` (${order.deliveryAddress.label})`}
+                        </div>
 
+                        <div>{order.deliveryAddress.addressLine}</div>
 
-                  <div className="mt-2">
-                    <div className="text-sm font-medium text-gray-700 mb-1">
-                      Items
-                    </div>
-                    <ul className="text-sm text-gray-700 space-y-1">
-                      {order.items.map((it, idx) => (
-                        <li
-                          key={idx}
-                          className="flex justify-between items-center"
-                        >
-                          <span>
-                            {it.name} × {it.quantity}
-                          </span>
-                          <span>
-                            ₹{it.price} × {it.quantity} ={" "}
-                            <span className="font-semibold">
-                              ₹{it.subtotal}
-                            </span>
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                        <div>
+                          {order.deliveryAddress.city},{" "}
+                          {order.deliveryAddress.state} –{" "}
+                          {order.deliveryAddress.pincode}
+                        </div>
 
-                  <div className="border-t mt-3 pt-2 flex justify-between items-center">
-                    <div className="text-sm text-gray-600">
-                      Payment:{" "}
-                      <span className="font-medium">
-                        {order.paymentMethod}
+                        <div className="text-xs text-gray-500">
+                          📞 {order.deliveryAddress.phone}
+                        </div>
+                      </>
+                    ) : (
+                      <span className="italic text-gray-400">
+                        Address not available
                       </span>
-                    </div>
-                    <div className="text-lg font-bold text-orange-600">
-                      Total: ₹{order.totalAmount}
-                    </div>
+                    )}
                   </div>
+
+
+                  {/* new responsive for items */}
+
+                  <div>
+  <div className="text-sm font-medium text-gray-700 mb-2">
+    Items
+  </div>
+
+  <ul className="space-y-2">
+    {order.items.map((it, idx) => (
+      <li
+        key={idx}
+        className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-sm"
+      >
+        <span>
+          {it.name} × {it.quantity}
+        </span>
+
+        <span className="text-gray-700">
+          ₹{it.price} × {it.quantity} ={" "}
+          <span className="font-semibold">₹{it.subtotal}</span>
+        </span>
+      </li>
+    ))}
+  </ul>
+</div>
+
+
+                 
+
+
+                  {/* ne responsive paytem page add */}
+
+        <div className="border-t pt-3 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+  <div className="text-sm text-gray-600">
+    Payment:{" "}
+    <span className="font-medium">{order.paymentMethod}</span>
+  </div>
+
+  <div className="text-lg font-bold text-orange-600">
+    Total: ₹{order.totalAmount}
+  </div>
+</div>
+
                 </div>
               ))}
             </div>

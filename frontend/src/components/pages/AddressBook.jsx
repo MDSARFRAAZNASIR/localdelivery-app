@@ -174,7 +174,8 @@ export default function AddressBook({ mode = "manage", onSelect }) {
   return (
     <>
       <Navbar />
-      <div className="max-w-3xl mx-auto p-6">
+      <div className="max-w-3xl mx-auto p-4 sm:p-6">
+
         <h1 className="text-2xl font-bold mb-4">🏠 My Addresses</h1>
 
         {loading && <div>Loading...</div>}
@@ -183,26 +184,23 @@ export default function AddressBook({ mode = "manage", onSelect }) {
         {!loading && addresses.length === 0 && <div>No addresses found.</div>}
 
         <div className="space-y-4">
-          {/* {addresses.map((addr) => (
-            <div
-              key={addr._id}
-              className={`border p-4 rounded ${
-                addr.isDefault ? "border-green-500 bg-green-50" : ""
-              }`}
-              
-            > */}
+         
           {addresses.map((addr) => (
+           
             <div
-              key={addr._id}
-              className={`border p-4 rounded ${
-                addr.isDefault ? "border-green-500 bg-green-50" : ""
-              }`}
-            >
+  key={addr._id}
+  className={`border rounded-lg p-4 space-y-2 ${
+    addr.isDefault ? "border-green-500 bg-green-50" : "bg-white"
+  }`}
+>
+
               {/* add on mode after */}
               {mode === "select" && (
-                <label className="flex gap-3 items-start cursor-pointer">
+              <label className="flex gap-3 items-start cursor-pointer w-full">
+
                   <input
                     type="radio"
+                    className="mt-1 scale-125"
                     checked={selectedId === addr._id}
                     onChange={() => {
                       setSelectedId(addr._id);
@@ -227,7 +225,8 @@ export default function AddressBook({ mode = "manage", onSelect }) {
               {/* add manage mode */}
               {mode === "manage" && (
                 <>
-                  <div className="flex justify-between items-start">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+
                     <div>
                       <div className="font-semibold">
                         {addr.label} {addr.isDefault && "(Default)"}
@@ -240,8 +239,8 @@ export default function AddressBook({ mode = "manage", onSelect }) {
                         <div className="text-sm">📞 {addr.phone}</div>
                       )}
                     </div>
+<div className="flex flex-wrap gap-3 text-sm">
 
-                    <div className="flex gap-2">
                       {/* add new update address */}
                       <button
                         onClick={() => {
@@ -287,7 +286,7 @@ export default function AddressBook({ mode = "manage", onSelect }) {
         </div>
 
         {/* Add Address */}
-        <button
+        {/* <button
           onClick={() => setShowForm(!showForm)}
           className="mt-6 bg-orange-500 text-white px-4 py-2 rounded"
         >
@@ -298,7 +297,25 @@ export default function AddressBook({ mode = "manage", onSelect }) {
           className="text-sm text-blue-600 underline"
         >
           📍 Pick from Map
-        </button>
+        </button> */}
+
+
+        <div className="mt-6 flex flex-col sm:flex-row gap-3">
+  <button
+    onClick={() => setShowForm(!showForm)}
+    className="bg-orange-500 text-white px-4 py-2 rounded w-full sm:w-auto"
+  >
+    + Add New Address
+  </button>
+
+  <button
+    onClick={() => setShowMap(!showMap)}
+    className="text-sm text-blue-600 underline text-center sm:text-left"
+  >
+    📍 Pick from Map
+  </button>
+</div>
+
 
         {/* add for google map */}
         {showMap && (
@@ -366,10 +383,12 @@ export default function AddressBook({ mode = "manage", onSelect }) {
               className="w-full border p-2 rounded"
             />
 
-            <div className="grid grid-cols-3 gap-2">
+            {/* <div className="grid grid-cols-3 gap-2"> */}
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+
               <input
                 placeholder="Pincode"
-                // value={form.pincode}
                 value={form.pincode}
                 onBlur={() => fetchByPincode(form.pincode)}
                 onChange={(e) => setForm({ ...form, pincode: e.target.value })}
@@ -381,7 +400,6 @@ export default function AddressBook({ mode = "manage", onSelect }) {
                 readOnly
                 onKeyDown={(e) => e.preventDefault()}
                 onPaste={(e) => e.preventDefault()}
-                // onChange={(e) => setForm({ ...form, city: e.target.value })}
                 className="border p-2 rounded"
               />
               <input
@@ -390,26 +408,17 @@ export default function AddressBook({ mode = "manage", onSelect }) {
                 readOnly
                 onKeyDown={(e) => e.preventDefault()}
                 onPaste={(e) => e.preventDefault()}
-                // onChange={(e) => setForm({ ...form, state: e.target.value })}
                 className="border p-2 rounded"
               />
 
-              {/* <input
-  value={form.pincode}
-  onBlur={() => fetchByPincode(form.pincode)}
-/> */}
-            </div>
-            {/* <button
-              onClick={addAddress}
-              className="bg-green-600 text-white px-4 py-2 rounded"
-            >
-              Save Address
-            </button> */}
+         </div>
+        
 
-            <button
-              onClick={saveAddress}
-              className="bg-green-600 text-white px-4 py-2 rounded"
-            >
+        <button
+  onClick={saveAddress}
+  className="bg-green-600 text-white px-4 py-2 rounded w-full sm:w-auto"
+>
+
               {editingId ? "Update Address" : "Save Address"}
             </button>
           </div>
