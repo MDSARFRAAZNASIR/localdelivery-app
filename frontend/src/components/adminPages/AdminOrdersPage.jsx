@@ -72,7 +72,7 @@ export default function AdminOrdersPage() {
     } catch (err) {
       alert(err.message);
     } finally{
-      setLoad(false);
+      setLoading(false);
     }
   };
 
