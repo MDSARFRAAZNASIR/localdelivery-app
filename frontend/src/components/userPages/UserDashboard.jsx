@@ -17,6 +17,25 @@ export default function UserDashboard() {
 
   const token = localStorage.getItem("token");
 
+  // add colour
+  const statusColor = (status) => {
+  switch (status) {
+    case "CREATED":
+      return "bg-gray-200 text-gray-800";
+    case "CONFIRMED":
+      return "bg-blue-100 text-blue-700";
+    case "OUT_FOR_DELIVERY":
+      return "bg-orange-100 text-orange-700";
+    case "DELIVERED":
+      return "bg-green-100 text-green-700";
+    case "CANCELLED":
+      return "bg-red-100 text-red-700";
+    default:
+      return "bg-gray-100 text-gray-600";
+  }
+};
+
+
   // Load profile
   useEffect(() => {
     if (!token) {
@@ -183,10 +202,17 @@ export default function UserDashboard() {
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                  <span className="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-700 font-medium">
+                  {/* <span className="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-700 font-medium">
 
                         {o.status}
-                      </span>
+                      </span> */}
+
+                      <span
+  className={`text-xs px-2 py-1 rounded-full font-medium ${statusColor(o.status)}`}
+>
+  {o.status}
+</span>
+
                       <button
                         className="text-xs text-blue-600"
                         onClick={() => navigate("/orders")}
