@@ -92,7 +92,9 @@ export default function ProductsPage() {
 
           {/* main content */}
           <div className="flex-1">
-            <div className="flex justify-between items-center mb-4">
+            {/* <div className="flex justify-between items-center mb-4"> */}
+            <div className="flex flex-col gap-3 md:flex-row md:justify-between md:items-center mb-4">
+
               <h2 className="text-2xl font-bold text-gray-800">Products 🛒</h2>
               <div className="flex items-center gap-3">
                 <input
@@ -100,20 +102,26 @@ export default function ProductsPage() {
                   value={query}
                   onChange={(e) => { setQuery(e.target.value); setPage(1); }}
                   placeholder="Search products..."
-                  className="p-2 border rounded w-60"
+                  className="p-2 border rounded w-full md:w-60"
                 />
-                <select value={sort} onChange={(e) => { setSort(e.target.value); setPage(1); }} className="p-2 border rounded">
+                <select value={sort} onChange={(e) => { setSort(e.target.value); setPage(1); }} className="p-2 border rounded w-full md:w-auto">
                   <option value="newest">Newest</option>
                   <option value="price_asc">Price: Low → High</option>
                   <option value="price_desc">Price: High → Low</option>
                 </select>
-                <button onClick={goToCart} className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">
+                <button onClick={goToCart} className=" w-full md:w-auto  bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">
                   Cart ({cartCount})
                 </button>
               </div>
             </div>
 
-            {loading ? <div>Loading products...</div> : null}
+            {/* {loading ? <div>Loading products...</div> : null} */}
+            {loading && (
+  <div className="text-center py-10 text-gray-500">
+    Loading products…
+  </div>
+)}
+
             {error ? <div className="text-red-600 p-2 bg-red-50 rounded">{error}</div> : null}
 
             {!loading && !error && products.length === 0 ? (
@@ -148,7 +156,7 @@ export default function ProductsPage() {
 
         {/* mobile categories row */}
         <div className="md:hidden mt-4">
-          <div className="flex gap-2 overflow-x-auto">
+          <div className="flex gap-2 overflow-x-auto pb-2">
             <button onClick={()=>{setSelectedCategory(""); setPage(1);}} className={`px-3 py-2 rounded ${selectedCategory==="" ? "bg-orange-50 text-orange-600" : "bg-white"}`}>All</button>
             {/* small fetch of categories for mobile (simple) */}
             <MobileCategories setSelectedCategory={setSelectedCategory} setPage={setPage} />

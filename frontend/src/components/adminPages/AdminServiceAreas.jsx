@@ -1,13 +1,7 @@
-
-
-
 import { useEffect, useCallback, useState } from "react";
 import Navbar from "../pages/Navbar";
 
-
-
 export default function AdminServiceAreas() {
-  
   const [areas, setAreas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
@@ -18,16 +12,15 @@ export default function AdminServiceAreas() {
   });
 
   const token = localStorage.getItem("token");
-  
 
-  const fetchAreas =useCallback (async () => {
+  const fetchAreas = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch(
         "https://localdelivery-app-backend.vercel.app/admin/service-areas",
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       const data = await res.json();
       if (res.ok) setAreas(data.areas || []);
@@ -52,7 +45,7 @@ export default function AdminServiceAreas() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(form),
-      }
+      },
     );
 
     const data = await res.json();
@@ -72,7 +65,7 @@ export default function AdminServiceAreas() {
       {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
-      }
+      },
     );
     fetchAreas();
   };
@@ -80,11 +73,11 @@ export default function AdminServiceAreas() {
   return (
     <>
       <Navbar />
-      <div className="max-w-4xl mx-auto p-6">
+      <div className="max-w-4xl mx-auto p-4 sm:p-6">
         <h1 className="text-2xl font-bold mb-4">📍 Service Areas</h1>
 
         {/* ADD / UPDATE */}
-        <div className="bg-white p-4 rounded shadow mb-6 grid grid-cols-4 gap-3">
+        <div className="bg-white p-4 rounded shadow mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <input
             placeholder="Pincode"
             value={form.pincode}
@@ -108,7 +101,7 @@ export default function AdminServiceAreas() {
           />
           <button
             onClick={saveArea}
-            className="bg-green-600 text-white rounded px-4"
+            className="bg-green-600 text-white rounded px-4 py-2 w-full sm:w-auto"
           >
             Save
           </button>
@@ -118,37 +111,38 @@ export default function AdminServiceAreas() {
         {loading ? (
           <div>Loading...</div>
         ) : (
-          <table className="w-full border text-sm">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="p-2 border">Pincode</th>
-                <th className="p-2 border">Area</th>
-                <th className="p-2 border">Fee</th>
-                <th className="p-2 border">Active</th>
-                <th className="p-2 border">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {areas.map((a) => (
-                <tr key={a._id} className="text-center">
-                  <td className="border p-2">{a.pincode}</td>
-                  <td className="border p-2">{a.areaName}</td>
-                  <td className="border p-2">₹{a.deliveryFee}</td>
-                  <td className="border p-2">
-                    {a.isActive ? "✅" : "❌"}
-                  </td>
-                  <td className="border p-2">
-                    <button
-                      onClick={() => deleteArea(a._id)}
-                      className="text-red-600 text-xs"
-                    >
-                      Delete
-                    </button>
-                  </td>
+          // <table className="w-full border text-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] border text-sm">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="p-2 border">Pincode</th>
+                  <th className="p-2 border">Area</th>
+                  <th className="p-2 border">Fee</th>
+                  <th className="p-2 border">Active</th>
+                  <th className="p-2 border">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {areas.map((a) => (
+                  <tr key={a._id} className="text-center hover:bg-gray-50">
+                    <td className="border p-2">{a.pincode}</td>
+                    <td className="border p-2">{a.areaName}</td>
+                    <td className="border p-2">₹{a.deliveryFee}</td>
+                    <td className="border p-2">{a.isActive ? "✅" : "❌"}</td>
+                    <td className="border p-2">
+                      <button
+                        onClick={() => deleteArea(a._id)}
+                        className="text-red-600 text-sm px-2 py-1 rounded hover:bg-red-50"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </>

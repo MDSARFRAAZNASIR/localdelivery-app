@@ -115,15 +115,16 @@ export default function UserDashboard() {
           <p className="text-sm text-gray-600">
             Phone: {user?.userphone || "Not provided"}
           </p>
-          <div className="mt-4 flex gap-2">
+          <div className="mt-4 flex flex-col sm:flex-row gap-2">
+
             <button
-              className="bg-orange-500 text-white px-4 py-2 rounded text-sm"
+              className=" w-full sm:w-auto  bg-orange-500 text-white px-4 py-2 rounded text-sm"
               onClick={() => navigate("/profile")}
             >
               Edit Profile
             </button>
             <button
-              className="bg-gray-200 text-gray-800 px-4 py-2 rounded text-sm"
+              className=" w-full sm:w-auto bg-gray-200 text-gray-800 px-4 py-2 rounded text-sm"
               onClick={() => navigate("/products")}
             >
               Shop Now
@@ -135,7 +136,11 @@ export default function UserDashboard() {
         <div className="bg-white p-6 rounded shadow">
           <h3 className="text-lg font-semibold mb-4">Recent Orders</h3>
           {ordersLoading ? (
-            <div>Loading orders...</div>
+            // <div>Loading orders...</div>
+            <div className="text-center text-sm text-gray-500 py-6">
+  Loading recent orders…
+</div>
+
           ) : orders.length === 0 ? (
             <div>No orders yet. Start shopping from Products! 🛒</div>
           ) : (
@@ -147,9 +152,12 @@ export default function UserDashboard() {
                 return (
                   <li
                     key={o._id}
-                    className="border p-3 rounded flex justify-between items-start gap-4"
+                 className="border p-3 rounded flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4"
+
                   >
-                    <div>
+                    {/* <div> */}
+                    <div className="flex flex-row sm:flex-col items-start sm:items-end gap-2">
+
                       <div className="text-xs text-gray-500 mb-1">
                         Order ID:{" "}
                         <span className="font-mono">{o._id.slice(-8)}</span>
@@ -175,7 +183,8 @@ export default function UserDashboard() {
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">
+                  <span className="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-700 font-medium">
+
                         {o.status}
                       </span>
                       <button
