@@ -12,6 +12,7 @@ export default function LandingPage() {
   const [loading, setLoading] = useState(true);
   const loadingTexts = [
     "Food on the way…",
+    "veggies on the way",
     "Stay safe, stay home…",
     "Your parcel is on the way…",
     "Quick delivery, just for you…",
@@ -64,10 +65,10 @@ export default function LandingPage() {
           Fast & Reliable Local Delivery
         </motion.h1>
         <p className="text-lg md:text-xl max-w-2xl mb-8">
-          Order Food across your city with ease. Trusted by shops, businesses, and customers.
+          Order Food, Vegetables and other  across your city with ease. Trusted by shops, businesses, and customers.
         </p>
         <div className="flex gap-4">
-          <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
+          <Button size="lg" className="bg-black text-blue-600 hover:bg-blue-600">
             Download App
           </Button>
           <Button size="lg" variant="outline" className="border-white text-white">
@@ -113,7 +114,7 @@ export default function LandingPage() {
 
       {/* Call to Action */}
       <section className="py-16 bg-gradient-to-r from-blue-600 to-indigo-700 text-white text-center">
-        <h2 className="text-3xl md:text-4xl font-bold mb-6">Start Order delicious and Testy food Today</h2>
+        <h2 className="text-3xl md:text-4xl font-bold mb-6">Start Order delicious and Testy food or Fresh vaggies and other Today</h2>
         <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
           <NavLink>
            <Link to="signup" className="link1" >Order Start Now</Link>

@@ -32,7 +32,7 @@ export default function AddressBook({ mode = "manage", onSelect }) {
         "https://localdelivery-app-backend.vercel.app/user/addresses",
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (res.status === 401) {
@@ -68,8 +68,6 @@ export default function AddressBook({ mode = "manage", onSelect }) {
       }
     }
   }, [addresses, mode, onSelect]);
-
- 
 
   const saveAddress = async () => {
     if (!form.addressLine.trim()) {
@@ -120,7 +118,7 @@ export default function AddressBook({ mode = "manage", onSelect }) {
         {
           method: "PUT",
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       const data = await res.json();
@@ -141,7 +139,7 @@ export default function AddressBook({ mode = "manage", onSelect }) {
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       const data = await res.json();
@@ -175,7 +173,6 @@ export default function AddressBook({ mode = "manage", onSelect }) {
     <>
       <Navbar />
       <div className="max-w-3xl mx-auto p-4 sm:p-6">
-
         <h1 className="text-2xl font-bold mb-4">🏠 My Addresses</h1>
 
         {loading && <div>Loading...</div>}
@@ -184,20 +181,16 @@ export default function AddressBook({ mode = "manage", onSelect }) {
         {!loading && addresses.length === 0 && <div>No addresses found.</div>}
 
         <div className="space-y-4">
-         
           {addresses.map((addr) => (
-           
             <div
-  key={addr._id}
-  className={`border rounded-lg p-4 space-y-2 ${
-    addr.isDefault ? "border-green-500 bg-green-50" : "bg-white"
-  }`}
->
-
+              key={addr._id}
+              className={`border rounded-lg p-4 space-y-2 ${
+                addr.isDefault ? "border-green-500 bg-green-50" : "bg-white"
+              }`}
+            >
               {/* add on mode after */}
               {mode === "select" && (
-              <label className="flex gap-3 items-start cursor-pointer w-full">
-
+                <label className="flex gap-3 items-start cursor-pointer w-full">
                   <input
                     type="radio"
                     className="mt-1 scale-125"
@@ -225,8 +218,7 @@ export default function AddressBook({ mode = "manage", onSelect }) {
               {/* add manage mode */}
               {mode === "manage" && (
                 <>
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
-
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
                     <div>
                       <div className="font-semibold">
                         {addr.label} {addr.isDefault && "(Default)"}
@@ -239,8 +231,7 @@ export default function AddressBook({ mode = "manage", onSelect }) {
                         <div className="text-sm">📞 {addr.phone}</div>
                       )}
                     </div>
-<div className="flex flex-wrap gap-3 text-sm">
-
+                    <div className="flex flex-wrap gap-3 text-sm">
                       {/* add new update address */}
                       <button
                         onClick={() => {
@@ -279,43 +270,25 @@ export default function AddressBook({ mode = "manage", onSelect }) {
                   </div>
                 </>
               )}
-
-           
             </div>
           ))}
         </div>
 
-        {/* Add Address */}
-        {/* <button
-          onClick={() => setShowForm(!showForm)}
-          className="mt-6 bg-orange-500 text-white px-4 py-2 rounded"
-        >
-          + Add New Address
-        </button>
-        <button
-          onClick={() => setShowMap(!showMap)}
-          className="text-sm text-blue-600 underline"
-        >
-          📍 Pick from Map
-        </button> */}
-
-
         <div className="mt-6 flex flex-col sm:flex-row gap-3">
-  <button
-    onClick={() => setShowForm(!showForm)}
-    className="bg-orange-500 text-white px-4 py-2 rounded w-full sm:w-auto"
-  >
-    + Add New Address
-  </button>
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="bg-orange-500 text-white px-4 py-2 rounded w-full sm:w-auto"
+          >
+            + Add New Address
+          </button>
 
-  <button
-    onClick={() => setShowMap(!showMap)}
-    className="text-sm text-blue-600 underline text-center sm:text-left"
-  >
-    📍 Pick from Map
-  </button>
-</div>
-
+          <button
+            onClick={() => setShowMap(!showMap)}
+            className="text-sm text-blue-600 underline text-center sm:text-left"
+          >
+            📍 Pick from Map
+          </button>
+        </div>
 
         {/* add for google map */}
         {showMap && (
@@ -323,7 +296,7 @@ export default function AddressBook({ mode = "manage", onSelect }) {
             onSelect={async ({ lat, lng }) => {
               try {
                 const res = await fetch(
-                  `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${process.env.REACT_APP_GOOGLE_MAPS_KEY}`
+                  `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${process.env.REACT_APP_GOOGLE_MAPS_KEY}`,
                 );
                 const data = await res.json();
 
@@ -383,10 +356,8 @@ export default function AddressBook({ mode = "manage", onSelect }) {
               className="w-full border p-2 rounded"
             />
 
-            {/* <div className="grid grid-cols-3 gap-2"> */}
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-
               <input
                 placeholder="Pincode"
                 value={form.pincode}
@@ -410,15 +381,12 @@ export default function AddressBook({ mode = "manage", onSelect }) {
                 onPaste={(e) => e.preventDefault()}
                 className="border p-2 rounded"
               />
+            </div>
 
-         </div>
-        
-
-        <button
-  onClick={saveAddress}
-  className="bg-green-600 text-white px-4 py-2 rounded w-full sm:w-auto"
->
-
+            <button
+              onClick={saveAddress}
+              className="bg-green-600 text-white px-4 py-2 rounded w-full sm:w-auto"
+            >
               {editingId ? "Update Address" : "Save Address"}
             </button>
           </div>

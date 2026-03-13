@@ -1,6 +1,3 @@
-
-
-
 // for New
 // src/pages/UserDashboard.jsx
 import React, { useEffect, useState } from "react";
@@ -19,22 +16,21 @@ export default function UserDashboard() {
 
   // add colour
   const statusColor = (status) => {
-  switch (status) {
-    case "CREATED":
-      return "bg-gray-200 text-gray-800";
-    case "CONFIRMED":
-      return "bg-blue-100 text-blue-700";
-    case "OUT_FOR_DELIVERY":
-      return "bg-orange-100 text-orange-700";
-    case "DELIVERED":
-      return "bg-green-100 text-green-700";
-    case "CANCELLED":
-      return "bg-red-100 text-red-700";
-    default:
-      return "bg-gray-100 text-gray-600";
-  }
-};
-
+    switch (status) {
+      case "CREATED":
+        return "bg-gray-200 text-gray-800";
+      case "CONFIRMED":
+        return "bg-blue-100 text-blue-700";
+      case "OUT_FOR_DELIVERY":
+        return "bg-orange-100 text-orange-700";
+      case "DELIVERED":
+        return "bg-green-100 text-green-700";
+      case "CANCELLED":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-gray-100 text-gray-600";
+    }
+  };
 
   // Load profile
   useEffect(() => {
@@ -50,7 +46,7 @@ export default function UserDashboard() {
           "https://localdelivery-app-backend.vercel.app/user/profile",
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
         const data = await res.json();
         if (!res.ok || !data.success) {
@@ -78,7 +74,7 @@ export default function UserDashboard() {
           "https://localdelivery-app-backend.vercel.app/orders",
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
         const data = await res.json();
         if (!res.ok || !data.success) {
@@ -135,7 +131,6 @@ export default function UserDashboard() {
             Phone: {user?.userphone || "Not provided"}
           </p>
           <div className="mt-4 flex flex-col sm:flex-row gap-2">
-
             <button
               className=" w-full sm:w-auto  bg-orange-500 text-white px-4 py-2 rounded text-sm"
               onClick={() => navigate("/profile")}
@@ -157,9 +152,8 @@ export default function UserDashboard() {
           {ordersLoading ? (
             // <div>Loading orders...</div>
             <div className="text-center text-sm text-gray-500 py-6">
-  Loading recent orders…
-</div>
-
+              Loading recent orders…
+            </div>
           ) : orders.length === 0 ? (
             <div>No orders yet. Start shopping from Products! 🛒</div>
           ) : (
@@ -171,12 +165,10 @@ export default function UserDashboard() {
                 return (
                   <li
                     key={o._id}
-                 className="border p-3 rounded flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4"
-
+                    className="border p-3 rounded flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4"
                   >
                     {/* <div> */}
                     <div className="flex flex-row sm:flex-col items-start sm:items-end gap-2">
-
                       <div className="text-xs text-gray-500 mb-1">
                         Order ID:{" "}
                         <span className="font-mono">{o._id.slice(-8)}</span>
@@ -202,16 +194,16 @@ export default function UserDashboard() {
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                  {/* <span className="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-700 font-medium">
+                      {/* <span className="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-700 font-medium">
 
                         {o.status}
                       </span> */}
 
                       <span
-  className={`text-xs px-2 py-1 rounded-full font-medium ${statusColor(o.status)}`}
->
-  {o.status}
-</span>
+                        className={`text-xs px-2 py-1 rounded-full font-medium ${statusColor(o.status)}`}
+                      >
+                        {o.status}
+                      </span>
 
                       <button
                         className="text-xs text-blue-600"

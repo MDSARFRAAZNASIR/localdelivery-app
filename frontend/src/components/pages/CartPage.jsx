@@ -1,5 +1,3 @@
-
-
 // add again
 import React, { useEffect, useState } from "react";
 import Navbar from "./Navbar";
@@ -137,7 +135,6 @@ export default function CartPage() {
       return;
     }
 
-
     if (!selectedAddressId) {
       setError("Please select a delivery address");
       return;
@@ -156,7 +153,7 @@ export default function CartPage() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-         
+
           body: JSON.stringify({
             items: cart.map((item) => ({
               productId: item.productId,
@@ -221,96 +218,58 @@ export default function CartPage() {
             </div>
           ) : (
             <>
-              {/* CART ITEMS */}
-              {/* <div className="space-y-3 mb-4">
+              {/* responsive */}
+
+              <div className="space-y-4 mb-6">
                 {cart.map((item) => (
                   <div
                     key={item.productId}
-                    className="flex justify-between items-center border-b pb-2"
+                    className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border-b pb-4"
                   >
+                    {/* Left */}
                     <div>
-                      <div className="font-semibold">{item.name}</div>
+                      <div className="font-semibold text-base">{item.name}</div>
                       <div className="text-sm text-gray-600">
                         ₹{item.price} × {item.quantity} = ₹
                         {item.price * item.quantity}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <button onClick={() => decreaseQty(item.productId)}>
-                        -
-                      </button>
-                      <span>{item.quantity}</span>
-                      <button onClick={() => increaseQty(item.productId)}>
-                        +
-                      </button>
+
+                    {/* Right */}
+                    <div className="flex items-center justify-between md:justify-end gap-4">
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => decreaseQty(item.productId)}
+                          className="px-3 py-1 border rounded"
+                        ></button>
+
+                        <span className="font-semibold">{item.quantity}</span>
+
+                        <button
+                          onClick={() => increaseQty(item.productId)}
+                          className="px-3 py-1 border rounded"
+                        >
+                          +
+                        </button>
+                      </div>
+
                       <button
                         onClick={() => removeItem(item.productId)}
-                        className="text-red-500 text-xs ml-2"
+                        className="text-red-500 text-sm"
                       >
                         Remove
                       </button>
                     </div>
                   </div>
                 ))}
-              </div> */}
-
-
-              {/* responsive */}
-
-              <div className="space-y-4 mb-6">
-  {cart.map((item) => (
-    <div
-      key={item.productId}
-      className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border-b pb-4"
-    >
-      {/* Left */}
-      <div>
-        <div className="font-semibold text-base">{item.name}</div>
-        <div className="text-sm text-gray-600">
-          ₹{item.price} × {item.quantity} = ₹{item.price * item.quantity}
-        </div>
-      </div>
-
-      {/* Right */}
-      <div className="flex items-center justify-between md:justify-end gap-4">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => decreaseQty(item.productId)}
-            className="px-3 py-1 border rounded"
-          >
-            −
-          </button>
-
-          <span className="font-semibold">{item.quantity}</span>
-
-          <button
-            onClick={() => increaseQty(item.productId)}
-            className="px-3 py-1 border rounded"
-          >
-            +
-          </button>
-        </div>
-
-        <button
-          onClick={() => removeItem(item.productId)}
-          className="text-red-500 text-sm"
-        >
-          Remove
-        </button>
-      </div>
-    </div>
-  ))}
-</div>
-
+              </div>
 
               {/* TOTAL */}
-             
 
               <div className="border-t pt-4 mb-6 flex justify-between font-semibold text-lg">
-  <span>Total</span>
-  <span>₹{totalAmount}</span>
-</div>
-
+                <span>Total</span>
+                <span>₹{totalAmount}</span>
+              </div>
 
               {/* ADDRESS SELECT */}
               <div className="mb-4">
@@ -329,87 +288,47 @@ export default function CartPage() {
                     </button>
                   </div>
                 ) : (
-                  
-                  // add new function
-
-                  // for default
-                  // <div className="space-y-3">
-                  //   {addresses.map((addr) => (
-                  //     <div
-                  //       key={addr._id}
-                  //       className={`border rounded-lg p-3 cursor-pointer ${
-                  //         selectedAddressId === addr._id
-                  //           ? "border-orange-500 bg-orange-50"
-                  //           : "border-gray-300"
-                  //       }`}
-                  //       onClick={() => setSelectedAddressId(addr._id)}
-                  //     >
-                  //       <div className="font-semibold">
-                  //         {addr.label}
-                  //         {addr.isDefault && (
-                  //           <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
-                  //             Default
-                  //           </span>
-                  //         )}
-                  //       </div>
-                  //       <div className="text-sm text-gray-600">
-                  //         {addr.name}, {addr.phone}
-                  //       </div>
-                  //       <div className="text-sm text-gray-600">
-                  //         {addr.addressLine}, {addr.city}, {addr.state} –{" "}
-                  //         {addr.pincode}
-                  //       </div>
-
-                  //       {selectedAddressId === addr._id && (
-                  //         <div className="mt-2 text-sm font-semibold text-orange-600">
-                  //           ✔ Delivering here
-                  //         </div>
-                  //       )}
-                  //     </div>
-                  //   ))}
-                  // </div>
-
                   // responsive
 
                   <div className="space-y-4">
-  {addresses.map((addr) => (
-    <div
-      key={addr._id}
-      onClick={() => setSelectedAddressId(addr._id)}
-      className={`border rounded-lg p-4 cursor-pointer transition ${
-        selectedAddressId === addr._id
-          ? "border-orange-500 bg-orange-50"
-          : "border-gray-300"
-      }`}
-    >
-      <div className="flex justify-between items-center">
-        <div className="font-semibold">
-          {addr.label}
-          {addr.isDefault && (
-            <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
-              Default
-            </span>
-          )}
-        </div>
-      </div>
+                    {addresses.map((addr) => (
+                      <div
+                        key={addr._id}
+                        onClick={() => setSelectedAddressId(addr._id)}
+                        className={`border rounded-lg p-4 cursor-pointer transition ${
+                          selectedAddressId === addr._id
+                            ? "border-orange-500 bg-orange-50"
+                            : "border-gray-300"
+                        }`}
+                      >
+                        <div className="flex justify-between items-center">
+                          <div className="font-semibold">
+                            {addr.label}
+                            {addr.isDefault && (
+                              <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
+                                Default
+                              </span>
+                            )}
+                          </div>
+                        </div>
 
-      <div className="text-sm text-gray-600 mt-1">
-        {addr.name}, {addr.phone}
-      </div>
+                        <div className="text-sm text-gray-600 mt-1">
+                          {addr.name}, {addr.phone}
+                        </div>
 
-      <div className="text-sm text-gray-600">
-        {addr.addressLine}, {addr.city}, {addr.state} – {addr.pincode}
-      </div>
+                        <div className="text-sm text-gray-600">
+                          {addr.addressLine}, {addr.city}, {addr.state} –{" "}
+                          {addr.pincode}
+                        </div>
 
-      {selectedAddressId === addr._id && (
-        <div className="mt-2 text-sm font-semibold text-orange-600">
-          ✔ Delivering here
-        </div>
-      )}
-    </div>
-  ))}
-</div>
-
+                        {selectedAddressId === addr._id && (
+                          <div className="mt-2 text-sm font-semibold text-orange-600">
+                            ✔ Delivering here
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
 
@@ -450,8 +369,6 @@ export default function CartPage() {
                 </div>
               )}
 
-          
-
               <button
                 onClick={handlePlaceOrder}
                 disabled={!serviceArea?.serviceable}
@@ -462,16 +379,7 @@ export default function CartPage() {
                 }`}
               >
                 {loading ? "Placing order..." : "Place Order"}
-
               </button>
-
-              {/* <button
-                onClick={handlePlaceOrder}
-                disabled={loading}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded"
-              >
-                {loading ? "Placing order..." : "Place Order"}
-              </button> */}
             </>
           )}
         </div>
