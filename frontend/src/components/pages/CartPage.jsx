@@ -281,7 +281,7 @@ export default function CartPage() {
                   <div className="text-sm text-gray-600">
                     No saved address.
                     <button
-                      onClick={() => navigate("/addresses")}
+                      onClick={() => navigate("/address")}
                       className="ml-2 text-blue-600 underline"
                     >
                       Add Address
