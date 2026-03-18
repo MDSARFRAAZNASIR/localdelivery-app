@@ -201,6 +201,7 @@ export default function ProductsPage() {
   const [error, setError] = useState("");
   const [toast, setToast] = useState({ visible: false, message: "" });
   const [cart, setCart] = useState(() => {
+    
     try {
       const saved = localStorage.getItem("cart");
       return saved ? JSON.parse(saved) : [];
@@ -328,6 +329,7 @@ export default function ProductsPage() {
       <Navbar />
 
       {/* Toast Notification */}
+
       {toast.visible && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] animate-bounce-in">
           <div className="bg-gray-900 text-white px-6 py-2 rounded-full shadow-2xl text-xs font-bold border border-gray-700">
@@ -470,6 +472,7 @@ export default function ProductsPage() {
                 </button>
                 <div className="text-sm font-bold text-gray-500 bg-white px-4 py-2 rounded-xl border">
                   Page {page} / {pages}
+
                 </div>
                 <button
                   disabled={page >= pages}
