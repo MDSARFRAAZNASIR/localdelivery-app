@@ -673,8 +673,11 @@ export default function OrdersPage() {
         const data = await res.json();
         if (!res.ok || !data.success) throw new Error(data.message || "Failed to load orders");
         setOrders(data.orders || []);
-      } catch (err) {
-        setError(err.message || "Error loading orders");
+      // } catch (err) {
+      //   setError(err.message || "Error loading orders");
+      }catch (err) {
+  setError(err?.message || "Error loading orders");
+
       } finally {
         setLoading(false);
       }
@@ -683,15 +686,31 @@ export default function OrdersPage() {
   }, [token, navigate]);
 
   // --- EXISTING SEARCH & FILTER LOGIC ---
+  // const filteredOrders = useMemo(() => {
+  //   return orders.filter((order) => {
+  //     const matchesSearch = 
+  //       order._id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //       order.items.some(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  //     const matchesStatus = statusFilter === "ALL" || order.status === statusFilter;
+  //     return matchesSearch && matchesStatus;
+  //   });
+  // }, [orders, searchQuery, statusFilter]);
+
+
   const filteredOrders = useMemo(() => {
-    return orders.filter((order) => {
-      const matchesSearch = 
-        order._id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.items.some(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
-      const matchesStatus = statusFilter === "ALL" || order.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  }, [orders, searchQuery, statusFilter]);
+  return orders.filter((order) => {
+    const matchesSearch =
+      order._id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (order.items || []).some(item =>
+        item?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
+    const matchesStatus =
+      statusFilter === "ALL" || order.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
+}, [orders, searchQuery, statusFilter]);
 
   // --- NEW RE-ORDER FUNCTIONALITY ---
   const handleReorder = (order) => {
@@ -758,7 +777,11 @@ export default function OrdersPage() {
           ) : (
             <div className="space-y-6">
               {filteredOrders.map((order) => {
-                const totalItems = order.items.reduce((acc, curr) => acc + curr.quantity, 0);
+                // const totalItems = order.items.reduce((acc, curr) => acc + curr.quantity, 0);
+                const totalItems = (order.items || []).reduce(
+  (acc, curr) => acc + curr.quantity,
+  0
+);
                 
                 return (
                   <div key={order._id} className="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:shadow-gray-200/50 transition-all duration-300">
@@ -798,7 +821,7 @@ export default function OrdersPage() {
                         </div>
                         <ul className="space-y-2">
                           {order.items.map((it, idx) => (
-                            <li key={idx} className="flex justify-between items-center text-sm">
+                            <li key={it._id || idx} className="flex justify-between items-center text-sm">
                               <span className="font-bold text-gray-700">{it.name} <span className="text-gray-300 ml-1">×{it.quantity}</span></span>
                               <span className="font-mono text-gray-400">₹{it.subtotal}</span>
                             </li>
