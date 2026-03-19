@@ -740,8 +740,18 @@ export default function OrdersPage() {
   return (
     <>
       <Navbar />
+      
       <div className="min-h-screen bg-gray-50/50 py-8 px-4 font-sans">
-        <div className="max-w-4xl mx-auto">
+        {/* <div className="max-w-4xl mx-auto"> */}
+          <div className="max-w-4xl mx-auto">
+
+  {error && (
+    <div className="bg-red-100 text-red-600 px-4 py-3 rounded-xl mb-4 font-bold text-sm">
+      ⚠️ {error}
+    </div>
+  )}
+
+  {/* rest of your UI */}
           
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
             <h2 className="text-3xl font-black text-gray-900 tracking-tight">Orders History 📦</h2>
