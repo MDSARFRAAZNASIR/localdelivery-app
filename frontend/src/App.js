@@ -43,6 +43,7 @@ function App() {
 
         {/* {protected routes} */}
         <Route element={<ProtectedRoute />}>
+        
           <Route path="/products" element={<ProductsPage />}></Route>
           <Route path="/cart" element={<CartPage />}></Route>
           <Route path="/orders" element={<OrdersPage />} />
