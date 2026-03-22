@@ -74,6 +74,47 @@ const orderSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+
+    // rating for the order
+
+  //   rating: {
+  //   type: Number,
+  //   min: 1,
+  //   max: 5,
+  //   default: 0
+  // },
+  // review: {
+  //   type: String,
+  //   default: ""
+  // },
+  // isRated: {
+  //   type: Boolean,
+  //   default: false
+  // }
+
+
+  // --- RATING SECTION (Enhanced) ---
+    rating: {
+      type: Number,
+      // Change: Default to 0, but min is only enforced if value > 0
+      default: 0,
+      validate: {
+        validator: function(v) {
+          return v === 0 || (v >= 1 && v <= 5);
+        },
+        message: 'Rating must be between 1 and 5'
+      }
+    },
+    review: {
+      type: String,
+      default: "",
+      trim: true // Clean up whitespace
+    },
+    isRated: {
+      type: Boolean,
+      default: false
+    },
+    
     
 
     // ✅ SINGLE deliveryAddress (NOT addresses[])

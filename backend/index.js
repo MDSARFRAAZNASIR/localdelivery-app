@@ -1300,6 +1300,85 @@ app.delete(
 );
 
 
+
+
+// --- RATE ORDER ROUTE ---
+app.post(
+  "/user/orders/:orderId/rate",
+  auth, // Uses your existing auth middleware
+  asyncHandler(async (req, res) => {
+    const { rating, comment } = req.body;
+    const { orderId } = req.params;
+
+    // 1. Basic Validation
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a rating between 1 and 5",
+      });
+    }
+
+    await connectDB();
+
+    // 2. Find order and verify ownership
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    // Checking if the user logged in matches the order owner
+    // Note: Adjust 'userId' or 'user' based on your orderModel field name
+    if (order.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: "Not authorized to rate this order" });
+    }
+
+    // 3. Ensure order is DELIVERED and NOT already rated
+    if (order.status !== "DELIVERED") {
+      return res.status(400).json({ success: false, message: "You can only rate delivered orders" });
+    }
+
+    if (order.isRated) {
+      return res.status(400).json({ success: false, message: "This order is already rated" });
+    }
+
+    // 4. Update the Order document
+    order.rating = Number(rating);
+    order.review = comment || "";
+    order.isRated = true;
+
+    await order.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Rating submitted! Thank you. ⭐",
+      order: {
+        id: order._id,
+        rating: order.rating,
+        isRated: order.isRated
+      }
+    });
+  })
+);
+
+
+
+// Add this to index.js so the RateOrder page can "see" the order info
+app.get(
+  "/orders/:orderId",
+  auth,
+  asyncHandler(async (req, res) => {
+    await connectDB();
+    const order = await Order.findById(req.params.orderId);
+    
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+    
+    res.json({ success: true, order });
+  })
+);
+
 // services area check by pincode
 
 app.get(
