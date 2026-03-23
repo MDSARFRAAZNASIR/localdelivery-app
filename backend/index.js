@@ -1379,6 +1379,37 @@ app.get(
   })
 );
 
+// indivisual items have own rating
+app.post("/rate-product", auth, asyncHandler(async (req, res) => {
+  const { orderId, productId, rating, review } = req.body;
+
+  await connectDB();
+
+  // 1. Update the item inside the Order
+  const order = await Order.findOneAndUpdate(
+    { _id: orderId, "items.productId": productId },
+    { 
+      $set: { 
+        "items.$.rating": rating, 
+        "items.$.review": review,
+        "items.$.isRated": true 
+      } 
+    },
+    { new: true }
+  );
+
+  // 2. Recalculate Product Average Rating
+  const product = await Product.findById(productId);
+  
+  // New Average formula: ((Old Avg * Old Count) + New Rating) / (Old Count + 1)
+  const totalPoints = (product.ratings.average * product.ratings.count) + rating;
+  product.ratings.count += 1;
+  product.ratings.average = totalPoints / product.ratings.count;
+
+  await product.save();
+
+  res.json({ success: true, message: "Product rated successfully!" });
+}));
 // services area check by pincode
 
 app.get(

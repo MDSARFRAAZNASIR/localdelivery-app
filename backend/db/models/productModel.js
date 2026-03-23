@@ -47,10 +47,15 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
+    ratings: {
+      average: { type: Number, default: 0 },
+      count: { type: Number, default: 0 },
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 /**
@@ -64,7 +69,6 @@ productSchema.index({ isActive: 1 });
  * Safe export for serverless / hot reload
  */
 const Productdata =
-  mongoose.models.Productdata ||
-  mongoose.model("Productdata", productSchema);
+  mongoose.models.Productdata || mongoose.model("Productdata", productSchema);
 
 module.exports = Productdata;
