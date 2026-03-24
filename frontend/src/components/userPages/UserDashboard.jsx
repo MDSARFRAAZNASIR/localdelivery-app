@@ -605,7 +605,7 @@ export default function UserDashboard() {
   const token = localStorage.getItem("token");
 
   // --- SUPPORT CONFIG ---
-  const SUPPORT_NUMBER = "919876543210"; // Replace with your actual WhatsApp number
+  const SUPPORT_NUMBER = "919798253680"; // Replace with your actual WhatsApp number
   const supportMessage = encodeURIComponent("Hello! I need help with my order.");
 
   // --- RE-ORDER LOGIC (Existing) ---
