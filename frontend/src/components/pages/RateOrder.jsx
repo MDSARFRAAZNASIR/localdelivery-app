@@ -59,6 +59,7 @@ export default function RateOrder() {
     <>
       <Navbar />
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+                {orderDate && <div className="bg-red-50 text-red-600 p-4 rounded-2xl mb-4 text-sm font-bold">{orderDate}</div>}
         <div className="max-w-md w-full bg-white rounded-[40px] shadow-xl shadow-gray-200/50 p-8 border border-gray-100">
           
           {/* Header */}
