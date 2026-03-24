@@ -785,7 +785,7 @@ export default function UserDashboard() {
                             Chat with Support
                         </a>
                         <button 
-                            onClick={() => window.location.href = "tel:+919876543210"}
+                            onClick={() => window.location.href = "tel:+919798253680"}
                             className="block w-full text-center bg-blue-500 text-white py-2 rounded-lg text-xs font-black hover:bg-blue-400 transition-colors"
                         >
                             Call Support
