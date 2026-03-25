@@ -865,12 +865,41 @@ app.post(
     });
 
     // 6️⃣ 🚨 NEW: UPDATE STOCK IN DATABASE
-    // We use a loop to decrement the stock for each product
-    for (const it of items) {
-      await Product.findByIdAndUpdate(it.productId, {
-        $inc: { stock: -it.quantity } // This subtracts the ordered amount
-      });
-    }
+  //   // We use a loop to decrement the stock for each product
+  //   for (const it of items) {
+  //     const productBefore = await Product.findById(it.productId);
+  // console.log(`Product: ${productBefore.name} | Current: ${productBefore.stock} | Reducing by: ${it.quantity}`)
+  //     await Product.findByIdAndUpdate(it.productId, {
+  //       $inc: { stock: -it.quantity } // This subtracts the ordered amount
+  //     });
+  //   }
+
+//   for (const it of items) {
+//   // Use it.productId._id if it's an object, or just it.productId if it's a string
+//   const id = it.productId._id || it.productId; 
+  
+//   await Product.findByIdAndUpdate(id, {
+//     $inc: { stock: -Math.abs(it.quantity) } // Math.abs ensures it's a positive number being subtracted
+//   });
+// }
+
+// Replace your loop with this:
+for (const it of items) {
+  const result = await Productdata.findOneAndUpdate(
+    { 
+      _id: it.productId, 
+      stock: { $gte: Number(it.quantity) } // Only update if stock >= quantity
+    },
+    { 
+      $inc: { stock: -Number(it.quantity) } 
+    },
+    { new: true }
+  );
+
+  if (!result) {
+    console.log(`Failed to update ${it.productId} - possibly insufficient stock.`);
+  }
+}
 
     return res.status(201).json({
       success: true,
