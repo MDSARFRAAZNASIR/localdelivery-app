@@ -680,57 +680,26 @@ app.get(
   })
 );
 
-// create item from cart
+
+// // CREATE CART
 // app.post(
 //   "/orders",
 //   auth,
 //   asyncHandler(async (req, res) => {
-//     // const { items, deliveryAddress, paymentMethod } = req.body || {};
-//     const { items, deliveryAddressId, paymentMethod } = req.body || {};
+//     const { items, deliveryAddressId, paymentMethod } = req.body;
 
-//     // if (!deliveryAddress || !Array.isArray(items)) {
-//     //   return res.status(400).json({
-//     //     success: false,
-//     //     message: "items[] and deliveryAddress are required",
-//     //   });
-//     // }
-//     //  Basic Validation
-//     if (!deliveryAddressId || !Array.isArray(items)) {
+//     if (!items?.length || !deliveryAddressId) {
 //       return res.status(400).json({
 //         success: false,
 //         message: "items[] and deliveryAddressId are required",
 //       });
 //     }
 
-//     // Clean Cart Items
-//     const cleanedItems = items
-//       .map((it) => ({
-//         productId: it.productId,
-//         quantity: Number(it.quantity || 0),
-//       }))
-//       .filter((it) => it.productId && it.quantity > 0);
-
-//     if (!cleanedItems.length) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "No valid cart items",
-//       });
-//     }
-//     //  DB Connection
 //     await connectDB();
 
-//     // 🔐 fetch user + address snapshot
+//     // 1️⃣ User + Address
 //     const user = await User.findById(req.user._id);
-//     if (!user) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "User not found",
-//       });
-//     }
-
-//     const address = user.addresses.find(
-//       (a) => a._id.toString() === deliveryAddressId
-//     );
+//     const address = user.addresses.id(deliveryAddressId);
 
 //     if (!address) {
 //       return res.status(400).json({
@@ -739,234 +708,62 @@ app.get(
 //       });
 //     }
 
-//     // Fetch Products
+//     // 2️⃣ ✅ SERVICE AREA CHECK (IMPORTANT)
+//     const serviceArea = await ServiceArea.findOne({
+//       pincode: address.pincode,
+//       isActive: true,
+//     });
+
+//     if (!serviceArea) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Sorry, delivery is not available in your area",
+//       });
+//     }
+
+//     // 3️⃣ Products
 //     const products = await Product.find({
-//       _id: { $in: cleanedItems.map((i) => i.productId) },
+//       _id: { $in: items.map(i => i.productId) },
 //       isActive: true,
 //     }).lean();
 
-//     const productMap = new Map(products.map((p) => [String(p._id), p]));
+//     const productMap = new Map(products.map(p => [String(p._id), p]));
 
-//     // Build Order Items
-
-//     let totalAmount = 0;
+//     // 4️⃣ Calculate total
+//     let totalAmount = serviceArea.deliveryFee || 0;
 //     const orderItems = [];
 
-//     for (const it of cleanedItems) {
+//     for (const it of items) {
 //       const prod = productMap.get(String(it.productId));
 //       if (!prod) continue;
 
-//       const price = Number(prod.price);
-//       const qty = Number(it.quantity);
-
-//       if (Number.isNaN(price) || Number.isNaN(qty)) continue;
-
-//       const subtotal = price * qty;
+//       const subtotal = prod.price * it.quantity;
 //       totalAmount += subtotal;
 
 //       orderItems.push({
 //         productId: prod._id,
 //         name: prod.name,
-//         price,
-//         quantity: qty,
+//         price: prod.price,
+//         quantity: it.quantity,
 //         subtotal,
 //       });
 //     }
 
-//     if (!orderItems.length || totalAmount <= 0) {
+//     if (!orderItems.length) {
 //       return res.status(400).json({
 //         success: false,
 //         message: "Invalid order items",
 //       });
 //     }
 
-//     // add on paymentMethod Logic
-//     const finalPaymentMethod = paymentMethod === "ONLINE" ? "ONLINE" : "COD";
-
-//     // const paymentStatus = "PENDING"; // 🔥 ALWAYS pending at creation
-//     const paymentStatus = finalPaymentMethod === "ONLINE" ? "PENDING" : "COD";
-
-//     // Create Order
-
-//     const order = new Order({
+//     // 5️⃣ Create order
+//     const order = await Order.create({
 //       userId: req.user._id,
-
 //       items: orderItems,
 //       totalAmount,
-
-//       // add fress
 //       paymentMethod: paymentMethod === "ONLINE" ? "ONLINE" : "COD",
-//       paymentStatus: "PENDING", // ✅ ALWAYS PENDING at creation
-//       status: "CREATED",
-
-//       // 🔥 ADDRESS SNAPSHOT (IMMUTABLE)
-//       deliveryAddress: {
-//         label: address.label,
-//         name: address.name,
-//         phone: address.phone,
-//         addressLine: address.addressLine,
-//         city: address.city,
-//         state: address.state,
-//         pincode: address.pincode,
-//       },
-
-//       addresses: [
-//         {
-//           label: String,
-//           name: String,
-//           phone: String,
-//           addressLine: String,
-//           city: String,
-//           state: String,
-//           pincode: String,
-//           isDefault: { type: Boolean, default: false },
-//         },
-//       ],
-//     });
-
-//     const saved = await order.save();
-//     // Response
-
-//     return res.status(201).json({
-//       success: true,
-//       order: saved,
-//       message: "Order created successfully",
-//     });
-//   })
-// );
-
-// // CREATE ORDER FROM CART
-// app.post(
-//   "/orders",
-//   auth,
-//   asyncHandler(async (req, res) => {
-//     const { items, deliveryAddressId, paymentMethod } = req.body || {};
-
-//     // 1️⃣ Basic validation
-//     if (!Array.isArray(items) || items.length === 0 || !deliveryAddressId) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "items[] and deliveryAddressId are required",
-//       });
-//     }
-
-//     // 2️⃣ Clean cart items
-//     const cleanedItems = items
-//       .map((it) => ({
-//         productId: it.productId,
-//         quantity: Number(it.quantity),
-//       }))
-//       .filter((it) => it.productId && it.quantity > 0);
-
-//     if (!cleanedItems.length) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "No valid cart items",
-//       });
-//     }
-
-//     // 3️⃣ DB connect
-//     await connectDB();
-
-//     // 4️⃣ Fetch user & selected address
-//     const user = await User.findById(req.user._id);
-//     if (!user) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "User not found",
-//       });
-//     }
-
-//     const address = user.addresses.find(
-//       (a) => a._id.toString() === deliveryAddressId
-//     );
-//     if (!address) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Invalid delivery address",
-//       });
-//     }
-
-//     //     // 🔟 Area / Pincode validation
-//     // const serviceArea = await ServiceArea.findOne({
-//     //   pincode: address.pincode,
-//     //   isActive: true,
-//     // });
-
-//     // if (!serviceArea) {
-//     //   return res.status(400).json({
-//     //     success: false,
-//     //     message: "Sorry, delivery is not available in your area",
-//     //   });
-//     // }
-
-//     // 5️⃣ Fetch products
-//     const products = await Product.find({
-//       _id: { $in: cleanedItems.map((i) => i.productId) },
-//       isActive: true,
-//     }).lean();
-
-//     const productMap = new Map(products.map((p) => [String(p._id), p]));
-
-//     // 6️⃣ Build order items + total
-//     // old one
-//     // let totalAmount = 0;
-
-//     // add delivary charge
-//     let totalAmount = 0;
-//     // const deliveryFee = serviceArea.deliveryFee || 0;
-
-//     const orderItems = [];
-
-//     for (const it of cleanedItems) {
-//       const prod = productMap.get(String(it.productId));
-//       if (!prod) continue;
-//       // new add
-//       const subtotal = prod.price * it.quantity;
-//       totalAmount += subtotal;
-
-//       // const price = Number(prod.price);
-//       // const qty = Number(it.quantity);
-
-//       // if (Number.isNaN(price) || Number.isNaN(qty)) continue;
-
-//       // const subtotal = price * qty;
-//       // totalAmount += subtotal ;
-//       // totalAmount += deliveryFee;
-
-//       orderItems.push({
-//         productId: prod._id,
-//         name: prod.name,
-//         price: prod.price,
-//         quantity: it.quantity,
-//         subtotal,
-//       });
-//     }
-
-//     // very fee ONCE
-//     totalAmount += serviceArea.deliveryFee;
-
-//     if (!orderItems.length || totalAmount <= 0) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Invalid order items",
-//       });
-//     }
-
-//     // 7️⃣ Payment logic
-//     const finalPaymentMethod = paymentMethod === "ONLINE" ? "ONLINE" : "COD";
-
-//     // 8️⃣ Create order (NO addresses[] HERE ❌)
-//     const order = new Order({
-//       userId: req.user._id,
-//       items: orderItems,
-//       totalAmount,
-
-//       paymentMethod: finalPaymentMethod,
 //       paymentStatus: "PENDING",
 //       status: "CREATED",
-
-//       // ✅ Address snapshot (immutable)
 //       deliveryAddress: {
 //         label: address.label,
 //         name: address.name,
@@ -978,174 +775,17 @@ app.get(
 //       },
 //     });
 
-//     const savedOrder = await order.save();
-
-//     // 9️⃣ Response
 //     return res.status(201).json({
 //       success: true,
-//       order: savedOrder,
-//       message: "Order created successfully",
-//     });
-
-//     // add areas services check
-//     // check delivary address area
-//     const serviceArea = await ServiceArea.findOne({
-//       pincode: address.pincode,
-//       isActive: true,
-//     });
-
-//     if (!serviceArea) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Sorry, delivery is not available in your area",
-//       });
-//     }
-//   })
-// );
-
-// CREATE ORDER FROM CART
-// app.post(
-//   "/orders",
-//   auth,
-//   asyncHandler(async (req, res) => {
-//     const { items, deliveryAddressId, paymentMethod } = req.body || {};
-
-//     // 1️⃣ Basic validation
-//     if (!Array.isArray(items) || items.length === 0 || !deliveryAddressId) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "items[] and deliveryAddressId are required",
-//       });
-//     }
-
-//     // 2️⃣ Clean cart items
-//     const cleanedItems = items
-//       .map((it) => ({
-//         productId: it.productId,
-//         quantity: Number(it.quantity),
-//       }))
-//       .filter((it) => it.productId && it.quantity > 0);
-
-//     if (!cleanedItems.length) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "No valid cart items",
-//       });
-//     }
-
-//     // 3️⃣ DB connect
-//     await connectDB();
-
-//     // 4️⃣ Fetch user & selected address
-//     const user = await User.findById(req.user._id);
-//     if (!user) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "User not found",
-//       });
-//     }
-
-//     const address = user.addresses.find(
-//       (a) => a._id.toString() === deliveryAddressId
-//     );
-
-//     if (!address) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Invalid delivery address",
-//       });
-//     }
-
-//     // ✅ 5️⃣ SERVICE AREA / PINCODE CHECK (CORRECT PLACE)
-//     const serviceArea = await ServiceArea.findOne({
-//       pincode: address.pincode,
-//       isActive: true,
-//     });
-
-//     if (!serviceArea) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Sorry, delivery is not available in your area",
-//       });
-//     }
-
-//     // 6️⃣ Fetch products
-//     const products = await Product.find({
-//       _id: { $in: cleanedItems.map((i) => i.productId) },
-//       isActive: true,
-//     }).lean();
-
-//     const productMap = new Map(products.map((p) => [String(p._id), p]));
-
-//     // 7️⃣ Build order items + subtotal
-//     let totalAmount = 0;
-//     const orderItems = [];
-
-//     for (const it of cleanedItems) {
-//       const prod = productMap.get(String(it.productId));
-//       if (!prod) continue;
-
-//       const subtotal = prod.price * it.quantity;
-//       totalAmount += subtotal;
-
-//       orderItems.push({
-//         productId: prod._id,
-//         name: prod.name,
-//         price: prod.price,
-//         quantity: it.quantity,
-//         subtotal,
-//       });
-//     }
-
-//     // ✅ 8️⃣ ADD DELIVERY FEE ONCE
-//     totalAmount += serviceArea.deliveryFee || 0;
-
-//     if (!orderItems.length || totalAmount <= 0) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Invalid order items",
-//       });
-//     }
-
-//     // 9️⃣ Payment logic
-//     const finalPaymentMethod =
-//       paymentMethod === "ONLINE" ? "ONLINE" : "COD";
-
-//     // 🔟 Create order
-//     const order = new Order({
-//       userId: req.user._id,
-//       items: orderItems,
-//       totalAmount,
-
-//       paymentMethod: finalPaymentMethod,
-//       paymentStatus: "PENDING",
-//       status: "CREATED",
-
-//       deliveryFee: serviceArea.deliveryFee || 0,
-
-//       deliveryAddress: {
-//         label: address.label,
-//         name: address.name,
-//         phone: address.phone,
-//         addressLine: address.addressLine,
-//         city: address.city,
-//         state: address.state,
-//         pincode: address.pincode,
-//       },
-//     });
-
-//     const savedOrder = await order.save();
-
-//     // ✅ FINAL RESPONSE
-//     return res.status(201).json({
-//       success: true,
-//       order: savedOrder,
+//       order,
 //       message: "Order created successfully",
 //     });
 //   })
 // );
 
-// CREATE CART
+
+// for stock and placing order successfully
+// CREATE ORDER (Updated with Stock Logic)
 app.post(
   "/orders",
   auth,
@@ -1153,53 +793,43 @@ app.post(
     const { items, deliveryAddressId, paymentMethod } = req.body;
 
     if (!items?.length || !deliveryAddressId) {
-      return res.status(400).json({
-        success: false,
-        message: "items[] and deliveryAddressId are required",
-      });
+      return res.status(400).json({ success: false, message: "items[] and deliveryAddressId are required" });
     }
 
     await connectDB();
 
-    // 1️⃣ User + Address
+    // 1️⃣ User + Address logic (Stayed the same)
     const user = await User.findById(req.user._id);
     const address = user.addresses.id(deliveryAddressId);
+    if (!address) return res.status(400).json({ success: false, message: "Invalid delivery address" });
 
-    if (!address) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid delivery address",
-      });
-    }
+    // 2️⃣ Service Area Check (Stayed the same)
+    const serviceArea = await ServiceArea.findOne({ pincode: address.pincode, isActive: true });
+    if (!serviceArea) return res.status(400).json({ success: false, message: "Sorry, delivery not available here" });
 
-    // 2️⃣ ✅ SERVICE AREA CHECK (IMPORTANT)
-    const serviceArea = await ServiceArea.findOne({
-      pincode: address.pincode,
-      isActive: true,
-    });
-
-    if (!serviceArea) {
-      return res.status(400).json({
-        success: false,
-        message: "Sorry, delivery is not available in your area",
-      });
-    }
-
-    // 3️⃣ Products
+    // 3️⃣ Products (Removed .lean() so we can save changes later)
     const products = await Product.find({
       _id: { $in: items.map(i => i.productId) },
       isActive: true,
-    }).lean();
+    });
 
     const productMap = new Map(products.map(p => [String(p._id), p]));
 
-    // 4️⃣ Calculate total
+    // 4️⃣ Calculate total + 🚨 NEW: STOCK CHECK
     let totalAmount = serviceArea.deliveryFee || 0;
     const orderItems = [];
 
     for (const it of items) {
       const prod = productMap.get(String(it.productId));
       if (!prod) continue;
+
+      // 🔥 CHECK: Is there enough stock?
+      if (prod.stock < it.quantity) {
+        return res.status(400).json({
+          success: false,
+          message: `Insufficient stock for ${prod.name}. Only ${prod.stock} left.`
+        });
+      }
 
       const subtotal = prod.price * it.quantity;
       totalAmount += subtotal;
@@ -1213,12 +843,7 @@ app.post(
       });
     }
 
-    if (!orderItems.length) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid order items",
-      });
-    }
+    if (!orderItems.length) return res.status(400).json({ success: false, message: "Invalid order items" });
 
     // 5️⃣ Create order
     const order = await Order.create({
@@ -1239,10 +864,18 @@ app.post(
       },
     });
 
+    // 6️⃣ 🚨 NEW: UPDATE STOCK IN DATABASE
+    // We use a loop to decrement the stock for each product
+    for (const it of items) {
+      await Product.findByIdAndUpdate(it.productId, {
+        $inc: { stock: -it.quantity } // This subtracts the ordered amount
+      });
+    }
+
     return res.status(201).json({
       success: true,
       order,
-      message: "Order created successfully",
+      message: "Order created and stock updated successfully ✅",
     });
   })
 );
@@ -1627,79 +1260,6 @@ app.get(
     res.json({ success: true, invoice });
   })
 );
-
-// app.get(
-//   "/invoice/:orderId",
-//   auth,
-//   asyncHandler(async (req, res) => {
-//     await connectDB();
-
-//     const order = await Order.findById(req.params.orderId)
-//       .populate("userId", "username useremail")
-//       .lean();
-
-//     if (!order) {
-//       return res.status(404).send("Order not found");
-//     }
-
-//     const doc = new PDFDocument({ size: "A4", margin: 50 });
-
-//     res.setHeader("Content-Type", "application/pdf");
-//     res.setHeader(
-//       "Content-Disposition",
-//       `attachment; filename=invoice-${order._id}.pdf`
-//     );
-
-//     doc.pipe(res);
-
-//     // 🧾 HEADER
-//     doc.fontSize(20).text("INVOICE", { align: "center" });
-//     doc.moveDown();
-
-//     doc.fontSize(10).text(`Invoice ID: ${order._id}`);
-//     doc.text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`);
-//     doc.moveDown();
-
-//     // 👤 CUSTOMER
-//     doc.fontSize(12).text("Billed To:");
-//     doc.text(order.userId.username);
-//     doc.text(order.userId.useremail);
-//     doc.moveDown();
-
-//     // 📍 ADDRESS
-//     if (order.deliveryAddress) {
-//       const a = order.deliveryAddress;
-//       doc.text("Delivery Address:");
-//       doc.text(`${a.name}`);
-//       doc.text(`${a.addressLine}`);
-//       doc.text(`${a.city}, ${a.state} - ${a.pincode}`);
-//       doc.text(`Phone: ${a.phone}`);
-//       doc.moveDown();
-//     }
-
-//     // 📦 ITEMS
-//     doc.text("Items:");
-//     doc.moveDown(0.5);
-
-//     order.items.forEach((item, i) => {
-//       doc.text(
-//         `${i + 1}. ${item.name}  |  ₹${item.price} × ${item.quantity} = ₹${item.subtotal}`
-//       );
-//     });
-
-//     doc.moveDown();
-//     doc.fontSize(14).text(`Total Amount: ₹${order.totalAmount}`, {
-//       align: "right",
-//     });
-
-//     doc.moveDown();
-//     doc.fontSize(10).text("Thank you for shopping with us!", {
-//       align: "center",
-//     });
-
-//     doc.end();
-//   })
-// );
 
 // GLOBAL error handler (single, last middleware)
 app.use((err, req, res, next) => {
