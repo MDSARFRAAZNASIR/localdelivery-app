@@ -885,7 +885,7 @@ app.post(
 
 // Replace your loop with this:
 for (const it of items) {
-  const result = await Productdata.findOneAndUpdate(
+  const result = await Product.findOneAndUpdate(
     { 
       _id: it.productId, 
       stock: { $gte: Number(it.quantity) } // Only update if stock >= quantity
