@@ -86,6 +86,14 @@ export default function ProductsPage() {
     setCart((prev) => {
       const existing = prev.find((item) => item.productId === product._id);
 
+// 🚨 STOCK CHECK: If trying to add, check if we have enough stock
+    if (delta > 0) {
+      const currentQtyInCart = existing ? existing.quantity : 0;
+      if (currentQtyInCart >= product.stock) {
+        setToast({ visible: true, message: `Only ${product.stock} items available!` });
+        return prev; // Don't add more
+      }
+    }
       if (!existing && delta > 0) {
         setToast({ visible: true, message: `Added ${product.name}` });
         return [
@@ -95,6 +103,7 @@ export default function ProductsPage() {
             name: product.name,
             price: product.price,
             quantity: 1,
+            stock: product.stock, // Store current stock for checkout reference
           },
         ];
       }
@@ -211,13 +220,42 @@ export default function ProductsPage() {
                           alt={p.name}
                           className="w-full h-36 object-contain group-hover:scale-105 transition-transform"
                         />
+
+                        {/* 🔴 OUT OF STOCK OVERLAY */}
+                        {p.stock === 0 && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="bg-black/70 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
+                              Sold Out
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="mt-3">
+                        <h3 className="font-black text-gray-800 text-sm truncate">
+                          {p.name}
+                        </h3>
+
+                        {/* 🏷️ DYNAMIC STOCK STATUS */}
+                        <div className="mt-1 flex items-center gap-2">
+                          {p.stock === 0 ? (
+                            <span className="text-[9px] font-black text-red-500 uppercase tracking-tight">
+                              Out of Stock
+                            </span>
+                          ) : p.stock <= 5 ? (
+                            <span className="text-[9px] font-black text-orange-500 animate-pulse uppercase tracking-tight">
+                              🔥 Only {p.stock} left!
+                            </span>
+                          ) : (
+                            <span className="text-[9px] font-black text-green-500 uppercase tracking-tight">
+                              In Stock
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       <div className="flex-1">
                         {/* Product Name */}
-                        <div className="font-bold text-sm text-gray-800 line-clamp-2 leading-tight h-10">
-                          {p.name}
-                        </div>
 
                         {/* --- RATING DISPLAY --- */}
                         <div className="flex items-center gap-1 mt-1">
@@ -243,6 +281,7 @@ export default function ProductsPage() {
                         <div className="font-black text-gray-900 text-lg">
                           ₹{p.price}
                         </div>
+
                         {/* ... rest of your Quantity Toggle Logic ... */}
 
                         {qty > 0 ? (
@@ -258,7 +297,11 @@ export default function ProductsPage() {
                             </span>
                             <button
                               onClick={() => updateQuantity(p, 1)}
-                              className="px-3 py-1.5 hover:bg-green-800 font-bold"
+
+                              // 🚨 DISABLE IF NO MORE STOCK
+                              disabled={qty >= p.stock}
+                              className={`px-3 py-1.5 font-bold ${qty >= p.stock ? 'opacity-30 cursor-not-allowed' : 'hover:bg-green-800'}`}
+                              // className="px-3 py-1.5 hover:bg-green-800 font-bold"
                             >
                               +
                             </button>
@@ -266,12 +309,27 @@ export default function ProductsPage() {
                         ) : (
                           <button
                             onClick={() => updateQuantity(p, 1)}
-                            className="bg-white border-2 border-green-700 text-green-700 hover:bg-green-700 hover:text-white font-bold text-[10px] px-6 py-2 rounded-lg transition-all active:scale-90"
-                          >
-                            ADD
-                          </button>
-                        )}
-                      </div>
+                            
+                      //       className="bg-white border-2 border-green-700 text-green-700 hover:bg-green-700 hover:text-white font-bold text-[10px] px-6 py-2 rounded-lg transition-all active:scale-90"
+                      //     >
+                      //       ADD
+                      //     </button>
+                      //   )}
+                      // </div>
+
+
+                      // 🚨 DISABLE IF OUT OF STOCK
+      disabled={p.stock <= 0}
+      className={`font-bold text-[10px] px-6 py-2 rounded-lg transition-all active:scale-90 border-2 ${
+        p.stock <= 0 
+          ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' 
+          : 'bg-white border-green-700 text-green-700 hover:bg-green-700 hover:text-white'
+      }`}
+    >
+      {p.stock <= 0 ? "SOLD OUT" : "ADD"}
+    </button>
+  )}
+</div>
                     </div>
                   );
                 })}

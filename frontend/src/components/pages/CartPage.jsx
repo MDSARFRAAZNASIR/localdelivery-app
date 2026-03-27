@@ -471,15 +471,32 @@ export default function CartPage() {
     localStorage.setItem("cart", JSON.stringify(newCart));
   };
 
+  // const increaseQty = (productId) => {
+  //   updateCart(
+  //     cart.map((item) =>
+  //       item.productId === productId
+  //         ? { ...item, quantity: item.quantity + 1 }
+  //         : item,
+  //     ),
+  //   );
+  // };
+
+
   const increaseQty = (productId) => {
-    updateCart(
-      cart.map((item) =>
-        item.productId === productId
-          ? { ...item, quantity: item.quantity + 1 }
-          : item,
-      ),
-    );
-  };
+  updateCart(
+    cart.map((item) => {
+      if (item.productId === productId) {
+        // 🚨 Check if adding 1 exceeds stock
+        if (item.quantity >= item.stock) {
+          setError(`Only ${item.stock} units available in stock!`);
+          return item; 
+        }
+        return { ...item, quantity: item.quantity + 1 };
+      }
+      return item;
+    }),
+  );
+};
 
   const decreaseQty = (productId) => {
     updateCart(
@@ -505,66 +522,69 @@ export default function CartPage() {
   const grandTotal = subtotal + deliveryFee;
 
   // ------------------ PLACE ORDER ------------------
-  const handlePlaceOrder = async () => {
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-    if (cart.length === 0) {
-      setError("Cart is empty");
-      return;
-    }
-    if (!selectedAddressId) {
-      setError("Please select a delivery address");
-      return;
-    }
+  
 
-    setLoading(true);
-    setError("");
-    setMessage("");
+// again code write
+const handlePlaceOrder = async () => {
+  if (!token) { navigate("/login"); return; }
+  if (cart.length === 0) { setError("Cart is empty"); return; }
+  if (!selectedAddressId) { setError("Please select a delivery address"); return; }
+  // 🚨 NEW: Verify stock one last time before API call
+  const outOfStockItem = cart.find(item => item.quantity > item.stock);
+  if (outOfStockItem) {
+    setError(`${outOfStockItem.name} only has ${outOfStockItem.stock} left. Please reduce quantity.`);
+    return;
+  }
 
-    try {
-      const res = await fetch(
-        "https://localdelivery-app-backend.vercel.app/orders",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            items: cart.map((item) => ({
-              productId: item.productId,
-              quantity: item.quantity,
-            })),
-            deliveryAddressId: selectedAddressId,
-            paymentMethod,
-          }),
-        },
-      );
 
-      const data = await res.json();
-      if (!res.ok || !data.success)
-        throw new Error(data.message || "Failed to place order");
+  setLoading(true);
+  setError("");
+  setMessage("");
 
-      updateCart([]);
-      setMessage("Order placed successfully ✅");
-      const orderId = data.order?._id;
+  try {
+    // 1. PLACE THE ORDER (Backend now handles stock decrement automatically)
+    const res = await fetch("https://localdelivery-app-backend.vercel.app/orders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        items: cart.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+        })),
+        deliveryAddressId: selectedAddressId,
+        paymentMethod,
+      }),
+    });
 
-      setTimeout(() => {
-        if (paymentMethod === "ONLINE" && orderId) {
-          navigate(`/user/orders/${orderId}`);
-        } else {
-          navigate("/orders");
-        }
-      }, 800);
-    } catch (err) {
-      setError(err.message || "Error placing order");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.message || "Failed to place order");
 
+    // --- STEP 2 (STOCK UPDATE) REMOVED FROM HERE ---
+    // Because the Backend /orders route now does: $inc: { stock: -quantity }
+
+    // 3. FINALIZE
+    updateCart([]); // Clear the cart
+    setMessage("Order placed successfully! ✅");
+    
+    const orderId = data.order?._id;
+
+    setTimeout(() => {
+      if (paymentMethod === "ONLINE" && orderId) {
+        navigate(`/user/orders/${orderId}`);
+      } else {
+        navigate("/orders");
+      }
+    }, 800);
+
+  } catch (err) {
+    setError(err.message || "Error placing order");
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <>
       <Navbar />
@@ -690,7 +710,18 @@ export default function CartPage() {
                 <div className="flex items-center bg-gray-100 rounded-xl p-1">
                   <button onClick={() => decreaseQty(item.productId)} className="w-8 h-8 flex items-center justify-center font-black text-gray-500 hover:text-black">−</button>
                   <span className="w-8 text-center font-black text-sm">{item.quantity}</span>
-                  <button onClick={() => increaseQty(item.productId)} className="w-8 h-8 flex items-center justify-center font-black text-gray-500 hover:text-black">+</button>
+
+
+                  {/* <button onClick={() => increaseQty(item.productId)} className="w-8 h-8 flex items-center justify-center font-black text-gray-500 hover:text-black">+</button> */}
+                  <button 
+  onClick={() => increaseQty(item.productId)} 
+  disabled={item.quantity >= item.stock} // 🚨 Disable if max stock reached
+  className={`w-8 h-8 flex items-center justify-center font-black transition-colors ${
+    item.quantity >= item.stock ? "text-gray-200 cursor-not-allowed" : "text-gray-500 hover:text-black"
+  }`}
+>
+  +
+</button>
                 </div>
                 <button onClick={() => removeItem(item.productId)} className="text-red-400 hover:text-red-600 p-2 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
@@ -740,7 +771,11 @@ export default function CartPage() {
                   >
                     <div className="font-black text-sm mb-1">{addr.label}</div>
                     <div className="text-xs text-gray-500 leading-relaxed font-medium">
-                      {addr.addressLine}, {addr.city} - {addr.pincode}
+                  <h3 className="font-black text-gray-800">{addr.name}</h3>
+                  
+                      {addr.addressLine}, {addr.city} , {addr.state} - <span className="text-black font-bold">{addr.pincode}</span>
+                  <div className="text-xs font-black text-gray-400 mt-1 uppercase">📞 {addr.phone}</div>
+
                     </div>
                     {selectedAddressId === addr._id && (
                       <div className="absolute top-4 right-4 text-green-600">
