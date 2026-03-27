@@ -263,6 +263,11 @@ export default function AdminOrdersPage() {
     <>
       <Navbar />
       <div className="p-6 max-w-7xl mx-auto bg-gray-50 min-h-screen">
+         {error && (
+            <div className="bg-red-100 text-red-600 px-4 py-3 rounded-xl mb-4 font-bold text-sm">
+              ⚠️ {error}
+            </div>
+          )}
         {/* --- SUMMARY HEADER --- */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
