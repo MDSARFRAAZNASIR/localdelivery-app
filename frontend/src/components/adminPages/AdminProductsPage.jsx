@@ -319,7 +319,7 @@
 
 
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Navbar from "../pages/Navbar";
 import { useNavigate } from "react-router-dom";
 
@@ -345,13 +345,13 @@ export default function AdminProductsPage() {
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-    fetchProducts();
-  }, [token, navigate]);
+  // useEffect(() => {
+  //   if (!token) {
+  //     navigate("/login");
+  //     return;
+  //   }
+  //   fetchProducts();
+  // }, [token, navigate, fetchProducts,]);
 
   // Search Logic
   useEffect(() => {
@@ -362,7 +362,7 @@ export default function AdminProductsPage() {
     setFilteredProducts(results);
   }, [searchTerm, products]);
 
-  const fetchProducts = async () => {
+  const fetchProducts =useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch("https://localdelivery-app-backend.vercel.app/admin/products", {
@@ -376,7 +376,16 @@ export default function AdminProductsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
+
+  // 3. Add fetchProducts to the useEffect dependency array
+useEffect(() => {
+  if (!token) {
+    navigate("/login");
+    return;
+  }
+  fetchProducts();
+}, [token, navigate, fetchProducts]); // Now it's safe to include
 
   const startEdit = (p) => {
     setForm({
@@ -442,6 +451,8 @@ export default function AdminProductsPage() {
       <Navbar />
       <div className="min-h-screen bg-gray-50 pb-20">
         <div className="max-w-7xl mx-auto px-4 py-8">
+{error && <p className="text-red-500">{error}</p>}
+
           
           {/* Header & Stats */}
           <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
