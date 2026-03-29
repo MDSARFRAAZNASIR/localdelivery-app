@@ -10,7 +10,13 @@ const Order = require("./db/models/orderModel");
 // const adminMiddle = require("./middleware/adminMiddle");
 const adminMiddlle = require("./middleware/adminMiddlle");
 const ServiceArea = require("./db/models/serviceAreaModel");
-// const ServiceArea = require("./db/models/ServiceArea");
+
+const admin = require("firebase-admin");
+
+// const serviceAccount = require("./firebasekey/serviceAccountKey.json");
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount)
+// });
 
 const auth = require("./middleware/auth");
 const bcrypt = require("bcryptjs");
@@ -18,6 +24,19 @@ const PDFDocument = require("pdfkit");
 
 // load env (important: do this once at entry)
 dotenv.config();
+
+// push Notification
+require('dotenv').config();
+
+const serviceAccount = {
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'), // Fixes new line issues
+  clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+};
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
 
 // create app
 const app = express();
@@ -79,7 +98,7 @@ app.post(
       });
     }
 
-    // normalize email
+    // Normalize email
     const normalizedEmail = String(useremail).trim().toLowerCase();
 
     // === phone normalization (Option A: accept many formats, store last 10 digits) ===
@@ -101,6 +120,7 @@ app.post(
         });
       }
     }
+
     // ===============================================================================
 
     // create user object
@@ -681,7 +701,12 @@ app.get(
 );
 
 
-// // CREATE CART
+
+
+
+
+// for stock and placing order successfully
+// CREATE ORDER (Updated with Stock Logic)
 // app.post(
 //   "/orders",
 //   auth,
@@ -689,53 +714,43 @@ app.get(
 //     const { items, deliveryAddressId, paymentMethod } = req.body;
 
 //     if (!items?.length || !deliveryAddressId) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "items[] and deliveryAddressId are required",
-//       });
+//       return res.status(400).json({ success: false, message: "items[] and deliveryAddressId are required" });
 //     }
 
 //     await connectDB();
 
-//     // 1️⃣ User + Address
+//     // 1️⃣ User + Address logic (Stayed the same)
 //     const user = await User.findById(req.user._id);
 //     const address = user.addresses.id(deliveryAddressId);
+//     if (!address) return res.status(400).json({ success: false, message: "Invalid delivery address" });
 
-//     if (!address) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Invalid delivery address",
-//       });
-//     }
+//     // 2️⃣ Service Area Check (Stayed the same)
+//     const serviceArea = await ServiceArea.findOne({ pincode: address.pincode, isActive: true });
+//     if (!serviceArea) return res.status(400).json({ success: false, message: "Sorry, delivery not available here" });
 
-//     // 2️⃣ ✅ SERVICE AREA CHECK (IMPORTANT)
-//     const serviceArea = await ServiceArea.findOne({
-//       pincode: address.pincode,
-//       isActive: true,
-//     });
-
-//     if (!serviceArea) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Sorry, delivery is not available in your area",
-//       });
-//     }
-
-//     // 3️⃣ Products
+//     // 3️⃣ Products (Removed .lean() so we can save changes later)
 //     const products = await Product.find({
 //       _id: { $in: items.map(i => i.productId) },
 //       isActive: true,
-//     }).lean();
+//     });
 
 //     const productMap = new Map(products.map(p => [String(p._id), p]));
 
-//     // 4️⃣ Calculate total
+//     // 4️⃣ Calculate total + 🚨 NEW: STOCK CHECK
 //     let totalAmount = serviceArea.deliveryFee || 0;
 //     const orderItems = [];
 
 //     for (const it of items) {
 //       const prod = productMap.get(String(it.productId));
 //       if (!prod) continue;
+
+//       // 🔥 CHECK: Is there enough stock?
+//       if (prod.stock < it.quantity) {
+//         return res.status(400).json({
+//           success: false,
+//           message: `Insufficient stock for ${prod.name}. Only ${prod.stock} left.`
+//         });
+//       }
 
 //       const subtotal = prod.price * it.quantity;
 //       totalAmount += subtotal;
@@ -749,12 +764,7 @@ app.get(
 //       });
 //     }
 
-//     if (!orderItems.length) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Invalid order items",
-//       });
-//     }
+//     if (!orderItems.length) return res.status(400).json({ success: false, message: "Invalid order items" });
 
 //     // 5️⃣ Create order
 //     const order = await Order.create({
@@ -775,17 +785,36 @@ app.get(
 //       },
 //     });
 
+//     // 6️⃣ 🚨 NEW: UPDATE STOCK IN DATABASE
+    
+// // Replace your loop with this:
+// for (const it of items) {
+//   const result = await Product.findOneAndUpdate(
+//     { 
+//       _id: it.productId, 
+//       stock: { $gte: Number(it.quantity) } // Only update if stock >= quantity
+//     },
+//     { 
+//       $inc: { stock: -Number(it.quantity) } 
+//     },
+//     { new: true }
+//   );
+
+//   if (!result) {
+//     console.log(`Failed to update ${it.productId} - possibly insufficient stock.`);
+//   }
+// }
+
 //     return res.status(201).json({
 //       success: true,
 //       order,
-//       message: "Order created successfully",
+//       message: "Order created and stock updated successfully ✅",
 //     });
 //   })
 // );
 
 
-// for stock and placing order successfully
-// CREATE ORDER (Updated with Stock Logic)
+// new add Notification
 app.post(
   "/orders",
   auth,
@@ -798,16 +827,16 @@ app.post(
 
     await connectDB();
 
-    // 1️⃣ User + Address logic (Stayed the same)
+    // 1️⃣ User + Address logic
     const user = await User.findById(req.user._id);
     const address = user.addresses.id(deliveryAddressId);
     if (!address) return res.status(400).json({ success: false, message: "Invalid delivery address" });
 
-    // 2️⃣ Service Area Check (Stayed the same)
+    // 2️⃣ Service Area Check
     const serviceArea = await ServiceArea.findOne({ pincode: address.pincode, isActive: true });
     if (!serviceArea) return res.status(400).json({ success: false, message: "Sorry, delivery not available here" });
 
-    // 3️⃣ Products (Removed .lean() so we can save changes later)
+    // 3️⃣ Products
     const products = await Product.find({
       _id: { $in: items.map(i => i.productId) },
       isActive: true,
@@ -815,7 +844,7 @@ app.post(
 
     const productMap = new Map(products.map(p => [String(p._id), p]));
 
-    // 4️⃣ Calculate total + 🚨 NEW: STOCK CHECK
+    // 4️⃣ Calculate total + STOCK CHECK
     let totalAmount = serviceArea.deliveryFee || 0;
     const orderItems = [];
 
@@ -823,7 +852,6 @@ app.post(
       const prod = productMap.get(String(it.productId));
       if (!prod) continue;
 
-      // 🔥 CHECK: Is there enough stock?
       if (prod.stock < it.quantity) {
         return res.status(400).json({
           success: false,
@@ -864,47 +892,40 @@ app.post(
       },
     });
 
-    // 6️⃣ 🚨 NEW: UPDATE STOCK IN DATABASE
-  //   // We use a loop to decrement the stock for each product
-  //   for (const it of items) {
-  //     const productBefore = await Product.findById(it.productId);
-  // console.log(`Product: ${productBefore.name} | Current: ${productBefore.stock} | Reducing by: ${it.quantity}`)
-  //     await Product.findByIdAndUpdate(it.productId, {
-  //       $inc: { stock: -it.quantity } // This subtracts the ordered amount
-  //     });
-  //   }
+    // 6️⃣ UPDATE STOCK IN DATABASE
+    for (const it of items) {
+      await Product.findOneAndUpdate(
+        { _id: it.productId, stock: { $gte: Number(it.quantity) } },
+        { $inc: { stock: -Number(it.quantity) } },
+        { new: true }
+      );
+    }
 
-//   for (const it of items) {
-//   // Use it.productId._id if it's an object, or just it.productId if it's a string
-//   const id = it.productId._id || it.productId; 
-  
-//   await Product.findByIdAndUpdate(id, {
-//     $inc: { stock: -Math.abs(it.quantity) } // Math.abs ensures it's a positive number being subtracted
-//   });
-// }
+    // 7️⃣ 🔔 NEW: SEND PUSH NOTIFICATION TO ADMIN
+    try {
+      const message = {
+        notification: {
+          title: "🛍️ New Order Received!",
+          body: `Order from ${address.name} for ₹${totalAmount}`,
+        },
 
-// Replace your loop with this:
-for (const it of items) {
-  const result = await Product.findOneAndUpdate(
-    { 
-      _id: it.productId, 
-      stock: { $gte: Number(it.quantity) } // Only update if stock >= quantity
-    },
-    { 
-      $inc: { stock: -Number(it.quantity) } 
-    },
-    { new: true }
-  );
+        // We send to a 'topic'. All admin browsers will subscribe to this.
 
-  if (!result) {
-    console.log(`Failed to update ${it.productId} - possibly insufficient stock.`);
-  }
-}
+        topic: "admin_orders", 
+
+      };
+
+      await admin.messaging().send(message);
+      console.log("Admin notified successfully");
+    } catch (pushError) {
+      // We don't want to crash the whole request if notification fails
+      console.error("Push Notification Error:", pushError);
+    }
 
     return res.status(201).json({
       success: true,
       order,
-      message: "Order created and stock updated successfully ✅",
+      message: "Order created and admin notified! ✅",
     });
   })
 );
