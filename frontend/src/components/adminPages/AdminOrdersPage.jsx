@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../pages/Navbar";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { app } from "../pages/firebaseConfig"; // Your web firebase config
+import { messaging } from "../pages/firebaseConfig";
 const STATUS_OPTIONS = [
   "CREATED",
   "CONFIRMED",
@@ -27,7 +28,7 @@ export default function AdminOrdersPage() {
       
       if (permission === "granted") {
         const token = await getToken(messaging, { 
-          vapidKey: "YOUR_PUBLIC_VAPID_KEY" 
+          vapidKey: "BHBDE6qygOrUtILhtP8TyD0hzu9jjHH2_u7iSbWt_ImyJrYjR4-Y001FwiRScoCT8Yqh60u8M-I3PVw9njA6JKU" 
         });
         console.log("Admin Notification Token:", token);
         // Save this token to your backend admin user profile
@@ -111,15 +112,41 @@ export default function AdminOrdersPage() {
 
 
    // Listen for foreground messages while the app is open
+  // useEffect(() => {
+  //   const messaging = getMessaging(app);
+  //   const unsubscribe = onMessage(messaging, (payload) => {
+  //     // Show a toast or simple alert when a new order arrives
+  //     alert(`New Order: ${payload.notification.body}`);
+  //     fetchOrders(); // Refresh the list automatically
+  //   });
+  //   return () => unsubscribe();
+  // }, [fetchOrders]);
+
   useEffect(() => {
-    const messaging = getMessaging(app);
-    const unsubscribe = onMessage(messaging, (payload) => {
-      // Show a toast or simple alert when a new order arrives
-      alert(`New Order: ${payload.notification.body}`);
-      fetchOrders(); // Refresh the list automatically
-    });
-    return () => unsubscribe();
-  }, [fetchOrders]);
+  // 🔔 Single listener for all foreground messages
+    // const messaging = getMessaging(app);
+
+  const unsubscribe = onMessage(messaging, (payload) => {
+    console.log("New Order Received:", payload);
+
+    // 1. Play the Notification Sound
+    const audio = new Audio("/notification.mp3");
+    audio.play().catch(err => console.log("Audio play blocked:", err));
+
+    // 2. Show the Alert
+    alert(`🔔 New Order: ${payload.notification.body}`);
+
+    // 3. Refresh your UI (Important!)
+    if (fetchOrders) {
+      fetchOrders(); 
+    }
+  });
+
+  return () => unsubscribe(); 
+}, [fetchOrders]); // Runs once, but updates if fetchOrders changes
+
+
+  
 
   return (
     <>
