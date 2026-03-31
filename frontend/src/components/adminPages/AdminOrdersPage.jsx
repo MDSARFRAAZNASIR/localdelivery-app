@@ -6,6 +6,9 @@ import Navbar from "../pages/Navbar";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { app } from "../pages/firebaseConfig"; // Your web firebase config
 import { messaging } from "../pages/firebaseConfig";
+
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const STATUS_OPTIONS = [
   "CREATED",
   "CONFIRMED",
@@ -151,85 +154,47 @@ export default function AdminOrdersPage() {
   }, [orders]);
 
 
-//   // for new order notification
-//   const requestPermission = async () => {
-//   try {
-//     const permission = await Notification.requestPermission();
-//     if (permission === "granted") {
-//       const token = await getToken(messaging, { 
-//         vapidKey: "YOUR_VAPID_KEY" 
-//       });
 
-//       if (token) {
-//         console.log("Admin Token:", token);
-        
-//         // 🔗 LINK THE TOKEN TO THE TOPIC
-//         await axios.post(`${process.env.REACT_APP_API_URL}/api/subscribe-admin`, 
-//           { token },
-//           { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
-//         );
-        
-//         alert("System Ready: You will now receive order alerts! 🔔");
-//       }
-//     }
-//   } catch (err) {
-//     console.error("Setup failed:", err);
-//   }
-// };
-
-
-   // Listen for foreground messages while the app is open
-  // useEffect(() => {
-  //   const messaging = getMessaging(app);
-  //   const unsubscribe = onMessage(messaging, (payload) => {
-  //     // Show a toast or simple alert when a new order arrives
-  //     alert(`New Order: ${payload.notification.body}`);
-  //     fetchOrders(); // Refresh the list automatically
-  //   });
-  //   return () => unsubscribe();
-  // }, [fetchOrders]);
-  
-
-//   useEffect(() => {
-//   // 🔔 Single listener for all foreground messages
-//     // const messaging = getMessaging(app);
-
+// useEffect(() => {
+//   // 🔔 Listen for orders while the dashboard is open
 //   const unsubscribe = onMessage(messaging, (payload) => {
-//     console.log("New Order Received:", payload);
-    
+//     // console.log("New Order Received:", payload);
+//     new Audio("/notification.mp3").play(); // 🔊 Plays instantly
+//     fetchOrders(); // 🔄 Refreshes list instantly
 
-//     // 1. Play the Notification Sound
+//     // 1. Play the corrected sound file
 //     const audio = new Audio("/notification.mp3");
-//     audio.play().catch(err => console.log("Audio play blocked:", err));
+//     audio.play().catch(err => console.log("Playback blocked by browser:", err));
 
-//     // 2. Show the Alert
-//     alert(`🔔 New Order: ${payload.notification.body}`);
+//     // 2. Show the alert with order details
+//     alert(`🛍️ ${payload.notification.title}\n${payload.notification.body}`);
 
-//     // 3. Refresh your UI (Important!)
-//     if (fetchOrders) {
-//       fetchOrders(); 
+//     // 3. Refresh the order list so the new order appears immediately
+//     if (typeof fetchOrders === "function") {
+//       fetchOrders();
 //     }
 //   });
 
-//   return () => unsubscribe(); 
-// }, [fetchOrders]); // Runs once, but updates if fetchOrders changes
-
+//   return () => unsubscribe();
+// }, [fetchOrders]);
 
 useEffect(() => {
-  // 🔔 Listen for orders while the dashboard is open
   const unsubscribe = onMessage(messaging, (payload) => {
-    console.log("New Order Received:", payload);
-
-    // 1. Play the corrected sound file
+    // 1. Safe Audio Play
     const audio = new Audio("/notification.mp3");
-    audio.play().catch(err => console.log("Playback blocked by browser:", err));
+    audio.play().catch(err => console.warn("Autoplay prevented:", err));
 
-    // 2. Show the alert with order details
-    alert(`🛍️ ${payload.notification.title}\n${payload.notification.body}`);
-
-    // 3. Refresh the order list so the new order appears immediately
+    // 2. Safe Refresh
     if (typeof fetchOrders === "function") {
       fetchOrders();
+    }
+
+    // 3. Safe Toast (Check if toast exists first)
+    if (payload?.notification) {
+      toast.success(`🛍️ New Order: ${payload.notification.body}`, {
+        position: "top-right",
+        autoClose: 5000,
+      });
     }
   });
 
@@ -276,7 +241,7 @@ useEffect(() => {
           </button>
           
   {/* // Manual trigger to test the sound/alert logic locally */}
-  {/* <button onClick={async () => {
+  <button onClick={async () => {
   try {
     // Note the "/" at the beginning - it looks in the 'public' folder
     const audio = new Audio("/notification.mp3"); 
@@ -293,7 +258,7 @@ useEffect(() => {
 }}>
   Test Sound System
 </button>
-   */}
+  
           
           <div className="flex flex-wrap gap-2 w-full md:w-auto">
             {/* SEARCH */}
@@ -392,6 +357,7 @@ useEffect(() => {
           </div>
         )}
       </div>
+      <ToastContainer />
     </>
   );
 }
