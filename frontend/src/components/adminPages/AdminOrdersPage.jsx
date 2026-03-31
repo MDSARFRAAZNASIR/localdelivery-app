@@ -21,23 +21,63 @@ export default function AdminOrdersPage() {
   const [searchTerm, setSearchTerm] = useState(""); // 🔍 New: Search
   const [statusFilter, setStatusFilter] = useState("ALL"); // 🔍 New: Filter
 
-  const requestPermission = async () => {
-    try {
-      const messaging = getMessaging(app);
-      const permission = await Notification.requestPermission();
+  // const requestPermission = async () => {
+  //   try {
+  //     const messaging = getMessaging(app);
+  //     const permission = await Notification.requestPermission();
       
-      if (permission === "granted") {
-        const token = await getToken(messaging, { 
-          vapidKey: "BHBDE6qygOrUtILhtP8TyD0hzu9jjHH2_u7iSbWt_ImyJrYjR4-Y001FwiRScoCT8Yqh60u8M-I3PVw9njA6JKU" 
-        });
-        console.log("Admin Notification Token:", token);
-        // Save this token to your backend admin user profile
-        alert("Notifications Enabled! ✅");
+  //     if (permission === "granted") {
+  //       const token = await getToken(messaging, { 
+  //         vapidKey: "BHBDE6qygOrUtILhtP8TyD0hzu9jjHH2_u7iSbWt_ImyJrYjR4-Y001FwiRScoCT8Yqh60u8M-I3PVw9njA6JKU" 
+  //       });
+        
+  //       console.log("Admin Notification Token:", token);
+  //       // Save this token to your backend admin user profile
+  //       alert("Notifications Enabled! ✅");
+  //     }
+  //   } catch (err) {
+  //     console.error("Permission denied", err);
+  //   }
+  // };
+
+
+  const requestPermission = async () => {
+  try {
+    const messaging = getMessaging(app);
+    const permission = await Notification.requestPermission();
+    
+    if (permission === "granted") {
+      const token = await getToken(messaging, { 
+        vapidKey: "BHBDE6qygOrUtILhtP8TyD0hzu9jjHH2_u7iSbWt_ImyJrYjR4-Y001FwiRScoCT8Yqh60u8M-I3PVw9njA6JKU" 
+      });
+      
+      console.log("Admin Notification Token:", token);
+
+      // --- 🔗 LINKING TO YOUR VERCEL BACKEND ---
+      const backendUrl = "https://localdelivery-app-backend.vercel.app";
+      
+      const response = await fetch(`${backendUrl}/api/subscribe-admin`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          // Assuming you store your login token in localStorage
+          'Authorization': `Bearer ${localStorage.getItem("token")}` 
+        },
+        body: JSON.stringify({ token })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        alert("Notifications Enabled & Subscribed to Orders! ✅🔔");
+      } else {
+        console.error("Subscription failed:", data.message);
       }
-    } catch (err) {
-      console.error("Permission denied", err);
     }
-  };
+  } catch (err) {
+    console.error("Permission or Subscription failed", err);
+  }
+};
 
  
   
@@ -111,6 +151,33 @@ export default function AdminOrdersPage() {
   }, [orders]);
 
 
+//   // for new order notification
+//   const requestPermission = async () => {
+//   try {
+//     const permission = await Notification.requestPermission();
+//     if (permission === "granted") {
+//       const token = await getToken(messaging, { 
+//         vapidKey: "YOUR_VAPID_KEY" 
+//       });
+
+//       if (token) {
+//         console.log("Admin Token:", token);
+        
+//         // 🔗 LINK THE TOKEN TO THE TOPIC
+//         await axios.post(`${process.env.REACT_APP_API_URL}/api/subscribe-admin`, 
+//           { token },
+//           { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+//         );
+        
+//         alert("System Ready: You will now receive order alerts! 🔔");
+//       }
+//     }
+//   } catch (err) {
+//     console.error("Setup failed:", err);
+//   }
+// };
+
+
    // Listen for foreground messages while the app is open
   // useEffect(() => {
   //   const messaging = getMessaging(app);
@@ -121,29 +188,53 @@ export default function AdminOrdersPage() {
   //   });
   //   return () => unsubscribe();
   // }, [fetchOrders]);
+  
 
-  useEffect(() => {
-  // 🔔 Single listener for all foreground messages
-    // const messaging = getMessaging(app);
+//   useEffect(() => {
+//   // 🔔 Single listener for all foreground messages
+//     // const messaging = getMessaging(app);
 
+//   const unsubscribe = onMessage(messaging, (payload) => {
+//     console.log("New Order Received:", payload);
+    
+
+//     // 1. Play the Notification Sound
+//     const audio = new Audio("/notification.mp3");
+//     audio.play().catch(err => console.log("Audio play blocked:", err));
+
+//     // 2. Show the Alert
+//     alert(`🔔 New Order: ${payload.notification.body}`);
+
+//     // 3. Refresh your UI (Important!)
+//     if (fetchOrders) {
+//       fetchOrders(); 
+//     }
+//   });
+
+//   return () => unsubscribe(); 
+// }, [fetchOrders]); // Runs once, but updates if fetchOrders changes
+
+
+useEffect(() => {
+  // 🔔 Listen for orders while the dashboard is open
   const unsubscribe = onMessage(messaging, (payload) => {
     console.log("New Order Received:", payload);
 
-    // 1. Play the Notification Sound
+    // 1. Play the corrected sound file
     const audio = new Audio("/notification.mp3");
-    audio.play().catch(err => console.log("Audio play blocked:", err));
+    audio.play().catch(err => console.log("Playback blocked by browser:", err));
 
-    // 2. Show the Alert
-    alert(`🔔 New Order: ${payload.notification.body}`);
+    // 2. Show the alert with order details
+    alert(`🛍️ ${payload.notification.title}\n${payload.notification.body}`);
 
-    // 3. Refresh your UI (Important!)
-    if (fetchOrders) {
-      fetchOrders(); 
+    // 3. Refresh the order list so the new order appears immediately
+    if (typeof fetchOrders === "function") {
+      fetchOrders();
     }
   });
 
-  return () => unsubscribe(); 
-}, [fetchOrders]); // Runs once, but updates if fetchOrders changes
+  return () => unsubscribe();
+}, [fetchOrders]);
 
 
   
@@ -183,6 +274,26 @@ export default function AdminOrdersPage() {
           >
             <span className="text-lg">🔔</span> Enable Desktop Alerts
           </button>
+          
+  {/* // Manual trigger to test the sound/alert logic locally */}
+  {/* <button onClick={async () => {
+  try {
+    // Note the "/" at the beginning - it looks in the 'public' folder
+    const audio = new Audio("/notification.mp3"); 
+    
+    // Force the browser to load it before playing
+    audio.load(); 
+    
+    await audio.play();
+    alert("🔔 Sound is working!");
+  } catch (err) {
+    console.error("Audio Error Details:", err);
+    alert("Sound failed. Check if notification.mp3 is in the public folder!");
+  }
+}}>
+  Test Sound System
+</button>
+   */}
           
           <div className="flex flex-wrap gap-2 w-full md:w-auto">
             {/* SEARCH */}
