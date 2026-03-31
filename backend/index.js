@@ -931,6 +931,23 @@ app.post(
 );
 
 
+// for bail
+// Add this in your backend index.js
+app.post("/api/subscribe-admin", auth, asyncHandler(async (req, res) => {
+  const { token } = req.body;
+  if (!token) return res.status(400).json({ message: "Token required" });
+
+  try {
+    // This connects the browser token to the 'admin_orders' topic
+    await admin.messaging().subscribeToTopic(token, "admin_orders");
+    console.log(`Admin token ${token.substring(0,10)}... subscribed to admin_orders`);
+    res.json({ success: true, message: "Subscribed successfully!" });
+  } catch (error) {
+    console.error("Subscription Error:", error);
+    res.status(500).json({ error: error.message });
+  }
+}));
+
 // ➕ Add / Update pincode
 app.post(
   "/admin/service-areas",
