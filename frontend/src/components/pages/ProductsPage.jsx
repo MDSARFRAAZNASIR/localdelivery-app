@@ -86,14 +86,17 @@ export default function ProductsPage() {
     setCart((prev) => {
       const existing = prev.find((item) => item.productId === product._id);
 
-// 🚨 STOCK CHECK: If trying to add, check if we have enough stock
-    if (delta > 0) {
-      const currentQtyInCart = existing ? existing.quantity : 0;
-      if (currentQtyInCart >= product.stock) {
-        setToast({ visible: true, message: `Only ${product.stock} items available!` });
-        return prev; // Don't add more
+      // 🚨 STOCK CHECK: If trying to add, check if we have enough stock
+      if (delta > 0) {
+        const currentQtyInCart = existing ? existing.quantity : 0;
+        if (currentQtyInCart >= product.stock) {
+          setToast({
+            visible: true,
+            message: `Only ${product.stock} items available!`,
+          });
+          return prev; // Don't add more
+        }
       }
-    }
       if (!existing && delta > 0) {
         setToast({ visible: true, message: `Added ${product.name}` });
         return [
@@ -297,10 +300,9 @@ export default function ProductsPage() {
                             </span>
                             <button
                               onClick={() => updateQuantity(p, 1)}
-
                               // 🚨 DISABLE IF NO MORE STOCK
                               disabled={qty >= p.stock}
-                              className={`px-3 py-1.5 font-bold ${qty >= p.stock ? 'opacity-30 cursor-not-allowed' : 'hover:bg-green-800'}`}
+                              className={`px-3 py-1.5 font-bold ${qty >= p.stock ? "opacity-30 cursor-not-allowed" : "hover:bg-green-800"}`}
                               // className="px-3 py-1.5 hover:bg-green-800 font-bold"
                             >
                               +
@@ -309,27 +311,25 @@ export default function ProductsPage() {
                         ) : (
                           <button
                             onClick={() => updateQuantity(p, 1)}
-                            
-                      //       className="bg-white border-2 border-green-700 text-green-700 hover:bg-green-700 hover:text-white font-bold text-[10px] px-6 py-2 rounded-lg transition-all active:scale-90"
-                      //     >
-                      //       ADD
-                      //     </button>
-                      //   )}
-                      // </div>
+                            //       className="bg-white border-2 border-green-700 text-green-700 hover:bg-green-700 hover:text-white font-bold text-[10px] px-6 py-2 rounded-lg transition-all active:scale-90"
+                            //     >
+                            //       ADD
+                            //     </button>
+                            //   )}
+                            // </div>
 
-
-                      // 🚨 DISABLE IF OUT OF STOCK
-      disabled={p.stock <= 0}
-      className={`font-bold text-[10px] px-6 py-2 rounded-lg transition-all active:scale-90 border-2 ${
-        p.stock <= 0 
-          ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' 
-          : 'bg-white border-green-700 text-green-700 hover:bg-green-700 hover:text-white'
-      }`}
-    >
-      {p.stock <= 0 ? "SOLD OUT" : "ADD"}
-    </button>
-  )}
-</div>
+                            // 🚨 DISABLE IF OUT OF STOCK
+                            disabled={p.stock <= 0}
+                            className={`font-bold text-[10px] px-6 py-2 rounded-lg transition-all active:scale-90 border-2 ${
+                              p.stock <= 0
+                                ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed"
+                                : "bg-white border-green-700 text-green-700 hover:bg-green-700 hover:text-white"
+                            }`}
+                          >
+                            {p.stock <= 0 ? "SOLD OUT" : "ADD"}
+                          </button>
+                        )}
+                      </div>
                     </div>
                   );
                 })}

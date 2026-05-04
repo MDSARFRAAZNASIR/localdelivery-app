@@ -1080,7 +1080,7 @@ app.put(
 
 
 // Get revenue stats for the last 7 days
-app.get("/admin/stats/revenue", auth, adminOnly, asyncHandler(async (req, res) => {
+app.get("/admin/stats/revenue", auth, adminMiddlle, asyncHandler(async (req, res) => {
   const stats = await Order.aggregate([
     {
       // 1. Filter for orders from the last 7 days
@@ -1105,7 +1105,7 @@ app.get("/admin/stats/revenue", auth, adminOnly, asyncHandler(async (req, res) =
 
 
 // Get order distribution by Pincode
-app.get("/api/admin/stats/pincodes", auth, adminOnly, asyncHandler(async (req, res) => {
+app.get("/api/admin/stats/pincodes", auth, adminMiddlle, asyncHandler(async (req, res) => {
   const stats = await Order.aggregate([
     {
       $group: {

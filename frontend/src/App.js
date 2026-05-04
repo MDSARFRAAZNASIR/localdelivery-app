@@ -24,6 +24,7 @@ import AdminServiceAreas from "./components/adminPages/AdminServiceAreas";
 import { LoadingProvider } from "./context/LoadingContext";
 import RateOrder from "./components/pages/RateOrder";
 import RateItem from "./components/pages/RateItem";
+import RevenueChart from "./components/pages/RevenueChart";
 
 function App() {
   useEffect(() => {
@@ -67,7 +68,8 @@ function App() {
           <Route path="/admin/service-areas" element={<AdminServiceAreas />} />
           {/* <Route path="/admin/orders" element={<AdminOrdersPage/>}></Route> */}
           <Route path="/rate-order/:orderId" element={<RateOrder/>}></Route>
-          <Route path="/rate-item/:orderId/:productId"element={<RateItem/>}></Route>
+          <Route path="/rate-item/:orderId/:productId" element={<RateItem/>}></Route>
+          <Route path="/admin/stats/revenue" element={<RevenueChart/>}></Route>
 
 
 
