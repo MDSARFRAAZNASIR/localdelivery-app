@@ -701,119 +701,6 @@ app.get(
 );
 
 
-
-
-
-
-// for stock and placing order successfully
-// CREATE ORDER (Updated with Stock Logic)
-// app.post(
-//   "/orders",
-//   auth,
-//   asyncHandler(async (req, res) => {
-//     const { items, deliveryAddressId, paymentMethod } = req.body;
-
-//     if (!items?.length || !deliveryAddressId) {
-//       return res.status(400).json({ success: false, message: "items[] and deliveryAddressId are required" });
-//     }
-
-//     await connectDB();
-
-//     // 1️⃣ User + Address logic (Stayed the same)
-//     const user = await User.findById(req.user._id);
-//     const address = user.addresses.id(deliveryAddressId);
-//     if (!address) return res.status(400).json({ success: false, message: "Invalid delivery address" });
-
-//     // 2️⃣ Service Area Check (Stayed the same)
-//     const serviceArea = await ServiceArea.findOne({ pincode: address.pincode, isActive: true });
-//     if (!serviceArea) return res.status(400).json({ success: false, message: "Sorry, delivery not available here" });
-
-//     // 3️⃣ Products (Removed .lean() so we can save changes later)
-//     const products = await Product.find({
-//       _id: { $in: items.map(i => i.productId) },
-//       isActive: true,
-//     });
-
-//     const productMap = new Map(products.map(p => [String(p._id), p]));
-
-//     // 4️⃣ Calculate total + 🚨 NEW: STOCK CHECK
-//     let totalAmount = serviceArea.deliveryFee || 0;
-//     const orderItems = [];
-
-//     for (const it of items) {
-//       const prod = productMap.get(String(it.productId));
-//       if (!prod) continue;
-
-//       // 🔥 CHECK: Is there enough stock?
-//       if (prod.stock < it.quantity) {
-//         return res.status(400).json({
-//           success: false,
-//           message: `Insufficient stock for ${prod.name}. Only ${prod.stock} left.`
-//         });
-//       }
-
-//       const subtotal = prod.price * it.quantity;
-//       totalAmount += subtotal;
-
-//       orderItems.push({
-//         productId: prod._id,
-//         name: prod.name,
-//         price: prod.price,
-//         quantity: it.quantity,
-//         subtotal,
-//       });
-//     }
-
-//     if (!orderItems.length) return res.status(400).json({ success: false, message: "Invalid order items" });
-
-//     // 5️⃣ Create order
-//     const order = await Order.create({
-//       userId: req.user._id,
-//       items: orderItems,
-//       totalAmount,
-//       paymentMethod: paymentMethod === "ONLINE" ? "ONLINE" : "COD",
-//       paymentStatus: "PENDING",
-//       status: "CREATED",
-//       deliveryAddress: {
-//         label: address.label,
-//         name: address.name,
-//         phone: address.phone,
-//         addressLine: address.addressLine,
-//         city: address.city,
-//         state: address.state,
-//         pincode: address.pincode,
-//       },
-//     });
-
-//     // 6️⃣ 🚨 NEW: UPDATE STOCK IN DATABASE
-    
-// // Replace your loop with this:
-// for (const it of items) {
-//   const result = await Product.findOneAndUpdate(
-//     { 
-//       _id: it.productId, 
-//       stock: { $gte: Number(it.quantity) } // Only update if stock >= quantity
-//     },
-//     { 
-//       $inc: { stock: -Number(it.quantity) } 
-//     },
-//     { new: true }
-//   );
-
-//   if (!result) {
-//     console.log(`Failed to update ${it.productId} - possibly insufficient stock.`);
-//   }
-// }
-
-//     return res.status(201).json({
-//       success: true,
-//       order,
-//       message: "Order created and stock updated successfully ✅",
-//     });
-//   })
-// );
-
-
 // new add Notification
 app.post(
   "/orders",
@@ -1191,6 +1078,51 @@ app.put(
   })
 );
 
+
+// Get revenue stats for the last 7 days
+app.get("/admin/stats/revenue", auth, adminOnly, asyncHandler(async (req, res) => {
+  const stats = await Order.aggregate([
+    {
+      // 1. Filter for orders from the last 7 days
+      $match: {
+        createdAt: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+        status: { $ne: "CANCELLED" } // Don't count cancelled orders in revenue
+      }
+    },
+    {
+      // 2. Group by Date (YYYY-MM-DD)
+      $group: {
+        _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+        revenue: { $sum: "$totalAmount" },
+        orders: { $sum: 1 }
+      }
+    },
+    { $sort: { "_id": 1 } } // Sort by date ascending
+  ]);
+
+  res.json(stats);
+}));
+
+
+// Get order distribution by Pincode
+app.get("/api/admin/stats/pincodes", auth, adminOnly, asyncHandler(async (req, res) => {
+  const stats = await Order.aggregate([
+    {
+      $group: {
+        _id: "$deliveryAddress.pincode",
+        value: { $sum: 1 } // Count number of orders per pincode
+      }
+    },
+    {
+      $project: {
+        name: "$_id", // Rename _id to name for Recharts
+        value: 1,
+        _id: 0
+      }
+    }
+  ]);
+  res.json(stats);
+}));
 //  create order with rozpay
 
 app.post(
