@@ -1134,14 +1134,14 @@ app.post(
   asyncHandler(async (req, res) => {
     // const { orderId } = req.body;
     const { orderId } = req.body;
-    console.log("Searching for Order:", orderId, "for User:", req.user._id); 
+    // console.log("Searching for Order:", orderId, "for User:", req.user._id); 
 
 
     await connectDB();
 
     const order = await Order.findOne({
       _id: orderId,
-      user: req.userId._id,
+      userId: req.user._id,
     });
 
     if (!order) {
