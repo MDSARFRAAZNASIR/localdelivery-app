@@ -214,6 +214,7 @@ export default function CartPage() {
     setMessage("");
 
     try {
+      
       // 1. CREATE ORDER IN DATABASE
       const res = await fetch(
         "https://localdelivery-app-backend.vercel.app/orders",
@@ -235,6 +236,8 @@ export default function CartPage() {
       );
 
       const data = await res.json();
+      // const data = await res.json();
+console.log("Full Server Response:", data);
       if (!res.ok || !data.success)
         throw new Error(data.message || "Failed to place order");
 
@@ -289,6 +292,8 @@ export default function CartPage() {
         description: "Order Payment",
         order_id: data.razorpayOrder.id,
         handler: async (response) => {
+
+          
           // VERIFY PAYMENT
           const verifyRes = await fetch(
             "https://localdelivery-app-backend.vercel.app/payments/razorpay/verify",
