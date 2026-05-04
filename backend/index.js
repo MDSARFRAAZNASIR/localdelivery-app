@@ -1125,6 +1125,8 @@ app.get("/api/admin/stats/pincodes", auth, adminMiddlle, asyncHandler(async (req
 }));
 //  create order with rozpay
 
+
+
 app.post(
   "/payments/razorpay/create-order",
   
@@ -1152,11 +1154,22 @@ app.post(
       return res.status(400).json({ message: "Order already paid" });
     }
 
+console.log("RAZORPAY PAYLOAD:", {
+  amount: order.totalAmount * 100,
+  currency: "INR"
+});
+    // const razorpayOrder = await razorpay.orders.create({
+    //   amount: order.totalAmount * 100, // paise
+    //   currency: "INR",
+    //   receipt: `order_${order._id}`,
+    // });
+ 
     const razorpayOrder = await razorpay.orders.create({
-      amount: order.totalAmount * 100, // paise
-      currency: "INR",
-      receipt: `order_${order._id}`,
-    });
+  // Math.round ensures 150.50 becomes 15050 exactly, with no decimals
+  amount: Math.round(order.totalAmount * 100), 
+  currency: "INR",
+  receipt: `order_${order._id}`,
+});
 
     order.razorpayOrderId = razorpayOrder.id;
     await order.save();
