@@ -1127,15 +1127,21 @@ app.get("/api/admin/stats/pincodes", auth, adminMiddlle, asyncHandler(async (req
 
 app.post(
   "/payments/razorpay/create-order",
+  
+  
   auth,
+
   asyncHandler(async (req, res) => {
+    // const { orderId } = req.body;
     const { orderId } = req.body;
+    console.log("Searching for Order:", orderId, "for User:", req.user._id); 
+
 
     await connectDB();
 
     const order = await Order.findOne({
       _id: orderId,
-      user: req.user._id,
+      user: req.userId._id,
     });
 
     if (!order) {
