@@ -115,7 +115,7 @@ export default function CartPage() {
   };
 
   const subtotal = cart.reduce(
-    
+
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
@@ -289,6 +289,7 @@ console.log("Full Server Response:", data);
 
       const options = {
         // key: data.key,
+        
         key: "rzp_live_SlRoLg9MFbnLUV",
         amount: data.razorpayOrder.amount,
         currency: "INR",
