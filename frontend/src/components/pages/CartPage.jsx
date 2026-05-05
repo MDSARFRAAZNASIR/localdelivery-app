@@ -285,7 +285,8 @@ console.log("Full Server Response:", data);
     }
 
       const options = {
-        key: data.key,
+        // key: data.key,
+        key: "rzp_live_SlRoLg9MFbnLUV",
         amount: data.razorpayOrder.amount,
         currency: "INR",
         name: "Local Delivery",
