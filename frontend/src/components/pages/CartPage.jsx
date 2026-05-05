@@ -27,6 +27,7 @@ export default function CartPage() {
   }, []);
 
   // ------------------ LOAD ADDRESSES ------------------
+
   useEffect(() => {
     if (!token) return;
     const fetchAddresses = async () => {
@@ -114,6 +115,7 @@ export default function CartPage() {
   };
 
   const subtotal = cart.reduce(
+    
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
@@ -217,6 +219,7 @@ export default function CartPage() {
       
       // 1. CREATE ORDER IN DATABASE
       const res = await fetch(
+
         "https://localdelivery-app-backend.vercel.app/orders",
         {
           method: "POST",
