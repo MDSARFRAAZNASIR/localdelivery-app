@@ -587,13 +587,14 @@ app.delete(
   })
 );
 // Admin: get all orders
-app.get(
-  "/admin/orders",
-  auth,
-  // adminOnly,
-  adminMiddlle,
-  asyncHandler(async (req, res) => {
-    await connectDB();
+
+// app.get(
+//   "/admin/orders",
+//   auth,
+//   // adminOnly,
+//   adminMiddlle,
+//   asyncHandler(async (req, res) => {
+//     await connectDB();
 
 //     const orders = await Order.find()
 //       .populate({
@@ -614,6 +615,7 @@ app.get(
 app.get(
   "/admin/orders", // Ensure this matches your admin route
   auth, // Assuming you have admin auth middleware
+  adminMiddlle,
   asyncHandler(async (req, res) => {
     // 🛡️ Filter logic:
     // Show COD orders OR Online orders that are PAID
