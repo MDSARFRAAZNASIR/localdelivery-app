@@ -531,16 +531,8 @@ app.get(
   adminMiddlle,
   asyncHandler(async (req, res) => {
     await connectDB();
-    // const products = await Product.find().sort({ createdAt: -1 }).lean();
-
-// Change your query to only show actionable orders
-const products = await Product.find({
-  $or: [
-    { paymentMethod: "COD" }, // Cash orders are always actionable
-    { paymentStatus: "PAID" }  // Online orders must be paid
-  ]
-}).sort({ createdAt: -1 });
-    return res.json({ success: true, products }).lean();
+    const products = await Product.find().sort({ createdAt: -1 }).lean();
+    return res.json({ success: true, products });
   })
 );
 
@@ -612,8 +604,15 @@ app.get(
         model: "Userdetail", // 🔥 FIX AGAIN
 
         select: "username useremail userphone",
-      })
-      .sort({ createdAt: -1 });
+        // Change your query to only show actionable orders
+
+  $or: [
+    { paymentMethod: "COD" }, // Cash orders are always actionable
+    { paymentStatus: "PAID" }  // Online orders must be paid
+  ]
+}).sort({ createdAt: -1 });
+      // })
+      // .sort({ createdAt: -1 });
 
     res.json({ success: true, orders });
   })
