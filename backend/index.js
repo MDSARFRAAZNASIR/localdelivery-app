@@ -534,7 +534,7 @@ app.get(
     // const products = await Product.find().sort({ createdAt: -1 }).lean();
 
 // Change your query to only show actionable orders
-const orders = await Order.find({
+const products = await Product.find({
   $or: [
     { paymentMethod: "COD" }, // Cash orders are always actionable
     { paymentStatus: "PAID" }  // Online orders must be paid
