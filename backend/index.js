@@ -12,6 +12,7 @@ const adminMiddlle = require("./middleware/adminMiddlle");
 const ServiceArea = require("./db/models/serviceAreaModel");
 
 const admin = require("firebase-admin");
+const crypto = require("crypto"); // 1. Put this at the very top with other imports
 
 // const serviceAccount = require("./firebasekey/serviceAccountKey.json");
 // admin.initializeApp({
@@ -530,8 +531,16 @@ app.get(
   adminMiddlle,
   asyncHandler(async (req, res) => {
     await connectDB();
-    const products = await Product.find().sort({ createdAt: -1 }).lean();
-    return res.json({ success: true, products });
+    // const products = await Product.find().sort({ createdAt: -1 }).lean();
+
+// Change your query to only show actionable orders
+const orders = await Order.find({
+  $or: [
+    { paymentMethod: "COD" }, // Cash orders are always actionable
+    { paymentStatus: "PAID" }  // Online orders must be paid
+  ]
+}).sort({ createdAt: -1 });
+    return res.json({ success: true, products }).lean();
   })
 );
 
@@ -1123,6 +1132,8 @@ app.get("/api/admin/stats/pincodes", auth, adminMiddlle, asyncHandler(async (req
   ]);
   res.json(stats);
 }));
+
+
 //  create order with rozpay
 
 
@@ -1163,6 +1174,7 @@ console.log("RAZORPAY PAYLOAD:", {
     //   currency: "INR",
     //   receipt: `order_${order._id}`,
     // });
+    
  
     const razorpayOrder = await razorpay.orders.create({
   // Math.round ensures 150.50 becomes 15050 exactly, with no decimals
@@ -1182,7 +1194,7 @@ console.log("RAZORPAY PAYLOAD:", {
 );
 
 // verify rozpay
-const crypto = require("crypto");
+// const crypto = require("crypto");
 
 app.post(
   "/payments/razorpay/verify",
@@ -1220,6 +1232,40 @@ app.post(
     res.json({ success: true, message: "Payment successful", order });
   })
 );
+
+
+
+
+// This is your verification route (e.g., /api/payment/verify)
+export const verifyPayment = async (req, res) => {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+  // 1. Create the expected signature
+  const body = razorpay_order_id + "|" + razorpay_payment_id;
+
+  const expectedSignature = crypto
+    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+    .update(body.toString())
+    .digest("hex");
+
+  // 2. Compare signatures
+  const isAuthentic = expectedSignature === razorpay_signature;
+
+  if (isAuthentic) {
+    // 3. Database Update: Find the order and mark as PAID
+    // await Order.findOneAndUpdate({ razorpayOrderId: razorpay_order_id }, { status: 'Paid', paymentId: razorpay_payment_id });
+
+    res.status(200).json({
+      success: true,
+      message: "Payment verified successfully",
+    });
+  } else {
+    res.status(400).json({
+      success: false,
+      message: "Invalid signature, payment verification failed!",
+    });
+  }
+};
 
 // Get all orders for logged-in user
 app.get(

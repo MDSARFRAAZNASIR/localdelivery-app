@@ -4,7 +4,6 @@
 # Firebase Secret Key
 
 firebasekey/serviceAccountKey.json
-.env
 
 # dependencies
 /node_modules
