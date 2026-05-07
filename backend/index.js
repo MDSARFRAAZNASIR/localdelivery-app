@@ -595,27 +595,44 @@ app.get(
   asyncHandler(async (req, res) => {
     await connectDB();
 
-    const orders = await Order.find()
-      .populate({
-        path: "userId",
-       
-        model: "Userdetail", // 🔥 FIX AGAIN
+//     const orders = await Order.find()
+//       .populate({
+//         path: "userId",
+//        
+//         model: "Userdetail", // 🔥 FIX AGAIN
 
-        select: "username useremail userphone",
-        // Change your query to only show actionable orders
+//         select: "username useremail userphone",
+        
+//       })
+//       .sort({ createdAt: -1 });
 
-  
-     paymentMethod: "COD" , // Cash orders are always actionable
-    paymentStatus: "PAID"   // Online orders must be paid
-  
-}).sort({ createdAt: -1 });
-      // })
-      // .sort({ createdAt: -1 });
+//     res.json({ success: true, orders });
+//   })
+// );
+
+//  add for filter online paid order
+app.get(
+  "/admin/orders", // Ensure this matches your admin route
+  auth, // Assuming you have admin auth middleware
+  asyncHandler(async (req, res) => {
+    // 🛡️ Filter logic:
+    // Show COD orders OR Online orders that are PAID
+    const orders = await Order.find({
+      $or: [
+        { paymentMethod: "COD" },
+        { $and: [{ paymentMethod: "ONLINE" }, { paymentStatus: "PAID" }] }
+      ]
+    })
+    .populate({
+      path: "userId",
+      model: "Userdetail", 
+      select: "username useremail userphone",
+    })
+    .sort({ createdAt: -1 });
 
     res.json({ success: true, orders });
   })
 );
-
 // GET /products?category=Fruits&q=milk&min=10&max=200&page=1&limit=24&sort=price_asc
 
 app.get(
