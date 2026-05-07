@@ -115,7 +115,6 @@ export default function CartPage() {
   };
 
   const subtotal = cart.reduce(
-
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
@@ -123,81 +122,6 @@ export default function CartPage() {
   const grandTotal = subtotal + deliveryFee;
 
   // ------------------ PLACE ORDER ------------------
-
-  // again code write
-  // const handlePlaceOrder = async () => {
-  //   if (!token) {
-  //     navigate("/login");
-  //     return;
-  //   }
-  //   if (cart.length === 0) {
-  //     setError("Cart is empty");
-  //     return;
-  //   }
-  //   if (!selectedAddressId) {
-  //     setError("Please select a delivery address");
-  //     return;
-  //   }
-  //   // 🚨 NEW: Verify stock one last time before API call
-  //   const outOfStockItem = cart.find((item) => item.quantity > item.stock);
-  //   if (outOfStockItem) {
-  //     setError(
-  //       `${outOfStockItem.name} only has ${outOfStockItem.stock} left. Please reduce quantity.`,
-  //     );
-  //     return;
-  //   }
-
-  //   setLoading(true);
-  //   setError("");
-  //   setMessage("");
-
-  //   try {
-  //     // 1. PLACE THE ORDER (Backend now handles stock decrement automatically)
-  //     const res = await fetch(
-  //       "https://localdelivery-app-backend.vercel.app/orders",
-  //       {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         body: JSON.stringify({
-  //           items: cart.map((item) => ({
-  //             productId: item.productId,
-  //             quantity: item.quantity,
-  //           })),
-  //           deliveryAddressId: selectedAddressId,
-  //           paymentMethod,
-  //         }),
-  //       },
-  //     );
-
-  //     const data = await res.json();
-  //     if (!res.ok || !data.success)
-  //       throw new Error(data.message || "Failed to place order");
-
-  //     // --- STEP 2 (STOCK UPDATE) REMOVED FROM HERE ---
-  //     // Because the Backend /orders route now does: $inc: { stock: -quantity }
-
-  //     // 3. FINALIZE
-  //     updateCart([]); // Clear the cart
-  //     setMessage("Order placed successfully! ✅");
-
-  //     const orderId = data.order?._id;
-
-  //     setTimeout(() => {
-  //       if (paymentMethod === "ONLINE" && orderId) {
-  //         navigate(`/user/orders/${orderId}`);
-  //       } else {
-  //         navigate("/orders");
-  //       }
-  //     }, 800);
-  //   } catch (err) {
-  //     setError(err.message || "Error placing order");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   const handlePlaceOrder = async () => {
     // --- SAFETY CHECKS ---
@@ -216,10 +140,8 @@ export default function CartPage() {
     setMessage("");
 
     try {
-      
       // 1. CREATE ORDER IN DATABASE
       const res = await fetch(
-
         "https://localdelivery-app-backend.vercel.app/orders",
         {
           method: "POST",
@@ -240,7 +162,7 @@ export default function CartPage() {
 
       const data = await res.json();
       // const data = await res.json();
-console.log("Full Server Response:", data);
+      console.log("Full Server Response:", data);
       if (!res.ok || !data.success)
         throw new Error(data.message || "Failed to place order");
 
@@ -283,22 +205,23 @@ console.log("Full Server Response:", data);
 
       const data = await res.json();
       // 🛡️ SAFETY CHECK: If the server gave an error, stop here!
-    if (!res.ok || !data.razorpayOrder) {
-      throw new Error(data.message || "Server failed to create Razorpay Order");
-    }
+      if (!res.ok || !data.razorpayOrder) {
+        throw new Error(
+          data.message || "Server failed to create Razorpay Order",
+        );
+      }
 
       const options = {
         // key: data.key,
-        
+
         key: "rzp_live_SlRoLg9MFbnLUV",
         amount: data.razorpayOrder.amount,
         currency: "INR",
         name: "Local Delivery",
         description: "Order Payment",
         order_id: data.razorpayOrder.id,
-        handler: async (response) => {
 
-          
+        handler: async (response) => {
           // VERIFY PAYMENT
           const verifyRes = await fetch(
             "https://localdelivery-app-backend.vercel.app/payments/razorpay/verify",
@@ -319,10 +242,11 @@ console.log("Full Server Response:", data);
 
           const verifyData = await verifyRes.json();
           if (verifyData.success) {
-            alert("Payment Successful! 🎉");
-            navigate(`/orders`);
+            alert("Payment Successful! Your order is confirmed.🎉");
+            // navigate(`/orders`);
+            window.location.href = "/orders";
           } else {
-            setError("Payment verification failed.");
+            setError("Payment verification failed. Please contact support.");
           }
         },
         prefill: {
@@ -335,10 +259,12 @@ console.log("Full Server Response:", data);
       rzp.open();
     } catch (err) {
       console.error("DEBUG PAYMENT ERROR:", err); // 👈 Add this line
-  setError(`Payment Error: ${err.message}`);
+      setError(`Payment Error: ${err.message}`);
       // setError("Could not initialize payment gateway.");
     }
   };
+
+  // signature varify
 
   return (
     <>
@@ -519,11 +445,13 @@ console.log("Full Server Response:", data);
             </div>
           </div>
 
-          {/* RIGHT COLUMN: Summary and Payment */}
-          {/* <div className="lg:col-span-1">
+          {/* RIGHT COLUMN: Summary and Payment * * new add application upi is show */}
+
+          <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 sticky top-24">
               <h3 className="font-black text-lg mb-6">Bill Details</h3>
 
+              {/* --- Price Breakdown --- */}
               <div className="space-y-3 text-sm font-bold text-gray-500 mb-6">
                 <div className="flex justify-between">
                   <span>Item Total</span>
@@ -550,103 +478,123 @@ console.log("Full Server Response:", data);
                 </div>
               </div>
 
+              {/* --- Payment Selection --- */}
               <div className="mb-6">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">
-                  Payment Mode
-                </label> */}
- {/* some thinngs */}
-                {/* <select
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-green-500/20"
-                >
-                  <option value="COD">Cash on Delivery</option>
-                  <option value="ONLINE">Pay via Online (UPI/Card)</option>
-                </select> */}
-                {/* end */}
-{/* 
-                <div className="mb-6">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">
-                    Choose Payment Method
-                  </label>
-                  <div className="grid grid-cols-1 gap-3"> */}
-                    {/* Cash on Delivery Option */}
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-3">
+                  Choose Payment Method
+                </label>
+                <div className="grid grid-cols-1 gap-3">
+                  {/* COD Option */}
+                  <button
+                    onClick={() => setPaymentMethod("COD")}
+                    className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all ${
+                      paymentMethod === "COD"
+                        ? "border-green-600 bg-green-50"
+                        : "border-gray-100 bg-gray-50 hover:border-gray-200"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">💵</span>
+                      <span className="font-bold text-sm text-gray-800">
+                        Cash on Delivery
+                      </span>
+                    </div>
+                    {paymentMethod === "COD" && (
+                      <div className="w-2.5 h-2.5 rounded-full bg-green-600 shadow-[0_0_8px_rgba(22,163,74,0.5)]" />
+                    )}
+                  </button>
 
-                    {/* <button
-                      onClick={() => setPaymentMethod("COD")}
-                      className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all ${
-                        paymentMethod === "COD"
-                          ? "border-green-600 bg-green-50"
-                          : "border-gray-100 bg-gray-50 hover:border-gray-200"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">💵</span>
-                        <span className="font-bold text-sm text-gray-800">
-                          Cash on Delivery
-                        </span>
+                  {/* Online Payment Option */}
+                  <button
+                    onClick={() => setPaymentMethod("ONLINE")}
+                    className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all ${
+                      paymentMethod === "ONLINE"
+                        ? "border-blue-600 bg-blue-50"
+                        : "border-gray-100 bg-gray-50 hover:border-gray-200"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">📱</span>
+                      <div className="text-left">
+                        <p className="font-bold text-sm text-gray-800">
+                          Online Payment
+                        </p>
+                        <p className="text-[10px] text-gray-500 font-medium">
+                          Fast & Secure
+                        </p>
                       </div>
-
-                      {paymentMethod === "COD" && (
-                        <div className="w-2 h-2 rounded-full bg-green-600" />
-                      )}
-                    </button>
-
-                    {/* Online Payment Option */}
-{/*                     
-                    <button
-                      onClick={() => setPaymentMethod("ONLINE")}
-                      className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all ${
-
-                        
-                        paymentMethod === "ONLINE"
-                          ? "border-blue-600 bg-blue-50"
-                          : "border-gray-100 bg-gray-50 hover:border-gray-200"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">📱</span>
-                        <div>
-                          <p className="font-bold text-sm text-gray-800 text-left">
-                            Online Payment
-                          </p>
-                          <p className="text-[10px] text-gray-500 italic">
-                            UPI, PhonePe, Cards
-                          </p>
-                        </div>
-                      </div>
-                      {paymentMethod === "ONLINE" && (
-                        <div className="w-2 h-2 rounded-full bg-blue-600" />
-                      )}
-                    </button>
-                  </div>
+                    </div>
+                    {paymentMethod === "ONLINE" && (
+                      <div className="w-2.5 h-2.5 rounded-full bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.5)]" />
+                    )}
+                  </button>
                 </div>
+
+                {/* --- Visual Payment Icons (Shows when ONLINE is selected) --- */}
+                {paymentMethod === "ONLINE" && (
+                  <div className="mt-4 p-3 bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-around animate-in fade-in slide-in-from-top-2">
+                    <img
+                      src="https://img.icons8.com/color/48/google-pay-india.png"
+                      className="h-6 grayscale hover:grayscale-0 transition-all"
+                      alt="GPay"
+                    />
+                    <img
+                      src="https://img.icons8.com/color/48/phone-pe.png"
+                      className="h-6 grayscale hover:grayscale-0 transition-all"
+                      alt="PhonePe"
+                    />
+                    <img
+                      src="https://img.icons8.com/color/48/visa.png"
+                      className="h-4 grayscale hover:grayscale-0 transition-all"
+                      alt="Visa"
+                    />
+                    <img
+                      src="https://img.icons8.com/color/48/mastercard.png"
+                      className="h-6 grayscale hover:grayscale-0 transition-all"
+                      alt="Mastercard"
+                    />
+                    <span className="text-[8px] font-black text-gray-400 uppercase">
+                      Secure by Razorpay
+                    </span>
+                  </div>
+                )}
               </div>
 
+              {/* --- Error/Success Messages --- */}
               {error && (
-                <div className="p-3 bg-red-50 text-red-600 text-xs font-bold rounded-xl mb-4 text-center">
+                <div className="p-3 bg-red-50 text-red-600 text-xs font-bold rounded-xl mb-4 text-center border border-red-100">
                   {error}
                 </div>
               )}
               {message && (
-                <div className="p-3 bg-green-50 text-green-600 text-xs font-bold rounded-xl mb-4 text-center">
+                <div className="p-3 bg-green-50 text-green-600 text-xs font-bold rounded-xl mb-4 text-center border border-green-100">
                   {message}
                 </div>
               )}
 
+              {/* --- Submit Button --- */}
               <button
                 onClick={handlePlaceOrder}
                 disabled={
                   loading ||
                   (selectedAddressId && serviceArea && !serviceArea.serviceable)
                 }
-                className={`w-full py-4 rounded-2xl text-white font-black shadow-lg transition-all active:scale-95 ${
+                className={`w-full py-4 rounded-2xl text-white font-black shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 ${
                   serviceArea?.serviceable
-                    ? "bg-black hover:bg-green-700 shadow-green-900/10"
+                    ? "bg-black hover:bg-gray-900 shadow-gray-900/20"
                     : "bg-gray-300 cursor-not-allowed"
                 }`}
               >
-                {loading ? "PROCESSING..." : "PLACE ORDER"}
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    PROCESSING...
+                  </>
+                ) : paymentMethod === "ONLINE" ? (
+                  "PAY & PLACE ORDER"
+                ) : (
+                  "CONFIRM ORDER"
+                )}
               </button>
 
               {!serviceArea?.serviceable &&
@@ -656,132 +604,8 @@ console.log("Full Server Response:", data);
                     🚫 We don't deliver to {selectedAddress?.pincode} yet!
                   </p>
                 )}
-            </div> */}
-          {/* </div>  */}
-
-
-          {/* new add application upi is show */}
-
-          <div className="lg:col-span-1">
-  <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 sticky top-24">
-    <h3 className="font-black text-lg mb-6">Bill Details</h3>
-
-    {/* --- Price Breakdown --- */}
-    <div className="space-y-3 text-sm font-bold text-gray-500 mb-6">
-      <div className="flex justify-between">
-        <span>Item Total</span>
-        <span className="text-gray-800">₹{subtotal}</span>
-      </div>
-      <div className="flex justify-between">
-        <span>Delivery Fee</span>
-        <span className={deliveryFee > 0 ? "text-gray-800" : "text-green-600"}>
-          {deliveryFee > 0 ? `₹${deliveryFee}` : "FREE"}
-        </span>
-      </div>
-      {checkingArea && (
-        <div className="text-[10px] text-orange-500 animate-pulse">
-          Checking pincode serviceability...
-        </div>
-      )}
-      <div className="border-t border-dashed pt-3 flex justify-between text-lg font-black text-black">
-        <span>Grand Total</span>
-        <span>₹{grandTotal}</span>
-      </div>
-    </div>
-
-    {/* --- Payment Selection --- */}
-    <div className="mb-6">
-      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-3">
-        Choose Payment Method
-      </label>
-      <div className="grid grid-cols-1 gap-3">
-        {/* COD Option */}
-        <button
-          onClick={() => setPaymentMethod("COD")}
-          className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all ${
-            paymentMethod === "COD"
-              ? "border-green-600 bg-green-50"
-              : "border-gray-100 bg-gray-50 hover:border-gray-200"
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-xl">💵</span>
-            <span className="font-bold text-sm text-gray-800">Cash on Delivery</span>
-          </div>
-          {paymentMethod === "COD" && <div className="w-2.5 h-2.5 rounded-full bg-green-600 shadow-[0_0_8px_rgba(22,163,74,0.5)]" />}
-        </button>
-
-        {/* Online Payment Option */}
-        <button
-          onClick={() => setPaymentMethod("ONLINE")}
-          className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all ${
-            paymentMethod === "ONLINE"
-              ? "border-blue-600 bg-blue-50"
-              : "border-gray-100 bg-gray-50 hover:border-gray-200"
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-xl">📱</span>
-            <div className="text-left">
-              <p className="font-bold text-sm text-gray-800">Online Payment</p>
-              <p className="text-[10px] text-gray-500 font-medium">Fast & Secure</p>
             </div>
           </div>
-          {paymentMethod === "ONLINE" && <div className="w-2.5 h-2.5 rounded-full bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.5)]" />}
-        </button>
-      </div>
-
-      {/* --- Visual Payment Icons (Shows when ONLINE is selected) --- */}
-      {paymentMethod === "ONLINE" && (
-        <div className="mt-4 p-3 bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-around animate-in fade-in slide-in-from-top-2">
-           <img src="https://img.icons8.com/color/48/google-pay-india.png" className="h-6 grayscale hover:grayscale-0 transition-all" alt="GPay" />
-           <img src="https://img.icons8.com/color/48/phone-pe.png" className="h-6 grayscale hover:grayscale-0 transition-all" alt="PhonePe" />
-           <img src="https://img.icons8.com/color/48/visa.png" className="h-4 grayscale hover:grayscale-0 transition-all" alt="Visa" />
-           <img src="https://img.icons8.com/color/48/mastercard.png" className="h-6 grayscale hover:grayscale-0 transition-all" alt="Mastercard" />
-           <span className="text-[8px] font-black text-gray-400 uppercase">Secure by Razorpay</span>
-        </div>
-      )}
-    </div>
-
-    {/* --- Error/Success Messages --- */}
-    {error && (
-      <div className="p-3 bg-red-50 text-red-600 text-xs font-bold rounded-xl mb-4 text-center border border-red-100">
-        {error}
-      </div>
-    )}
-    {message && (
-      <div className="p-3 bg-green-50 text-green-600 text-xs font-bold rounded-xl mb-4 text-center border border-green-100">
-        {message}
-      </div>
-    )}
-
-    {/* --- Submit Button --- */}
-    <button
-      onClick={handlePlaceOrder}
-      disabled={loading || (selectedAddressId && serviceArea && !serviceArea.serviceable)}
-      className={`w-full py-4 rounded-2xl text-white font-black shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 ${
-        serviceArea?.serviceable
-          ? "bg-black hover:bg-gray-900 shadow-gray-900/20"
-          : "bg-gray-300 cursor-not-allowed"
-      }`}
-    >
-      {loading ? (
-        <>
-          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          PROCESSING...
-        </>
-      ) : (
-        paymentMethod === "ONLINE" ? "PAY & PLACE ORDER" : "CONFIRM ORDER"
-      )}
-    </button>
-
-    {!serviceArea?.serviceable && selectedAddressId && !checkingArea && (
-      <p className="text-[10px] text-red-500 font-bold text-center mt-3 leading-tight uppercase tracking-tighter">
-        🚫 We don't deliver to {selectedAddress?.pincode} yet!
-      </p>
-    )}
-  </div>
-</div>
         </div>
       </div>
     </>
