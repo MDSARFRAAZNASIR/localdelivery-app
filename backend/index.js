@@ -598,18 +598,16 @@ app.get(
     const orders = await Order.find()
       .populate({
         path: "userId",
-        // model: "Userdata", // 🔥 FIX
-        // model: "User", // 🔥 FIX AGAIN
-        //  model: "Userdata", // 🔥 FIX
+       
         model: "Userdetail", // 🔥 FIX AGAIN
 
         select: "username useremail userphone",
         // Change your query to only show actionable orders
 
-  $or: [
-    { paymentMethod: "COD" }, // Cash orders are always actionable
-    { paymentStatus: "PAID" }  // Online orders must be paid
-  ]
+  
+     paymentMethod: "COD" , // Cash orders are always actionable
+    paymentStatus: "PAID"   // Online orders must be paid
+  
 }).sort({ createdAt: -1 });
       // })
       // .sort({ createdAt: -1 });
