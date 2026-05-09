@@ -79,6 +79,7 @@ const orderSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    
 
     // --- RATING SECTION (Enhanced) ---
     rating: {
@@ -131,7 +132,17 @@ const orderSchema = new mongoose.Schema(
       enum: ["PENDING", "PAID"],
       default: "PENDING",
     },
+    // Add a field for expiration
+expiresAt: {
+  type: Date,
+  default: () => Date.now() + 24*60*60*1000 // 24 hours from now
+}
+
+// Then in your DB setup, create a TTL index
+// orderSchema.index({ "expiresAt": 1 }, { expireAfterSeconds: 0 });
   },
+
+  
   {
     timestamps: true,
   },

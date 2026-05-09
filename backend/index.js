@@ -1154,100 +1154,155 @@ app.get("/api/admin/stats/pincodes", auth, adminMiddlle, asyncHandler(async (req
 
 
 
-app.post(
-  "/payments/razorpay/create-order",
-  
-  
-  auth,
-
-  asyncHandler(async (req, res) => {
-    // const { orderId } = req.body;
-    const { orderId } = req.body;
-    // console.log("Searching for Order:", orderId, "for User:", req.user._id); 
+// app.post(
+//   "/payments/razorpay/create-order",
+//   auth,
+//   asyncHandler(async (req, res) => {
+//     // const { orderId } = req.body;
+//     const { orderId } = req.body;
+//     // console.log("Searching for Order:", orderId, "for User:", req.user._id); 
 
 
-    await connectDB();
+//     await connectDB();
 
-    const order = await Order.findOne({
-      _id: orderId,
-      userId: req.user._id,
-    });
+//     const order = await Order.findOne({
+//       _id: orderId,
+//       userId: req.user._id,
+//     });
 
-    if (!order) {
-      return res.status(404).json({ message: "Order not found" });
-    }
+//     if (!order) {
+//       return res.status(404).json({ message: "Order not found" });
+//     }
 
-    if (order.paymentStatus === "PAID") {
-      return res.status(400).json({ message: "Order already paid" });
-    }
+//     if (order.paymentStatus === "PAID") {
+//       return res.status(400).json({ message: "Order already paid" });
+//     }
 
-console.log("RAZORPAY PAYLOAD:", {
-  amount: order.totalAmount * 100,
-  currency: "INR"
-});
-    // const razorpayOrder = await razorpay.orders.create({
-    //   amount: order.totalAmount * 100, // paise
-    //   currency: "INR",
-    //   receipt: `order_${order._id}`,
-    // });
+// console.log("RAZORPAY PAYLOAD:", {
+//   amount: order.totalAmount * 100,
+//   currency: "INR"
+// });
+//     // const razorpayOrder = await razorpay.orders.create({
+//     //   amount: order.totalAmount * 100, // paise
+//     //   currency: "INR",
+//     //   receipt: `order_${order._id}`,
+//     // });
     
  
-    const razorpayOrder = await razorpay.orders.create({
-  // Math.round ensures 150.50 becomes 15050 exactly, with no decimals
-  amount: Math.round(order.totalAmount * 100), 
-  currency: "INR",
-  receipt: `order_${order._id}`,
-});
+//     const razorpayOrder = await razorpay.orders.create({
+//   // Math.round ensures 150.50 becomes 15050 exactly, with no decimals
+//   amount: Math.round(order.totalAmount * 100), 
+//   currency: "INR",
+//   receipt: `order_${order._id}`,
+// });
 
+//     order.razorpayOrderId = razorpayOrder.id;
+//     await order.save();
+
+//     res.json({
+//       key: process.env.RAZORPAY_KEY_ID,
+//       razorpayOrder,
+//     });
+//   })
+// );
+
+// // verify rozpay
+// // const crypto = require("crypto");
+
+// app.post(
+//   "/payments/razorpay/verify",
+//   auth,
+//   asyncHandler(async (req, res) => {
+//     const {
+//       razorpay_order_id,
+//       razorpay_payment_id,
+//       razorpay_signature,
+//       orderId,
+//     } = req.body;
+
+//     const body = razorpay_order_id + "|" + razorpay_payment_id;
+
+//     const expectedSignature = crypto
+//       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+//       .update(body.toString())
+//       .digest("hex");
+
+//     if (expectedSignature !== razorpay_signature) {
+//       return res.status(400).json({ message: "Payment verification failed" });
+//     }
+
+//     await connectDB();
+
+//     const order = await Order.findById(orderId);
+//     if (!order) return res.status(404).json({ message: "Order not found" });
+
+//     order.paymentStatus = "PAID";
+//     order.paymentMethod = "ONLINE";
+//     order.razorpayPaymentId = razorpay_payment_id;
+
+//     await order.save();
+
+//     res.json({ success: true, message: "Payment successful", order });
+//   })
+// );
+
+
+// new one
+// 1. CREATE RAZORPAY ORDER (Handles both Fresh and Retry)
+app.post("/payments/razorpay/create-order", auth, asyncHandler(async (req, res) => {
+    const { orderId } = req.body;
+    await connectDB();
+
+    const order = await Order.findOne({ _id: orderId, userId: req.user._id });
+
+    if (!order) return res.status(404).json({ message: "Order not found" });
+    if (order.paymentStatus === "PAID") return res.status(400).json({ message: "Order already paid" });
+
+    // Create a new Razorpay session for this existing order
+    const razorpayOrder = await razorpay.orders.create({
+        amount: Math.round(order.totalAmount * 100), 
+        currency: "INR",
+        receipt: `order_rcpt_${order._id}`,
+    });
+
+    // CRITICAL: Update the order with the NEW razorpayOrderId 
+    // This ensures verification matches the current payment attempt
     order.razorpayOrderId = razorpayOrder.id;
     await order.save();
 
     res.json({
-      key: process.env.RAZORPAY_KEY_ID,
-      razorpayOrder,
+        key: process.env.RAZORPAY_KEY_ID,
+        razorpayOrder,
     });
-  })
-);
+}));
 
-// verify rozpay
-// const crypto = require("crypto");
+// 2. VERIFY PAYMENT
+app.post("/payments/razorpay/verify", auth, asyncHandler(async (req, res) => {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
 
-app.post(
-  "/payments/razorpay/verify",
-  auth,
-  asyncHandler(async (req, res) => {
-    const {
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature,
-      orderId,
-    } = req.body;
-
+    // Verify Signature
     const body = razorpay_order_id + "|" + razorpay_payment_id;
-
     const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(body.toString())
       .digest("hex");
 
     if (expectedSignature !== razorpay_signature) {
-      return res.status(400).json({ message: "Payment verification failed" });
+      return res.status(400).json({ success: false, message: "Invalid Signature" });
     }
 
     await connectDB();
-
     const order = await Order.findById(orderId);
-    if (!order) return res.status(404).json({ message: "Order not found" });
+    if (!order) return res.status(404).json({ success: false, message: "Order not found" });
 
+    // Update the existing order to PAID
     order.paymentStatus = "PAID";
     order.paymentMethod = "ONLINE";
     order.razorpayPaymentId = razorpay_payment_id;
-
     await order.save();
 
-    res.json({ success: true, message: "Payment successful", order });
-  })
-);
+    res.json({ success: true, message: "Payment verified successfully", order });
+}));
 
 
 

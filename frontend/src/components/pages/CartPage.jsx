@@ -254,8 +254,18 @@ export default function CartPage() {
         },
         theme: { color: "#16a34a" }, // Green theme to match your app
       };
-
       const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', async function (response) {
+  console.log("Payment failed or cancelled");
+  
+  // Optional: Call your backend to delete the pending order
+  await fetch(`https://your-api.com/api/orders/${orderId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  
+  setError("Payment was not successful. Order cancelled.");
+});
       rzp.open();
     } catch (err) {
       console.error("DEBUG PAYMENT ERROR:", err); // 👈 Add this line
