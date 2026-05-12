@@ -630,7 +630,10 @@ app.get(
       model: "Userdetail", 
       select: "username useremail userphone",
     })
-    .sort({ createdAt: -1 });
+
+    // .sort({ createdAt: -1 });
+    
+    .sort({ updatedAt: -1 })
 
     res.json({ success: true, orders });
   })
@@ -1280,6 +1283,8 @@ app.post("/payments/razorpay/create-order", auth, asyncHandler(async (req, res) 
 app.post("/payments/razorpay/verify", auth, asyncHandler(async (req, res) => {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
 
+   
+    
     // Verify Signature
     const body = razorpay_order_id + "|" + razorpay_payment_id;
     const expectedSignature = crypto
@@ -1292,14 +1297,29 @@ app.post("/payments/razorpay/verify", auth, asyncHandler(async (req, res) => {
     }
 
     await connectDB();
-    const order = await Order.findById(orderId);
-    if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+    // const order = await Order.findById(orderId);
+    // if (!order) return res.status(404).json({ success: false, message: "Order not found" });
 
-    // Update the existing order to PAID
-    order.paymentStatus = "PAID";
-    order.paymentMethod = "ONLINE";
-    order.razorpayPaymentId = razorpay_payment_id;
-    await order.save();
+    // // Update the existing order to PAID
+    // order.paymentStatus = "PAID";
+    // order.paymentMethod = "ONLINE";
+    // order.razorpayPaymentId = razorpay_payment_id;
+    // await order.save();
+
+    // add another
+    // Inside your verify route after signature is valid:
+const order = await Order.findById(orderId);
+if (!order) return res.status(404).json({ message: "Order not found" });
+
+order.paymentStatus = "PAID";
+order.paymentMethod = "ONLINE";
+order.razorpayPaymentId = razorpay_payment_id;
+
+// 🔥 ADD THIS: Record exactly when the payment actually happened
+order.paidAt = new Date(); 
+
+// This forces the "updatedAt" field to refresh to the current time
+await order.save();
 
     res.json({ success: true, message: "Payment verified successfully", order });
 }));
