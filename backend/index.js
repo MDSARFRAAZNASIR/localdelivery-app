@@ -1328,7 +1328,7 @@ await order.save();
 
 
 // This is your verification route (e.g., /api/payment/verify)
-export const verifyPayment = async (req, res) => {
+const verifyPayment = async (req, res) => {
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
   // 1. Create the expected signature
@@ -1357,6 +1357,38 @@ export const verifyPayment = async (req, res) => {
     });
   }
 };
+
+
+
+// add route failed paymet
+// app.post("/payments/razorpay/update-status", auth, asyncHandler(async (req, res) => {
+//     const { orderId, status } = req.body;
+//     await connectDB();
+    
+//     const order = await Order.findById(orderId);
+//     if (!order) return res.status(404).json({ message: "Order not found" });
+
+//     order.paymentStatus = status; // Will be set to 'FAILED'
+//     await order.save();
+
+//     res.json({ success: true, message: "Status updated" });
+// }));
+
+
+// payments.js
+app.post("/payments/razorpay/payment-failed", auth, asyncHandler(async (req, res) => {
+    const { orderId, errorDescription } = req.body;
+    await connectDB();
+    
+    const order = await Order.findById(orderId);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    order.paymentStatus = "FAILED";
+    order.paymentError = errorDescription || "Payment was unsuccessful";
+    
+    await order.save();
+    res.json({ success: true, message: "Order status updated to FAILED" });
+}));
 
 // Get all orders for logged-in user
 app.get(

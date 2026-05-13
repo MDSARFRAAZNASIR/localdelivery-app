@@ -129,14 +129,20 @@ const orderSchema = new mongoose.Schema(
 
     paymentStatus: {
       type: String,
-      enum: ["PENDING", "PAID"],
+      enum: ["PENDING", "PAID", "FAILED", "CANCELLED"],
       default: "PENDING",
     },
     // Add a field for expiration
 expiresAt: {
   type: Date,
   default: () => Date.now() + 24*60*60*1000 // 24 hours from now
-}
+},
+paymentError: { 
+    type: String // Stores "User cancelled", "Insufficent funds", etc.
+  },
+paidAt: { 
+    type: Date 
+  },
 
 // Then in your DB setup, create a TTL index
 // orderSchema.index({ "expiresAt": 1 }, { expireAfterSeconds: 0 });
