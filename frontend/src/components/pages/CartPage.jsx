@@ -223,6 +223,7 @@ export default function CartPage() {
 
         handler: async (response) => {
           // VERIFY PAYMENT
+          
           const verifyRes = await fetch(
             "https://localdelivery-app-backend.vercel.app/payments/razorpay/verify",
             {
@@ -249,17 +250,20 @@ export default function CartPage() {
             setError("Payment verification failed. Please contact support.");
           }
         },
+        
         prefill: {
           name: "User", // You can pass actual user name from profile
         },
         theme: { color: "#16a34a" }, // Green theme to match your app
       };
       const rzp = new window.Razorpay(options);
+
+      
       rzp.on('payment.failed', async function (response) {
   console.log("Payment failed or cancelled");
   
   // Optional: Call your backend to delete the pending order
-  await fetch(`https://your-api.com/api/orders/${orderId}`, {
+  await fetch(`https://localdelivery-app-backend.vercel.app/orders/${orderId}`, {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${token}` }
   });

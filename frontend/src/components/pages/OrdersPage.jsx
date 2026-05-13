@@ -44,15 +44,7 @@ export default function OrdersPage() {
   }, [token, navigate]);
 
   // --- EXISTING SEARCH & FILTER LOGIC ---
-  // const filteredOrders = useMemo(() => {
-  //   return orders.filter((order) => {
-  //     const matchesSearch =
-  //       order._id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //       order.items.some(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
-  //     const matchesStatus = statusFilter === "ALL" || order.status === statusFilter;
-  //     return matchesSearch && matchesStatus;
-  //   });
-  // }, [orders, searchQuery, statusFilter]);
+  
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
@@ -102,6 +94,104 @@ export default function OrdersPage() {
     }
   };
 
+  
+
+  // new one Repayment Function
+  const handleRetryPayment = async (order) => {
+    try {
+      // Step 1: Tell backend to generate a NEW Razorpay ID for this OLD order
+      const res = await fetch(
+        "https://localdelivery-app-backend.vercel.app/payments/razorpay/create-order",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ orderId: order._id }), // This is the MongoDB ID
+        },
+      );
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      const options = {
+        key: data.key, // Best to get this from backend data.key
+        amount: data.razorpayOrder.amount,
+        currency: "INR",
+        name: "Local Delivery",
+        description: "Retry Payment",
+        order_id: data.razorpayOrder.id, // The NEW Razorpay Order ID from backend
+        handler: async (response) => {
+          // Step 2: Send the new payment details back for verification
+          const verifyRes = await fetch(
+            "https://localdelivery-app-backend.vercel.app/payments/razorpay/verify",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                orderId: order._id, // Sending the MongoDB ID so backend knows which one to update
+              }),
+            },
+          );
+
+          const verifyData = await verifyRes.json();
+          if (verifyData.success) {
+            alert("Payment Successful! 🎉");
+            window.location.reload();
+          } else {
+            alert(
+              "Verification failed. Please check your bank and contact us.",
+            );
+          }
+        },
+        prefill: { contact: order.userphone || "" },
+        theme: { color: "#2563eb" },
+      };
+
+      const rzp = new window.Razorpay(options);
+
+      // add new rv
+      // 🔥 Add this listener
+      rzp.on("payment.failed", async function (response) {
+        // console.log("Payment failed logic triggered");
+        console.error("Payment Failed:", response.error.description);
+
+        // Update backend to 'FAILED'
+        await fetch(
+          `https://your-backend.vercel.app/payments/razorpay/payment-failed`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              orderId: order._id,
+              // status: 'FAILED'
+              errorDescription: response.error.description,
+            }),
+          },
+        );
+        // Optional: Show a toast or alert
+        alert("Payment Failed: " + response.error.description);
+
+        // Refresh UI to show the "Failed" message
+        window.location.reload();
+      });
+
+      rzp.open();
+    } catch (err) {
+      console.error("Retry Error:", err);
+      alert("Could not start payment.");
+    }
+  };
   return (
     <>
       <Navbar />
@@ -194,12 +284,21 @@ export default function OrdersPage() {
                             #{order._id.slice(-8)}
                           </span>
                         </div>
+
                         <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                          Placed{" "}
-                          {new Date(order.createdAt).toLocaleDateString(
-                            "en-IN",
-                            { day: "2-digit", month: "short", year: "numeric" },
-                          )}
+                          {order.paymentStatus === "PAID"
+                            ? "Paid on "
+                            : "Placed "}
+                          {new Date(
+                            order.paidAt || order.updatedAt || order.createdAt,
+                          ).toLocaleString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                          })}
                         </h3>
                       </div>
                       <span
@@ -286,9 +385,61 @@ export default function OrdersPage() {
                         <div className="text-2xl font-black text-gray-900 leading-none tracking-tighter">
                           ₹{order.totalAmount}
                         </div>
-                        <div className="text-[8px] font-black bg-white border border-gray-100 text-blue-500 px-2 py-0.5 rounded uppercase mb-1">
-                          {order.paymentMethod}
+
+                        {/* another  repayment and date fixing*/}
+                      
+                        <div>
+                          <h3 className="text-xs font-thin text-gray-400 uppercase tracking-widest">
+                            {order.paymentStatus === "PAID"
+                              ? "Paid on "
+                              : "Placed "}
+                            {new Date(
+                              order.paidAt || order.createdAt,
+                            ).toLocaleString("en-IN", {
+                              day: "2-digit",
+                              month: "short",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </h3>
+
+                          {/* Dynamic Status Badge */}
+                          {/* <div > */}
+                          {order.paymentStatus === "FAILED" ? (
+                            <span className="px-2 py-1 bg-red-100 text-red-600 text-xs font-bold rounded uppercase">
+                              ⚠️ Online: Payment Failed
+                            </span>
+                          ) : order.paymentStatus === "PAID" ? (
+                            <span className="px-2 py-1 bg-green-100 text-green-600 text-xs font-bold rounded uppercase">
+                              ✅ Paid
+                            </span>
+                          ) : (
+                            <span className="px-2 py-1 bg-yellow-100 text-yellow-600 text-xs font-bold rounded uppercase">
+                              ⏳ Pending
+                            </span>
+                          )}
+                          {/* </div> */}
+
+                          {/* Show Error Reason if it exists */}
+                          {order.paymentStatus === "FAILED" &&
+                            order.paymentError && (
+                              <p className="text-[10px] text-red-400 mt-1 italic">
+                                Reason: {order.paymentError}
+                              </p>
+                            )}
                         </div>
+
+                        {/* Retry Button - Only show if not paid */}
+                        {order.paymentStatus !== "PAID" && (
+                          <button
+                            onClick={() => handleRetryPayment(order)}
+                            className=" text-blue-600 hover:bg-green-600 hover:text-white rounded"
+                          >
+                            Retry Payment
+                          </button>
+                        )}
+                        {/* </div> */}
+                        {/* </div> */}
                       </div>
 
                       <div className="flex items-center gap-4 w-full sm:w-auto">
@@ -329,7 +480,6 @@ export default function OrdersPage() {
 
                         {/* for rating the indivisual items */}
 
-                        
                         {/* 
                         {order.items.map((item) => (
                           <div
@@ -395,12 +545,6 @@ export default function OrdersPage() {
                           </div>
                         ))}
 
-                        {/* <button
-                          onClick={() => navigate(`/user/orders/${order._id}`)}
-                          className="flex-1 sm:flex-none bg-black text-white text-xs font-black px-8 py-3 rounded-2xl shadow-xl shadow-gray-200 hover:scale-105 active:scale-95 transition-all"
-                        >
-                          TRACK ORDER
-                        </button> */}
                         <button
                           // onClick={() => navigate(`/orders`)}
                           onClick={() => navigate(`/user/orders/${order._id}`)}
