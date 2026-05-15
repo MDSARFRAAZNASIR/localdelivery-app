@@ -271,10 +271,10 @@ export default function OrdersPage() {
                 return (
                   <div
                     key={order._id}
-                    className="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:shadow-gray-200/50 transition-all duration-300"
+                    className="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:shadow-gray-200/50 transition-all duration-300 hover:bg-red-800 hover:border-fuchsia-400 hover:border:shadow-orange-400"
                   >
                     {/* Card Header */}
-                    <div className="p-6 pb-4 flex justify-between items-start border-b border-gray-50">
+                    <div className="p-6 pb-4 flex justify-between items-start border-b border-gray-50 ">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-xs font-black text-orange-500 bg-orange-50 px-2 py-0.5 rounded uppercase tracking-tighter">
@@ -288,7 +288,7 @@ export default function OrdersPage() {
                         <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">
                           {order.paymentStatus === "PAID"
                             ? "Paid on "
-                            : "Placed "}
+                            : "Not Placed "}
                           {new Date(
                             order.paidAt || order.updatedAt || order.createdAt,
                           ).toLocaleString("en-IN", {
@@ -392,7 +392,7 @@ export default function OrdersPage() {
                           <h3 className="text-xs font-thin text-gray-400 uppercase tracking-widest">
                             {order.paymentStatus === "PAID"
                               ? "Paid on "
-                              : "Placed "}
+                              : "Payment Failed "}
                             {new Date(
                               order.paidAt || order.createdAt,
                             ).toLocaleString("en-IN", {
@@ -433,7 +433,7 @@ export default function OrdersPage() {
                         {order.paymentStatus !== "PAID" && (
                           <button
                             onClick={() => handleRetryPayment(order)}
-                            className=" text-blue-600 hover:bg-green-600 hover:text-white rounded"
+                            className=" text-blue-600 hover:underline "
                           >
                             Retry Payment
                           </button>

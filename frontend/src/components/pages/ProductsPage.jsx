@@ -214,7 +214,7 @@ export default function ProductsPage() {
                   return (
                     <div
                       key={p._id}
-                      className="bg-white rounded-2xl border border-gray-100 p-3 flex flex-col hover:shadow-lg transition-all group"
+                      className="bg-white rounded-2xl border border-gray-100 p-3 flex flex-col hover:shadow-lg transition-all group hover:bg-red-800"
                     >
                       {/* Image Section */}
                       <div className="relative overflow-hidden rounded-xl mb-3">
