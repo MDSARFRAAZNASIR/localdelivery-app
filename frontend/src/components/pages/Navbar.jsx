@@ -2,12 +2,16 @@
 
 
 // src/components/Navbar.jsx
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { LanguageContext } from "../../context/LanguageContext";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const { t } = useContext(LanguageContext);
+  const { language, switchLanguage } = useContext(LanguageContext);
+ 
 
   let user = null;
   try {
@@ -26,6 +30,21 @@ export default function Navbar() {
 
   return (
     <nav className="bg-white shadow sticky top-0 z-50">
+      {/* Global Language Toggle */}
+      <div className="flex gap-2">
+        <button 
+          onClick={() => switchLanguage('en')}
+          className={`px-3 py-1 text-xs rounded ${language === 'en' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+        >
+          English
+        </button>
+        <button 
+          onClick={() => switchLanguage('hi')}
+          className={`px-3 py-1 text-xs rounded ${language === 'hi' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+        >
+          हिंदी
+        </button>
+      </div>
       <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
 
         {/* Logo */}
@@ -35,14 +54,14 @@ export default function Navbar() {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-6 text-sm">
-                   <Link to="/userdashboard" className="hover:text-orange-500">Dashboard</Link>
+                   <Link to="/userdashboard" className="hover:text-orange-500">{t("Dashboard")}</Link>
 
-          <Link to="/products" className="hover:text-orange-500">Products</Link>
-          <Link to="/orders" className="hover:text-orange-500">Orders</Link>
-          <Link to="/cart" className="hover:text-orange-500">Cart</Link>
+          <Link to="/products" className="hover:text-orange-500">{t("Products")}</Link>
+          <Link to="/orders" className="hover:text-orange-500">{t("Orders")}</Link>
+          <Link to="/cart" className="hover:text-orange-500">{t("Cart")}</Link>
 
-          <Link to="/address" className="hover:text-orange-500">Addresses</Link>
-          <Link to="/profile" className="hover:text-orange-500">Profile</Link>
+          <Link to="/address" className="hover:text-orange-500">{t("Addresses")}</Link>
+          <Link to="/profile" className="hover:text-orange-500">{t("Profile")}</Link>
 
 
 
@@ -50,10 +69,10 @@ export default function Navbar() {
            {user?.isAdmin && (
             <div className="hidden md:flex items-center gap-6 text-sm"> 
            
-               <Link to="/admin/products"  className="hover:text-orange-500">Add Product</Link> 
-                         <Link to="/admin/service-areas"  className="hover:text-orange-500">Area</Link>
+               <Link to="/admin/products"  className="hover:text-orange-500">{t("Add Product")}</Link> 
+                         <Link to="/admin/service-areas"  className="hover:text-orange-500">{t("Area")}</Link>
 
-         <Link to="/admin/orders"  className="hover:text-orange-500">Orders List</Link>
+         <Link to="/admin/orders"  className="hover:text-orange-500">{t("Orders List")}</Link>
 
             </div>
              

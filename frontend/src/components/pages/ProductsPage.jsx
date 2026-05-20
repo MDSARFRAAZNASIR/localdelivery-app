@@ -1,8 +1,10 @@
 // src/pages/ProductsPage.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState , useContext} from "react";
 import Navbar from "./Navbar";
 import CategoriesSidebar from "./CategoriesSidebar";
 import { useNavigate } from "react-router-dom";
+import { LanguageContext } from "../../context/LanguageContext";
+
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
@@ -17,6 +19,9 @@ export default function ProductsPage() {
       return [];
     }
   });
+
+      const { t } = useContext(LanguageContext);
+  
 
   // --- REINSTATED FILTER/SEARCH STATES ---
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -166,7 +171,7 @@ export default function ProductsPage() {
             {/* --- HEADER WITH SEARCH & SORT --- */}
             <div className="flex flex-col gap-3 md:flex-row md:justify-between md:items-center mb-6">
               <h2 className="text-2xl font-black text-gray-800 tracking-tight">
-                Products
+                {t("Products")}
               </h2>
 
               <div className="flex items-center gap-2">
@@ -177,7 +182,7 @@ export default function ProductsPage() {
                     setQuery(e.target.value);
                     setPage(1);
                   }}
-                  placeholder="Search snacks, drinks..."
+                  placeholder={t("Search snacks, drinks...")}
                   className="p-2.5 border border-gray-300 rounded-xl w-full md:w-64 shadow-sm focus:ring-2 focus:ring-green-500 outline-none transition-all"
                 />
                 <select
@@ -188,16 +193,16 @@ export default function ProductsPage() {
                   }}
                   className="p-2.5 border border-gray-300 rounded-xl bg-white shadow-sm text-sm"
                 >
-                  <option value="newest">Newest</option>
-                  <option value="price_asc">Price: Low → High</option>
-                  <option value="price_desc">Price: High → Low</option>
+                  <option value="newest">{t("Newest")}</option>
+                  <option value="price_asc">{t("Price: Low → High")}</option>
+                  <option value="price_desc">{t("Price: High → Low")}</option>
                 </select>
               </div>
             </div>
 
             {loading && (
               <div className="text-center py-20 text-gray-400 font-medium animate-pulse">
-                Fetching fresh items...
+                {t("Fetching fresh items")}...
               </div>
             )}
             {error && (
@@ -228,7 +233,7 @@ export default function ProductsPage() {
                         {p.stock === 0 && (
                           <div className="absolute inset-0 flex items-center justify-center">
                             <span className="bg-black/70 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
-                              Sold Out
+                              {t("Sold Out")}
                             </span>
                           </div>
                         )}
@@ -243,15 +248,15 @@ export default function ProductsPage() {
                         <div className="mt-1 flex items-center gap-2">
                           {p.stock === 0 ? (
                             <span className="text-[9px] font-black text-red-500 uppercase tracking-tight">
-                              Out of Stock
+                              {t("Out of Stock")}
                             </span>
                           ) : p.stock <= 5 ? (
                             <span className="text-[9px] font-black text-orange-500 animate-pulse uppercase tracking-tight">
-                              🔥 Only {p.stock} left!
+                              🔥 {t("Only")} {p.stock} {t("left")}!
                             </span>
                           ) : (
                             <span className="text-[9px] font-black text-green-500 uppercase tracking-tight">
-                              In Stock
+                              {t("In Stock")}
                             </span>
                           )}
                         </div>
@@ -326,7 +331,7 @@ export default function ProductsPage() {
                                 : "bg-white border-green-700 text-green-700 hover:bg-green-700 hover:text-white"
                             }`}
                           >
-                            {p.stock <= 0 ? "SOLD OUT" : "ADD"}
+                            {p.stock <= 0 ? t("SOLD OUT") : t("ADD")}
                           </button>
                         )}
                       </div>
@@ -344,7 +349,7 @@ export default function ProductsPage() {
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   className="px-4 py-2 bg-white border rounded-xl disabled:opacity-30 shadow-sm font-medium"
                 >
-                  Prev
+                  {t("Prev")}
                 </button>
                 <div className="text-sm font-bold text-gray-500 bg-white px-4 py-2 rounded-xl border">
                   Page {page} / {pages}
@@ -354,7 +359,7 @@ export default function ProductsPage() {
                   onClick={() => setPage((p) => Math.min(pages, p + 1))}
                   className="px-4 py-2 bg-white border rounded-xl disabled:opacity-30 shadow-sm font-medium"
                 >
-                  Next
+                  {t("Next")}
                 </button>
               </div>
             )}
@@ -390,7 +395,7 @@ export default function ProductsPage() {
             <div className="flex items-center gap-4">
               <div className="flex flex-col">
                 <span className="text-[10px] font-black opacity-70 uppercase tracking-tighter">
-                  {cartCount} {cartCount === 1 ? "Item" : "Items"}
+                  {cartCount} {cartCount === 1 ? t("Item") : t("Items")}
                 </span>
                 <span className="text-lg font-black leading-none">
                   ₹{cartTotal}
@@ -398,7 +403,7 @@ export default function ProductsPage() {
               </div>
             </div>
             <div className="flex items-center gap-2 font-black text-sm uppercase">
-              View Cart
+              {t("View Cart")}
               <div className="bg-white/10 p-1.5 rounded-lg border border-white/10">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

@@ -1,13 +1,17 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
-
+import { LanguageContext } from "../../context/LanguageContext";
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
+  
+
+  const { t } = useContext(LanguageContext);
+  
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -195,7 +199,7 @@ export default function OrdersPage() {
   return (
     <>
       <Navbar />
-
+  
       <div className="min-h-screen bg-gray-50/50 py-8 px-4 font-sans">
         {/* <div className="max-w-4xl mx-auto"> */}
         <div className="max-w-4xl mx-auto">
@@ -209,13 +213,13 @@ export default function OrdersPage() {
 
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
             <h2 className="text-3xl font-black text-gray-900 tracking-tight">
-              Orders History 📦
+              {t("Orders History")} 📦
             </h2>
             <button
               onClick={() => navigate("/products")}
               className="bg-orange-500 hover:bg-orange-600 text-white font-black py-2.5 px-6 rounded-2xl shadow-lg transition-all active:scale-95 text-sm"
             >
-              + New Order
+              + {t("New Order")}
             </button>
           </div>
 
@@ -225,7 +229,7 @@ export default function OrdersPage() {
               <span className="absolute left-4 top-3.5">🔍</span>
               <input
                 type="text"
-                placeholder="Search orders or items..."
+                placeholder={t("Search orders or items...")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-orange-500/20 transition-all"
@@ -233,7 +237,7 @@ export default function OrdersPage() {
             </div>
             <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
               {[
-                "ALL",
+                t("ALL"),
                 "CREATED",
                 "CONFIRMED",
                 "OUT_FOR_DELIVERY",
@@ -250,7 +254,6 @@ export default function OrdersPage() {
               ))}
             </div>
           </div>
-
           {loading ? (
             <div className="text-center py-20 font-bold text-gray-300">
               Loading your orders...
@@ -278,7 +281,7 @@ export default function OrdersPage() {
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-xs font-black text-orange-500 bg-orange-50 px-2 py-0.5 rounded uppercase tracking-tighter">
-                            {totalItems} {totalItems === 1 ? "Item" : "Items"}
+                            {totalItems} {totalItems === 1 ? t("Item") : t("Items")}
                           </span>
                           <span className="text-[10px] font-bold text-gray-300 font-mono">
                             #{order._id.slice(-8)}
@@ -287,13 +290,13 @@ export default function OrdersPage() {
 
                         <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">
                           {order.paymentStatus === "PAID"
-                            ? "Paid on "
+                            ? t("Placed On ")
                             : "Not Placed "}
                           {new Date(
                             order.paidAt || order.updatedAt || order.createdAt,
                           ).toLocaleString("en-IN", {
                             day: "2-digit",
-                            month: "short",
+                            month: t("short"),
                             year: "numeric",
                             hour: "2-digit",
                             minute: "2-digit",
@@ -314,7 +317,7 @@ export default function OrdersPage() {
                       <div className="space-y-3">
                         <div className="flex justify-between items-center">
                           <h4 className="text-[10px] font-black text-gray-300 uppercase tracking-widest">
-                            Order Summary
+                            {t("Order Summary")}
                           </h4>
                           {/* RE-ORDER BUTTON */}
                           <button
