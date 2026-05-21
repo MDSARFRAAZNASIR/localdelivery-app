@@ -142,7 +142,8 @@ export default function CreateOrderPage() {
               />
             </div>
 
-            {/* Parcel */}
+            {/* Parcels */}
+
             <div>
               <label className="block text-sm font-medium mb-1">
                 Parcel Description *

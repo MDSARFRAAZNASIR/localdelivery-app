@@ -375,7 +375,7 @@ export default function ProductsPage() {
             }}
             className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-bold shadow-sm ${selectedCategory === "" ? "bg-green-700 text-white" : "bg-white text-gray-600"}`}
           >
-            All
+            {t("All")}
           </button>
           <MobileCategories
             setSelectedCategory={setSelectedCategory}
