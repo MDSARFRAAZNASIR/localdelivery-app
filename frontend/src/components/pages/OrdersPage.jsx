@@ -324,7 +324,7 @@ export default function OrdersPage() {
                             onClick={() => handleReorder(order)}
                             className="text-[10px] font-black text-blue-600 hover:underline"
                           >
-                            🔄 RE-ORDER
+                            🔄 {t("RE-ORDER")}
                           </button>
                         </div>
                         <ul className="space-y-2">
@@ -353,7 +353,7 @@ export default function OrdersPage() {
                           📍
                         </div>
                         <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">
-                          Delivery Address
+                          {t("Delivery Address")}
                         </h4>
                         {order.deliveryAddress ? (
                           <div className="text-xs text-gray-600 leading-relaxed font-medium">
@@ -383,7 +383,7 @@ export default function OrdersPage() {
                     <div className="px-6 py-5 bg-gray-50/80 border-t border-gray-50 flex flex-col sm:flex-row justify-between items-center gap-4">
                       <div className="flex items-end gap-2">
                         <div className="text-[10px] font-black text-gray-400 uppercase pb-1 leading-none">
-                          Total Paid
+                          {t("Total Paid")}
                         </div>
                         <div className="text-2xl font-black text-gray-900 leading-none tracking-tighter">
                           ₹{order.totalAmount}
@@ -394,7 +394,7 @@ export default function OrdersPage() {
                         <div>
                           <h3 className="text-xs font-thin text-gray-400 uppercase tracking-widest">
                             {order.paymentStatus === "PAID"
-                              ? "Paid on "
+                              ? t("Paid on")
                               : "Payment Failed "}
                             {new Date(
                               order.paidAt || order.createdAt,
@@ -410,15 +410,15 @@ export default function OrdersPage() {
                           {/* <div > */}
                           {order.paymentStatus === "FAILED" ? (
                             <span className="px-2 py-1 bg-red-100 text-red-600 text-xs font-bold rounded uppercase">
-                              ⚠️ Online: Payment Failed
+                              ⚠️ {t("Online: Payment Failed")}
                             </span>
                           ) : order.paymentStatus === "PAID" ? (
                             <span className="px-2 py-1 bg-green-100 text-green-600 text-xs font-bold rounded uppercase">
-                              ✅ Paid
+                              ✅ {t("Paid")}
                             </span>
                           ) : (
                             <span className="px-2 py-1 bg-yellow-100 text-yellow-600 text-xs font-bold rounded uppercase">
-                              ⏳ Pending
+                              ⏳ {t("Pending")}
                             </span>
                           )}
                           {/* </div> */}
@@ -438,7 +438,7 @@ export default function OrdersPage() {
                             onClick={() => handleRetryPayment(order)}
                             className=" text-blue-600 hover:underline "
                           >
-                            Retry Payment
+                            {t("Retry Payment")}
                           </button>
                         )}
                         {/* </div> */}
@@ -450,7 +450,7 @@ export default function OrdersPage() {
                           onClick={() => navigate(`/invoice/${order._id}`)}
                           className="text-xs font-bold text-gray-400 hover:text-gray-600 transition-colors"
                         >
-                          Invoice
+                          {t("Invoice")}
                         </button>
 
                         {/* CONDITIONAL RATE ORDER BUTTON */}
@@ -470,7 +470,7 @@ export default function OrdersPage() {
                             onClick={() => handleRateOrder(order._id)}
                             className="text-xs font-black text-green-600 hover:text-green-700"
                           >
-                            ⭐ RATE ORDER
+                            ⭐ {t("RATE ORDER")}
                           </button>
                         )}
 
@@ -520,7 +520,7 @@ export default function OrdersPage() {
                                 {item.name}
                               </p>
                               <p className="text-xs text-gray-400 font-bold">
-                                Qty: {item.quantity}
+                                {t("Qty")}: {item.quantity}
                               </p>
                             </div>
 
@@ -541,7 +541,7 @@ export default function OrdersPage() {
                                   // className="text-[10px] font-black bg-gray-900 text-white px-4 py-2 rounded-xl hover:bg-orange-500 transition-colors"
                                   className="text-xs bg-gray-100 px-3 py-1 rounded-full font-bold"
                                 >
-                                  rate-item
+                                  {t("rate-item")}
                                 </button>
                               ) : null}
                             </div>
@@ -553,7 +553,7 @@ export default function OrdersPage() {
                           onClick={() => navigate(`/user/orders/${order._id}`)}
                           className="text-[10px] font-black uppercase text-gray-400 hover:text-orange-600 px-2"
                         >
-                          Track →
+                          {t("Track")} →
                         </button>
                       </div>
                     </div>

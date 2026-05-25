@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useContext } from "react";
 import Navbar from "./Navbar";
 import { useNavigate } from "react-router-dom";
+import { LanguageContext } from "../../context/LanguageContext";
 
 export default function CartPage() {
   const [cart, setCart] = useState([]);
@@ -12,9 +13,11 @@ export default function CartPage() {
   const [loading, setLoading] = useState(false);
   const [serviceArea, setServiceArea] = useState(null);
   const [checkingArea, setCheckingArea] = useState(false);
+  
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
+   const { t } = useContext(LanguageContext);
 
   // ------------------ LOAD CART ------------------
   useEffect(() => {
@@ -290,9 +293,9 @@ export default function CartPage() {
             <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-black flex items-center gap-2">
-                  Your Basket{" "}
+                  {t("Your Basket")}{" "}
                   <span className="bg-gray-100 px-2 py-0.5 rounded text-sm">
-                    {cart.length} Items
+                    {cart.length} {t("Items")}
                   </span>
                 </h2>
 
@@ -302,7 +305,7 @@ export default function CartPage() {
                     onClick={() => navigate("/products")}
                     className="text-[10px] font-black text-green-700 bg-green-50 px-3 py-2 rounded-xl uppercase tracking-widest hover:bg-green-100 transition-colors"
                   >
-                    + Add More
+                    + {t("Add More")}
                   </button>
                 )}
               </div>
@@ -310,13 +313,13 @@ export default function CartPage() {
               {cart.length === 0 ? (
                 <div className="text-center py-10">
                   <p className="text-gray-400 mb-4 font-bold">
-                    Your cart is feeling light...
+                    {t("Your cart is feeling light")}
                   </p>
                   <button
                     onClick={() => navigate("/products")}
                     className="bg-green-600 text-white px-6 py-2 rounded-xl font-bold"
                   >
-                    Start Shopping
+                    {t("Start Shopping")}
                   </button>
                 </div>
               ) : (
@@ -332,7 +335,7 @@ export default function CartPage() {
                             {item.name}
                           </div>
                           <div className="text-sm text-gray-400 font-bold">
-                            ₹{item.price} per unit
+                            ₹{item.price} {t("per unit")}
                           </div>
                         </div>
 
@@ -393,7 +396,7 @@ export default function CartPage() {
                       +
                     </span>
                     <span className="text-sm">
-                      Forgot something? Add more items
+                      {t("Forgot something? Add more items")}
                     </span>
                   </button>
                 </>
@@ -405,12 +408,12 @@ export default function CartPage() {
             {/* Address Selection */}
             <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-black">Delivery Address</h2>
+                <h2 className="text-xl font-black">{t("Delivery Address")}</h2>
                 <button
                   onClick={() => navigate("/address")}
                   className="text-xs font-black text-blue-600 uppercase tracking-widest"
                 >
-                  + Add New
+                  + {t("Add New")}
                 </button>
               </div>
 
@@ -463,31 +466,31 @@ export default function CartPage() {
 
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 sticky top-24">
-              <h3 className="font-black text-lg mb-6">Bill Details</h3>
+              <h3 className="font-black text-lg mb-6">{t("Bill Details")}</h3>
 
               {/* --- Price Breakdown --- */}
               <div className="space-y-3 text-sm font-bold text-gray-500 mb-6">
                 <div className="flex justify-between">
-                  <span>Item Total</span>
+                  <span>{t("Item Total")}</span>
                   <span className="text-gray-800">₹{subtotal}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Delivery Fee</span>
+                  <span>{t("Delivery Fee")}</span>
                   <span
                     className={
                       deliveryFee > 0 ? "text-gray-800" : "text-green-600"
                     }
                   >
-                    {deliveryFee > 0 ? `₹${deliveryFee}` : "FREE"}
+                    {deliveryFee > 0 ? `₹${deliveryFee}` : t("FREE")}
                   </span>
                 </div>
                 {checkingArea && (
                   <div className="text-[10px] text-orange-500 animate-pulse">
-                    Checking pincode serviceability...
+                    {t("Checking pincode serviceability")}...
                   </div>
                 )}
                 <div className="border-t border-dashed pt-3 flex justify-between text-lg font-black text-black">
-                  <span>Grand Total</span>
+                  <span>{t("Grand Total")}</span>
                   <span>₹{grandTotal}</span>
                 </div>
               </div>
@@ -495,7 +498,7 @@ export default function CartPage() {
               {/* --- Payment Selection --- */}
               <div className="mb-6">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-3">
-                  Choose Payment Method
+                  {t("Choose Payment Method")}
                 </label>
                 <div className="grid grid-cols-1 gap-3">
                   {/* COD Option */}
@@ -510,7 +513,7 @@ export default function CartPage() {
                     <div className="flex items-center gap-3">
                       <span className="text-xl">💵</span>
                       <span className="font-bold text-sm text-gray-800">
-                        Cash on Delivery
+                        {t("Cash on Delivery")}
                       </span>
                     </div>
                     {paymentMethod === "COD" && (
@@ -531,10 +534,10 @@ export default function CartPage() {
                       <span className="text-xl">📱</span>
                       <div className="text-left">
                         <p className="font-bold text-sm text-gray-800">
-                          Online Payment
+                          {t("Online Payment")}
                         </p>
                         <p className="text-[10px] text-gray-500 font-medium">
-                          Fast & Secure
+                          {t("Fast & Secure")}
                         </p>
                       </div>
                     </div>
@@ -568,7 +571,7 @@ export default function CartPage() {
                       alt="Mastercard"
                     />
                     <span className="text-[8px] font-black text-gray-400 uppercase">
-                      Secure by Razorpay
+                      {t("Secure by Razorpay")}
                     </span>
                   </div>
                 )}
@@ -605,9 +608,9 @@ export default function CartPage() {
                     PROCESSING...
                   </>
                 ) : paymentMethod === "ONLINE" ? (
-                  "PAY & PLACE ORDER"
+                  t("PAY & PLACE ORDER")
                 ) : (
-                  "CONFIRM ORDER"
+                  t("CONFIRM ORDER")
                 )}
               </button>
 
@@ -615,7 +618,7 @@ export default function CartPage() {
                 selectedAddressId &&
                 !checkingArea && (
                   <p className="text-[10px] text-red-500 font-bold text-center mt-3 leading-tight uppercase tracking-tighter">
-                    🚫 We don't deliver to {selectedAddress?.pincode} yet!
+                    🚫 {t("We don't deliver to")} {selectedAddress?.pincode} {t("yet")}!
                   </p>
                 )}
             </div>
