@@ -305,7 +305,7 @@ useEffect(() => {
             <div className="bg-gray-50 rounded-[32px] p-6 sm:p-8 border border-gray-100 shadow-inner space-y-4">
               <div className="flex justify-between items-center mb-2">
                  <h2 className="font-black text-lg">{editingId ? "Edit Address" : "New Address"}</h2>
-                 <button onClick={resetForm} className="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-red-500">Cancel</button>
+                 <button onClick={resetForm} className="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-red-500">{t("Cancel")}</button>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -377,20 +377,20 @@ useEffect(() => {
   </div>
 )}
                 
-                <textarea placeholder="House No., Building, Street Name..." value={form.addressLine} onChange={(e) => setForm({ ...form, addressLine: e.target.value })} className="col-span-2 bg-white border-none rounded-2xl p-4 text-sm font-bold shadow-sm h-24 focus:ring-2 focus:ring-orange-500/20" />
+                <textarea placeholder={t("House No., Building, Street Name...")} value={form.addressLine} onChange={(e) => setForm({ ...form, addressLine: e.target.value })} className="col-span-2 bg-white border-none rounded-2xl p-4 text-sm font-bold shadow-sm h-24 focus:ring-2 focus:ring-orange-500/20" />
 
                 <div className="col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="relative">
-                    <input placeholder="Pincode" maxLength={6} value={form.pincode} onBlur={() => fetchByPincode(form.pincode)} onChange={(e) => setForm({ ...form, pincode: e.target.value })} className="w-full bg-white border-none rounded-2xl p-4 text-sm font-bold shadow-sm focus:ring-2 focus:ring-orange-500/20" />
+                    <input placeholder={t("Pincode")} maxLength={6} value={form.pincode} onBlur={() => fetchByPincode(form.pincode)} onChange={(e) => setForm({ ...form, pincode: e.target.value })} className="w-full bg-white border-none rounded-2xl p-4 text-sm font-bold shadow-sm focus:ring-2 focus:ring-orange-500/20" />
                     {fetchingPin && <span className="absolute right-3 top-4 animate-spin text-orange-500">⏳</span>}
                   </div>
-                  <input placeholder="City" value={form.city} readOnly className="bg-gray-100 border-none rounded-2xl p-4 text-sm font-bold text-gray-400 cursor-not-allowed" />
-                  <input placeholder="State" value={form.state} readOnly className="bg-gray-100 border-none rounded-2xl p-4 text-sm font-bold text-gray-400 cursor-not-allowed" />
+                  <input placeholder={t("City")} value={form.city} readOnly className="bg-gray-100 border-none rounded-2xl p-4 text-sm font-bold text-gray-400 cursor-not-allowed" />
+                  <input placeholder={t("State")} value={form.state} readOnly className="bg-gray-100 border-none rounded-2xl p-4 text-sm font-bold text-gray-400 cursor-not-allowed" />
                 </div>
               </div>
 
               <button onClick={saveAddress} className="w-full bg-black text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl hover:bg-orange-600 transition-all active:scale-95">
-                {editingId ? "Update Address" : "Save Location"}
+                {editingId ? "Update Address" : t("Save Location")}
               </button>
             </div>
           ) : (

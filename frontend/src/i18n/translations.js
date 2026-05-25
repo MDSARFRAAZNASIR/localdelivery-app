@@ -102,7 +102,7 @@ export const translations = {
     "Retry Payment": "दोबारा प्रयास",
     "Your Basket": "आपकी टोकरी",
     "Add More": "और जोड़ें",
-    "Your cart is feeling light...": "आपका कार्ट काफी हल्का लग रहा है...",
+    "Your cart is feeling light": "आपका कार्ट काफी हल्का लग रहा है...",
     "Start Shopping": "खरीदारी शुरू करें",
     "Forgot something? Add more items": "कुछ भूल गए क्या? और सामान जोड़ें",
     "per unit": "प्रति यूनिट",
@@ -132,7 +132,7 @@ export const translations = {
     "EDIT":"बदलें",
     "DEFAULT":"प्राथमिक",
     "DELETE":"मिटाएं",
-    "Default":"मिटाएं",
+    "Default":"प्राथमिक",
     "Use Interactive Map to Pin Location":"मैप पर अपनी लोकेशन पिन करें",
     "Move pin to your doorstep":"पिन को अपने घर के दरवाज़े पर लगाएं",
     "CHECK":"जांचें",
@@ -148,6 +148,13 @@ export const translations = {
      "Email":"ईमेल",
      "Cancel":"रद्द करें",
      "Logout Account":"खाते से बाहर निकलें",
-     "Manage Addresses":"पते प्रबंधित करें"
+     "Manage Addresses":"पते प्रबंधित करें",
+     "House No., Building, Street Name...":"भवन/मकान संख्या, इमारत, गली/सड़क का नाम...",
+     "Pincode":"पिनकोड",
+     "City":"शहर",
+     "State":"राज्य",
+     "Save Location":"पता सुरक्षित करें",
+     "Loading Account...":"खाता लोड हो रहा है...",
+     "Save Profile":"प्रोफाइल सेव करें"
   },
 };

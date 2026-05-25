@@ -102,7 +102,7 @@ export default function ProfilePage() {
         <div className="flex flex-col items-center justify-center h-[80vh]">
           <div className="w-12 h-12 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin"></div>
           <p className="mt-4 font-black text-gray-400 uppercase text-xs tracking-widest">
-            Loading Account...
+            {t("Loading Account...")}
           </p>
         </div>
       </>
@@ -207,7 +207,7 @@ export default function ProfilePage() {
                     disabled={saving}
                     className="flex-1 bg-black text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all"
                   >
-                    {saving ? "Saving..." : "Save Profile"}
+                    {saving ? "Saving..." : t("Save Profile")}
                   </button>
                 </div>
               )}

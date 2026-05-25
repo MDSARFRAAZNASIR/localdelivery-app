@@ -313,7 +313,7 @@ export default function CartPage() {
               {cart.length === 0 ? (
                 <div className="text-center py-10">
                   <p className="text-gray-400 mb-4 font-bold">
-                    {t("Your cart is feeling light")}
+                    {t("Your cart is feeling light")}...
                   </p>
                   <button
                     onClick={() => navigate("/products")}
