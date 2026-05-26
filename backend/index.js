@@ -49,10 +49,13 @@ app.use(
       "http://localhost:3000",
       "http://localhost:8081", // 👈 EXPO WEB
       "http://127.0.0.1:8081",
+      "https://purnia.store",
+      "https://www.purnia.store" ,// Include www just in case
       "https://localdelivery-app-frontend.vercel.app",
       "https://localdelivery-app.vercel.app",
     ],
     //  credentials: true,
+    
   })
 );
 
