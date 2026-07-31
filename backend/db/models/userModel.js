@@ -103,6 +103,11 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // In your User/Admin Model
+// notificationToken: {
+//   type: String,
+//   default: null
+// },
     // address of user
     addresses: [
   {
@@ -123,8 +128,6 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-
-
 
 /**
  * Indexes

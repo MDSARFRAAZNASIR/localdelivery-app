@@ -50,6 +50,7 @@ app.use(
       "http://localhost:8081", // 👈 EXPO WEB
       "http://127.0.0.1:8081",
       "https://purnia.store",
+      "http://localhost:5173",
       "https://www.purnia.store" ,// Include www just in case
       "https://localdelivery-app-frontend.vercel.app",
       "https://localdelivery-app.vercel.app",
@@ -58,6 +59,27 @@ app.use(
     
   })
 );
+
+// also you can used
+// const allowedOrigins = [
+//   "https://your-default-vercel-frontend.vercel.app",
+//   "https://purnia.store",
+//   "https://www.purnia.store" // Include www just in case
+// ];
+
+// app.use(cors({
+//   origin: function (origin, callback) {
+//     // allow requests with no origin (like mobile apps or curl requests)
+//     if (!origin) return callback(null, true);
+    
+//     if (allowedOrigins.indexOf(origin) === -1) {
+//       const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+//       return callback(new Error(msg), false);
+//     }
+//     return callback(null, true);
+//   },
+//   credentials: true // Crucial if you are using cookies for login sessions
+// }));
 
 // middleware
 app.use(express.json());
