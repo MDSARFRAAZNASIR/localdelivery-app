@@ -5,6 +5,7 @@ import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { app } from "../pages/firebaseConfig"; // Your web firebase config
 import { messaging } from "../pages/firebaseConfig";
 
+
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 const STATUS_OPTIONS = [
@@ -28,6 +29,7 @@ export default function AdminOrdersPage() {
     try {
       const messaging = getMessaging(app);
       const permission = await Notification.requestPermission();
+   
 
       if (permission === "granted") {
         const token = await getToken(messaging, {

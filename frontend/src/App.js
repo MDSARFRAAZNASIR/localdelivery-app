@@ -17,7 +17,6 @@ import CartPage from "./components/pages/CartPage";
 import OrdersPage from "./components/pages/OrdersPage";
 import AdminProductsPage from "./components/adminPages/AdminProductsPage";
 import AdminOrdersPage from "./components/adminPages/AdminOrdersPage";
-// import UserOrderDetails from "./components/userPages/UserOrderDetails";
 import AddressBook from "./components/pages/AddressBook";
 import InvoicePage from "./components/pages/InvoicePage"
 import AdminServiceAreas from "./components/adminPages/AdminServiceAreas";
@@ -51,7 +50,6 @@ function App() {
           <Route path="/cart" element={<CartPage />}></Route>
           <Route path="/orders" element={<OrdersPage />} />
 
-          {/* <Route path="/orders" element={<OrdersPage/>}></Route> */}
           <Route path="/profile" element={<ProfilePage />} />
 
           <Route path="/create-order" element={<CreateOrderPage />} />
@@ -61,12 +59,9 @@ function App() {
           </Route>
           <Route path="/admin/orders" element={<AdminOrdersPage />} />
 
-          {/* <Route path="/orders/:orderId" element={<UserOrderDetails />} /> */}
           <Route path="/address" element={<AddressBook />} />
           <Route path="/invoice/:orderId" element={<InvoicePage />} />
-          {/* <Route path="/admin/areaselected" element={<AdminServiceAreas/>}/> */}
           <Route path="/admin/service-areas" element={<AdminServiceAreas />} />
-          {/* <Route path="/admin/orders" element={<AdminOrdersPage/>}></Route> */}
           <Route path="/rate-order/:orderId" element={<RateOrder/>}></Route>
           <Route path="/rate-item/:orderId/:productId" element={<RateItem/>}></Route>
           <Route path="/admin/stats/revenue" element={<RevenueChart/>}></Route>
@@ -74,10 +69,8 @@ function App() {
 
 
 
-          {/* yahan aur protected routes add kar sakte ho */}
-          {/* <Route path="/orders" element={<OrdersPage />} /> */}
+          
         </Route>
-        {/* Default/fallback route */}
         <Route path="*" element={<LogInPage />} />
       </Routes>
       </LoadingProvider>
