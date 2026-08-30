@@ -8,7 +8,8 @@ WORKDIR /app
 COPY package*.json ./
 
 # Step 4: Install dependencies
-RUN npm install
+RUN npm ci --omit=dev
+
 
 # Step 5: Copy the rest of your backend source code
 COPY . .
@@ -17,4 +18,4 @@ COPY . .
 EXPOSE 5000
 
 # Step 7: Command to run your backend
-CMD ["npm", "start"]
+CMD ["node", "index.js"]
