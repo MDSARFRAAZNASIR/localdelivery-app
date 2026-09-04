@@ -1,4 +1,6 @@
 // index.js
+const dns = require('node:dns');
+dns.setServers(['1.1.1.1', '1.0.0.1'])
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
@@ -48,6 +50,7 @@ app.use(
     origin: [
       "http://localhost:3000",
       "http://localhost:8081", // 👈 EXPO WEB
+      "http://localhost:8080", // 👈 EXPO WEB
       "http://127.0.0.1:8081",
       "https://purnia.store",
       "http://localhost:5173",
@@ -108,12 +111,21 @@ connectDB().catch((err) => {
   console.error("Initial DB connect failed:", err && err.message);
 });
 
+
 // Health for server chaeck
 app.get("/", (req, res) => res.send("API is running successfully ✅"));
 
+// add for devops
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    service: "localdelivery-backend",
+  });
+});
+
 // Register (replace the previous handler body with this)
 app.post(
-  "/userregister",
+  "/api/userregister",
   asyncHandler(async (req, res) => {
     const { username, useremail, userpassword, userphone } = req.body || {};
 
@@ -176,7 +188,7 @@ app.post(
 // add after jwt
 // Login
 app.post(
-  "/userlogin",
+  "/api/userlogin",
   asyncHandler(async (req, res) => {
     const { useremail, userpassword } = req.body || {};
 
@@ -233,7 +245,7 @@ app.post(
 // user profile upadate
 // GET user profile
 app.get(
-  "/user/profile",
+  "/api/user/profile",
   auth,
   asyncHandler(async (req, res) => {
     const user = { ...req.user };
@@ -244,7 +256,7 @@ app.get(
 
 // PUT update profile (name / phone / email)
 app.put(
-  "/user/profile",
+  "/api/user/profile",
   auth,
   asyncHandler(async (req, res) => {
     const { username, useremail, userphone } = req.body || {};
@@ -315,7 +327,7 @@ app.put(
 
 // User: get single order details
 app.get(
-  "/user/orders/:orderId",
+  "/api/user/orders/:orderId",
   auth,
   asyncHandler(async (req, res) => {
     const { orderId } = req.params;
@@ -340,7 +352,7 @@ app.get(
 
 // User: cancel order (only if CREATED)
 app.put(
-  "/user/orders/:orderId/cancel",
+  "/api/user/orders/:orderId/cancel",
   auth,
   asyncHandler(async (req, res) => {
     const { orderId } = req.params;
@@ -379,7 +391,7 @@ app.put(
 
 // get all address of user
 app.get(
-  "/user/addresses",
+  "/api/user/addresses",
   auth,
   asyncHandler(async (req, res) => {
     await connectDB();
@@ -390,7 +402,7 @@ app.get(
 
 // add new address of user
 app.post(
-  "/user/addresses",
+  "/api/user/addresses",
   auth,
   asyncHandler(async (req, res) => {
     const address = req.body;
@@ -418,7 +430,7 @@ app.post(
 
 // PUT /user/addresses/:id/default
 app.put(
-  "/user/addresses/:id/default",
+  "/api/user/addresses/:id/default",
   auth,
   asyncHandler(async (req, res) => {
     await connectDB();
@@ -450,7 +462,7 @@ app.put(
 
 // delete address of user
 app.delete(
-  "/user/addresses/:id",
+  "/api/user/addresses/:id",
   auth,
   asyncHandler(async (req, res) => {
     await connectDB();
@@ -472,7 +484,7 @@ app.delete(
 
 // UPDATE address
 app.put(
-  "/user/addresses/:id",
+  "/api/user/addresses/:id",
   auth,
   asyncHandler(async (req, res) => {
     const { id } = req.params;
@@ -510,7 +522,7 @@ app.put(
 
 // Create product (admin use via Postman for now)
 app.post(
-  "/admin/products",
+  "/api/admin/products",
   auth,
   // adminOnly,
   adminMiddlle,
@@ -550,7 +562,7 @@ app.post(
  */
 
 app.get(
-  "/admin/products",
+  "/api/admin/products",
   auth,
   // adminOnly,
   adminMiddlle,
@@ -562,7 +574,7 @@ app.get(
 );
 
 app.put(
-  "/admin/products/:id",
+  "/api/admin/products/:id",
   auth,
   // adminOnly,
   adminMiddlle,
@@ -596,7 +608,7 @@ app.put(
 );
 
 app.delete(
-  "/admin/products/:id",
+  "/api/admin/products/:id",
 
   auth,
   // adminOnly,
@@ -638,7 +650,7 @@ app.delete(
 
 //  add for filter online paid order
 app.get(
-  "/admin/orders", // Ensure this matches your admin route
+  "/api/admin/orders", // Ensure this matches your admin route
   auth, // Assuming you have admin auth middleware
   adminMiddlle,
   asyncHandler(async (req, res) => {
@@ -666,7 +678,7 @@ app.get(
 // GET /products?category=Fruits&q=milk&min=10&max=200&page=1&limit=24&sort=price_asc
 
 app.get(
-  "/products",
+  "/api/products",
   asyncHandler(async (req, res) => {
     await connectDB();
 
@@ -726,7 +738,7 @@ app.get(
 // GET /categories  -> returns list of categories and counts (optional)
 
 app.get(
-  "/categories",
+  "/api/categories",
   asyncHandler(async (req, res) => {
     await connectDB();
 
@@ -745,7 +757,7 @@ app.get(
 
 // Public list of active products
 app.get(
-  "/products",
+  "/api/products",
   asyncHandler(async (req, res) => {
     await connectDB();
     const products = await Product.find({ isActive: true }).lean();
@@ -756,7 +768,7 @@ app.get(
 
 // new add Notification
 app.post(
-  "/orders",
+  "/api/orders",
   auth,
   asyncHandler(async (req, res) => {
     const { items, deliveryAddressId, paymentMethod } = req.body;
@@ -890,7 +902,7 @@ app.post("/api/subscribe-admin", auth, asyncHandler(async (req, res) => {
 
 // ➕ Add / Update pincode
 app.post(
-  "/admin/service-areas",
+  "/api/admin/service-areas",
   auth,
   // adminOnly,
   adminMiddlle,
@@ -915,7 +927,7 @@ app.post(
 
 // 📋 List all pincodes
 app.get(
-  "/admin/service-areas",
+  "/api/admin/service-areas",
   auth,
   // adminOnly,
   adminMiddlle,
@@ -928,7 +940,7 @@ app.get(
 
 // ❌ Delete pincode
 app.delete(
-  "/admin/service-areas/:id",
+  "/api/admin/service-areas/:id",
   auth,
   // adminOnly,
   adminMiddlle,
@@ -944,7 +956,7 @@ app.delete(
 
 // --- RATE ORDER ROUTE ---
 app.post(
-  "/user/orders/:orderId/rate",
+  "/api/user/orders/:orderId/rate",
   auth, // Uses your existing auth middleware
   asyncHandler(async (req, res) => {
     const { rating, comment } = req.body;
@@ -1005,7 +1017,7 @@ app.post(
 
 // Add this to index.js so the RateOrder page can "see" the order info
 app.get(
-  "/orders/:orderId",
+  "/api/orders/:orderId",
   auth,
   asyncHandler(async (req, res) => {
     await connectDB();
@@ -1020,7 +1032,7 @@ app.get(
 );
 
 // indivisual items have own rating
-app.post("/rate-product", auth, asyncHandler(async (req, res) => {
+app.post("/api/rate-product", auth, asyncHandler(async (req, res) => {
   const { orderId, productId, rating, review } = req.body;
 
   await connectDB();
@@ -1053,7 +1065,7 @@ app.post("/rate-product", auth, asyncHandler(async (req, res) => {
 // services area check by pincode
 
 app.get(
-  "/service-area/check",
+  "/api/service-area/check",
   asyncHandler(async (req, res) => {
     const { pincode } = req.query;
     if (!pincode) {
@@ -1086,7 +1098,7 @@ app.get(
 
 // Admin: update order status
 app.put(
-  "/admin/orders/:id/status",
+  "/api/admin/orders/:id/status",
   auth,
   // adminOnly,
   adminMiddlle,
@@ -1133,7 +1145,7 @@ app.put(
 
 
 // Get revenue stats for the last 7 days
-app.get("/admin/stats/revenue", auth, adminMiddlle, asyncHandler(async (req, res) => {
+app.get("/api/admin/stats/revenue", auth, adminMiddlle, asyncHandler(async (req, res) => {
   const stats = await Order.aggregate([
     {
       // 1. Filter for orders from the last 7 days
@@ -1277,7 +1289,7 @@ app.get("/api/admin/stats/pincodes", auth, adminMiddlle, asyncHandler(async (req
 
 // new one
 // 1. CREATE RAZORPAY ORDER (Handles both Fresh and Retry)
-app.post("/payments/razorpay/create-order", auth, asyncHandler(async (req, res) => {
+app.post("/api/payments/razorpay/create-order", auth, asyncHandler(async (req, res) => {
     const { orderId } = req.body;
     await connectDB();
 
@@ -1305,7 +1317,7 @@ app.post("/payments/razorpay/create-order", auth, asyncHandler(async (req, res) 
 }));
 
 // 2. VERIFY PAYMENT
-app.post("/payments/razorpay/verify", auth, asyncHandler(async (req, res) => {
+app.post("/api/payments/razorpay/verify", auth, asyncHandler(async (req, res) => {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
 
    
@@ -1401,7 +1413,7 @@ const verifyPayment = async (req, res) => {
 
 
 // payments.js
-app.post("/payments/razorpay/payment-failed", auth, asyncHandler(async (req, res) => {
+app.post("/api/payments/razorpay/payment-failed", auth, asyncHandler(async (req, res) => {
     const { orderId, errorDescription } = req.body;
     await connectDB();
     
@@ -1417,7 +1429,7 @@ app.post("/payments/razorpay/payment-failed", auth, asyncHandler(async (req, res
 
 // Get all orders for logged-in user
 app.get(
-  "/orders",
+  "/api/orders",
   auth,
   asyncHandler(async (req, res) => {
     await connectDB();
@@ -1431,7 +1443,7 @@ app.get(
 
 // add code for invoice generation
 app.get(
-  "/orders/:orderId/invoice",
+  "/api/orders/:orderId/invoice",
   auth,
   asyncHandler(async (req, res) => {
     await connectDB();
