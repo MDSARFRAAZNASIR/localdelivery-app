@@ -121,15 +121,18 @@ jobs:
           script: |
             set -e
 
-            echo "Starting deployment..."
-
             cd /opt/localdelivery
 
+            VERSION="${{ github.sha }}"
+
+            echo "Deploying version: $VERSION"
+
+            export IMAGE_TAG="$VERSION"
+
             echo "Pulling Docker images..."
-            export IMAGE_TAG=${{ github.sha }}
             docker compose pull
 
-            echo "Restarting application..."
+            echo "Starting application..."
             docker compose up -d
 
             echo "Waiting for backend..."
@@ -141,10 +144,12 @@ jobs:
             echo "Checking production health..."
             curl -fsS https://mayadelivery.online/health
 
-            echo ""
+            echo "Saving deployed version..."
+            echo "$VERSION" > deployed_version
+
             echo "Running containers:"
             docker compose ps
 
-            echo "Deployment successful!"
+            echo "Deployment successful: $VERSION"
 
   
