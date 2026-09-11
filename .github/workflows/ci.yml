@@ -104,10 +104,8 @@ jobs:
   deploy:
     name: Deploy to Hostinger VPS
     runs-on: ubuntu-latest
-
     needs:
       - docker
-
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
@@ -118,6 +116,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
+
           script: |
             set -e
 
@@ -125,31 +124,119 @@ jobs:
 
             VERSION="${{ github.sha }}"
 
-            echo "Deploying version: $VERSION"
+            echo "======================================"
+            echo "Starting deployment"
+            echo "New version: $VERSION"
+            echo "======================================"
+
+            # ---------------------------------------
+            # 1. Save current production version
+            # ---------------------------------------
+
+            if [ ! -f deployed_version ]; then
+              echo "ERROR: deployed_version does not exist"
+              exit 1
+            fi
+
+            CURRENT_VERSION=$(cat deployed_version)
+
+            echo "Current production version: $CURRENT_VERSION"
+
+            echo "$CURRENT_VERSION" > previous_version
+
+            # ---------------------------------------
+            # 2. Pull new Docker images
+            # ---------------------------------------
 
             export IMAGE_TAG="$VERSION"
 
             echo "Pulling Docker images..."
-            docker compose pull
+
+            if ! docker compose pull; then
+              echo ""
+              echo "======================================"
+              echo "DEPLOYMENT FAILED"
+              echo "Docker image pull failed"
+              echo "Starting automatic rollback..."
+              echo "======================================"
+
+              ./rollback.sh
+              exit 1
+            fi
+
+            # ---------------------------------------
+            # 3. Start new containers
+            # ---------------------------------------
 
             echo "Starting application..."
-            docker compose up -d
 
-            echo "Waiting for backend..."
+            if ! docker compose up -d; then
+              echo ""
+              echo "======================================"
+              echo "DEPLOYMENT FAILED"
+              echo "Container startup failed"
+              echo "Starting automatic rollback..."
+              echo "======================================"
+
+              ./rollback.sh
+              exit 1
+            fi
+
+            # ---------------------------------------
+            # 4. Backend health check
+            # ---------------------------------------
+
+            echo "Waiting for backend health..."
             sleep 10
 
             echo "Checking backend health..."
-            curl -fsS http://localhost:5000/health
 
-            echo "Checking production health..."
-            curl -fsS https://mayadelivery.online/health
+            if ! curl -fsS http://localhost:5000/health; then
+              echo ""
+              echo "======================================"
+              echo "DEPLOYMENT FAILED"
+              echo "Backend health check failed"
+              echo "Starting automatic rollback..."
+              echo "======================================"
 
-            echo "Saving deployed version..."
+              ./rollback.sh
+              exit 1
+            fi
+
+            echo ""
+            echo "Backend health check passed."
+
+            # ---------------------------------------
+            # 5. Public HTTPS health check
+            # ---------------------------------------
+
+            echo "Checking production HTTPS health..."
+
+            if ! curl -fsS https://mayadelivery.online/health; then
+              echo ""
+              echo "======================================"
+              echo "DEPLOYMENT FAILED"
+              echo "Production HTTPS health check failed"
+              echo "Starting automatic rollback..."
+              echo "======================================"
+
+              ./rollback.sh
+              exit 1
+            fi
+
+            echo ""
+            echo "Production HTTPS health check passed."
+
+            # ---------------------------------------
+            # 6. Mark deployment successful
+            # ---------------------------------------
+
             echo "$VERSION" > deployed_version
 
-            echo "Running containers:"
+            echo ""
+            echo "======================================"
+            echo "DEPLOYMENT SUCCESSFUL"
+            echo "Version: $VERSION"
+            echo "======================================"
+
             docker compose ps
-
-            echo "Deployment successful: $VERSION"
-
-  
