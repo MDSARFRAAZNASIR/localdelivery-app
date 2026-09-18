@@ -1,0 +1,3 @@
+vps_plan       = "KVM 2"
+data_center_id = 13
+template_id    = 1121
