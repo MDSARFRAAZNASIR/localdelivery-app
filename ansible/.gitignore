@@ -1,0 +1,6 @@
+# Ansible private/local files
+*.pem
+*.key
+*_vps
+id_*
+*.retry
