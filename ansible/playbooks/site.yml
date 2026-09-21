@@ -24,3 +24,29 @@
           - "CPU cores: {{ ansible_facts['processor_vcpus'] }}"
           - "Memory: {{ ansible_facts['memtotal_mb'] }} MB"
           - "Python: {{ ansible_facts['python']['executable'] }}"
+    - name: Check Docker version
+      ansible.builtin.command: docker --version
+      register: docker_version
+      changed_when: false
+
+    - name: Display Docker version
+      ansible.builtin.debug:
+        msg: "{{ docker_version.stdout }}"
+
+    - name: Check Docker Compose version
+      ansible.builtin.command: docker compose version
+      register: compose_version
+      changed_when: false
+
+    - name: Display Docker Compose version
+      ansible.builtin.debug:
+        msg: "{{ compose_version.stdout }}"
+
+    - name: Check Docker service status
+      ansible.builtin.command: systemctl is-active docker
+      register: docker_service
+      changed_when: false
+
+    - name: Display Docker service status
+      ansible.builtin.debug:
+        msg: "Docker service: {{ docker_service.stdout }}"
