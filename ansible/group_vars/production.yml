@@ -1,0 +1,10 @@
+---
+deployment_environment: production
+application_name: localdelivery
+server_hostname: srv1948884
+
+docker_compose_directory: /opt/localdelivery
+monitoring_directory: /opt/monitoring
+
+backend_port: 5000
+frontend_port: 8080

@@ -3,8 +3,20 @@
   hosts: production
   gather_facts: true
 
+  vars_files:
+    - ../group_vars/production.yml
+
   tasks:
-    - name: Display server information
+    - name: Display environment information
+      ansible.builtin.debug:
+        msg:
+          - "Environment: {{ deployment_environment }}"
+          - "Application: {{ application_name }}"
+          - "Server: {{ server_hostname }}"
+          - "Docker Compose directory: {{ docker_compose_directory }}"
+          - "Monitoring directory: {{ monitoring_directory }}"
+
+    - name: Display server facts
       ansible.builtin.debug:
         msg:
           - "Hostname: {{ ansible_facts['hostname'] }}"
