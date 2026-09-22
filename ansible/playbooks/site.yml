@@ -62,3 +62,15 @@
         msg:
           - "Docker service state: {{ docker_service_management.state | default('running') }}"
           - "Docker service changed: {{ docker_service_management.changed }}"
+    - name: Create Ansible managed marker
+      become: true
+      ansible.builtin.copy:
+        content: "LocalDelivery Ansible managed server\n"
+        dest: /tmp/localdelivery-ansible-managed
+        mode: "0644"
+      notify: Marker file changed
+
+  handlers:
+    - name: Marker file changed
+      ansible.builtin.debug:
+        msg: "Handler executed because the managed file changed."
