@@ -50,3 +50,15 @@
     - name: Display Docker service status
       ansible.builtin.debug:
         msg: "Docker service: {{ docker_service.stdout }}"
+    - name: Ensure Docker service is running
+      become: true
+      ansible.builtin.service:
+        name: docker
+        state: started
+      register: docker_service_management
+
+    - name: Display Docker management result
+      ansible.builtin.debug:
+        msg:
+          - "Docker service state: {{ docker_service_management.state | default('running') }}"
+          - "Docker service changed: {{ docker_service_management.changed }}"
