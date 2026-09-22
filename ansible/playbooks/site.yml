@@ -62,6 +62,23 @@
         msg:
           - "Docker service state: {{ docker_service_management.state | default('running') }}"
           - "Docker service changed: {{ docker_service_management.changed }}"
+    - name: Ensure LocalDelivery directory exists
+      become: true
+      ansible.builtin.file:
+        path: "{{ docker_compose_directory }}"
+        state: directory
+        owner: deploy
+        group: deploy
+        mode: "0755"
+
+    - name: Ensure monitoring directory exists
+      become: true
+      ansible.builtin.file:
+        path: "{{ monitoring_directory }}"
+        state: directory
+        owner: deploy
+        group: deploy
+        mode: "0755"
     - name: Create Ansible managed marker
       become: true
       ansible.builtin.copy:
