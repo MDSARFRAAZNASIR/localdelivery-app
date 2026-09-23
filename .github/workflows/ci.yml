@@ -240,3 +240,42 @@ jobs:
             echo "======================================"
 
             docker compose ps
+
+  ansible-production:
+    name: Ansible Production Validation
+    runs-on: ubuntu-latest
+    needs:
+      - deploy
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' '${{ secrets.VPS_SSH_KEY }}' > ~/.ssh/localdelivery_vps
+          chmod 600 ~/.ssh/localdelivery_vps
+
+      - name: Add VPS host key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Install Ansible
+        run: |
+          python3 -m pip install --user ansible
+          ansible-galaxy collection install community.docker
+
+      - name: Run Ansible production playbook
+        env:
+          ANSIBLE_PRIVATE_KEY_FILE: ~/.ssh/localdelivery_vps
+          ANSIBLE_BECOME_PASS: ${{ secrets.VPS_SUDO_PASSWORD }}
+          ANSIBLE_ROLES_PATH: ${{ github.workspace }}/ansible/roles
+        run: |
+          ansible-playbook \
+            -i ansible/inventory/hosts.ini \
+            --private-key "$ANSIBLE_PRIVATE_KEY_FILE" \
+            --become \
+            ansible/playbooks/site.yml
