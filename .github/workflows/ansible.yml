@@ -22,10 +22,11 @@ jobs:
         run: |
           python3 -m pip install --user ansible
 
-      - name: Run Ansible ping
+      - name: Run Ansible production playbook
         env:
           ANSIBLE_PRIVATE_KEY_FILE: ~/.ssh/localdelivery_vps
         run: |
-          ansible production -i ansible/inventory/hosts.ini \
+          ansible-playbook \
+            -i ansible/inventory/hosts.ini \
             --private-key "$ANSIBLE_PRIVATE_KEY_FILE" \
-            -m ping
+            ansible/playbooks/site.yml
