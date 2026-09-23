@@ -2,6 +2,9 @@ name: Ansible Production Check
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - devops/dockerization
 
 jobs:
   ansible:
