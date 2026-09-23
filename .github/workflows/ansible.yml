@@ -24,10 +24,12 @@ jobs:
       - name: Install Ansible
         run: |
           python3 -m pip install --user ansible
+          ansible-galaxy collection install community.docker
 
       - name: Run Ansible production playbook
         env:
           ANSIBLE_PRIVATE_KEY_FILE: ~/.ssh/localdelivery_vps
+          ANSIBLE_ROLES_PATH: ${{ github.workspace }}/ansible/roles
         run: |
           ansible-playbook \
             -i ansible/inventory/hosts.ini \
