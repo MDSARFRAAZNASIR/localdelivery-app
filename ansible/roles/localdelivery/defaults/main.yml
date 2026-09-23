@@ -2,4 +2,5 @@
 # Default variables for the LocalDelivery role
 
 localdelivery_marker_path: /tmp/localdelivery-role-managed
+localdelivery_health_host: 127.0.0.1
 localdelivery_health_path: /health
