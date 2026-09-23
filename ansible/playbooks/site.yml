@@ -112,14 +112,6 @@
       ansible.builtin.debug:
         msg: "Docker Compose configuration is valid."
       when: compose_validation.rc == 0
-    - name: Ensure LocalDelivery application is running
-      become: true
-      community.docker.docker_compose_v2:
-        project_src: "{{ docker_compose_directory }}"
-        state: present
-      environment:
-        IMAGE_TAG: "{{ deployed_image_tag }}"
-      register: localdelivery_compose
     - name: Create Ansible managed marker
       become: true
       ansible.builtin.copy:
