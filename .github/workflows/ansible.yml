@@ -1,0 +1,31 @@
+name: Ansible Production Check
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ansible:
+    name: Ansible Production Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' '${{ secrets.VPS_SSH_KEY }}' > ~/.ssh/localdelivery_vps
+          chmod 600 ~/.ssh/localdelivery_vps
+
+      - name: Install Ansible
+        run: |
+          python3 -m pip install --user ansible
+
+      - name: Run Ansible ping
+        env:
+          ANSIBLE_PRIVATE_KEY_FILE: ~/.ssh/localdelivery_vps
+        run: |
+          ansible production -i ansible/inventory/hosts.ini \
+            --private-key "$ANSIBLE_PRIVATE_KEY_FILE" \
+            -m ping
