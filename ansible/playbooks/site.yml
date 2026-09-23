@@ -1,0 +1,114 @@
+---
+- name: Inspect LocalDelivery production server
+  hosts: production
+  gather_facts: true
+
+  vars_files:
+    - ../group_vars/production.yml
+
+  roles:
+    - localdelivery
+
+
+  tasks:
+    - name: Display environment information
+      ansible.builtin.debug:
+        msg:
+          - "Environment: {{ deployment_environment }}"
+          - "Application: {{ application_name }}"
+          - "Server: {{ server_hostname }}"
+          - "Docker Compose directory: {{ docker_compose_directory }}"
+          - "Monitoring directory: {{ monitoring_directory }}"
+
+    - name: Display server facts
+      ansible.builtin.debug:
+        msg:
+          - "Hostname: {{ ansible_facts['hostname'] }}"
+          - "OS: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
+          - "CPU cores: {{ ansible_facts['processor_vcpus'] }}"
+          - "Memory: {{ ansible_facts['memtotal_mb'] }} MB"
+          - "Python: {{ ansible_facts['python']['executable'] }}"
+    - name: Check Docker version
+      ansible.builtin.command: docker --version
+      register: docker_version
+      changed_when: false
+
+    - name: Display Docker version
+      ansible.builtin.debug:
+        msg: "{{ docker_version.stdout }}"
+
+    - name: Check Docker Compose version
+      ansible.builtin.command: docker compose version
+      register: compose_version
+      changed_when: false
+
+    - name: Display Docker Compose version
+      ansible.builtin.debug:
+        msg: "{{ compose_version.stdout }}"
+    - name: Display backend health
+      ansible.builtin.debug:
+        msg: "Backend health: {{ backend_health.content }}"
+    - name: Display frontend health
+      ansible.builtin.debug:
+        msg: "Frontend HTTP status: {{ frontend_health.status }}"
+    - name: Display LocalDelivery deployment summary
+      ansible.builtin.debug:
+        msg:
+          - "======================================"
+          - "LocalDelivery Deployment Summary"
+          - "======================================"
+          - "Application: {{ application_name }}"
+          - "Environment: {{ deployment_environment }}"
+          - "Server: {{ server_hostname }}"
+          - "Deployed version: {{ deployed_image_tag }}"
+          - "Backend: HTTP {{ backend_health.status }}"
+          - "Frontend: HTTP {{ frontend_health.status }}"
+          - "======================================"
+
+    - name: Check Docker service status
+      ansible.builtin.command: systemctl is-active docker
+      register: docker_service
+      changed_when: false
+
+    - name: Display Docker service status
+      ansible.builtin.debug:
+        msg: "Docker service: {{ docker_service.stdout }}"
+    - name: Ensure Docker service is running
+      become: true
+      ansible.builtin.service:
+        name: docker
+        state: started
+      register: docker_service_management
+
+    - name: Display Docker management result
+      ansible.builtin.debug:
+        msg:
+          - "Docker service state: {{ docker_service_management.state | default('running') }}"
+          - "Docker service changed: {{ docker_service_management.changed }}"
+    - name: Ensure LocalDelivery directory exists
+      become: true
+      ansible.builtin.file:
+        path: "{{ docker_compose_directory }}"
+        state: directory
+        owner: deploy
+        group: deploy
+        mode: "0755"
+
+    - name: Ensure monitoring directory exists
+      become: true
+      ansible.builtin.file:
+        path: "{{ monitoring_directory }}"
+        state: directory
+        owner: deploy
+        group: deploy
+        mode: "0755"
+    - name: Validate LocalDelivery Docker Compose configuration
+      become: true
+      ansible.builtin.command:
+        cmd: docker compose -f "{{ docker_compose_file }}" config -q
+      register: compose_validation
+      changed_when: false
+    - name: Display Compose validation result
+      ansible.builtin.debug:
+        msg: "Docker Compose configuration is valid."
+      when: compose_validation.rc == 0
