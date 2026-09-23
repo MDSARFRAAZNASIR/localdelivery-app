@@ -48,13 +48,6 @@
     - name: Display backend health
       ansible.builtin.debug:
         msg: "Backend health: {{ backend_health.content }}"
-    - name: Check LocalDelivery frontend health
-      ansible.builtin.uri:
-        url: "http://127.0.0.1:{{ frontend_port }}"
-        method: GET
-        status_code: 200
-      register: frontend_health
-      changed_when: false
     - name: Display frontend health
       ansible.builtin.debug:
         msg: "Frontend HTTP status: {{ frontend_health.status }}"
