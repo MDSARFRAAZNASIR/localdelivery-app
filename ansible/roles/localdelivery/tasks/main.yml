@@ -17,3 +17,12 @@
       - backend_health.json.service == "localdelivery-backend"
     fail_msg: "Backend health response is invalid."
     success_msg: "Backend health response is valid."
+- name: Create LocalDelivery role marker
+  become: true
+  ansible.builtin.copy:
+    content: "LocalDelivery role managed by Ansible\n"
+    dest: /tmp/localdelivery-role-managed
+    owner: root
+    group: root
+    mode: "0644"
+  notify: LocalDelivery role configuration changed

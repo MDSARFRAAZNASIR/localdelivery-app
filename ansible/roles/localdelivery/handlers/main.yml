@@ -1,0 +1,4 @@
+---
+- name: LocalDelivery role configuration changed
+  ansible.builtin.debug:
+    msg: "LocalDelivery role handler executed because a managed configuration changed."
