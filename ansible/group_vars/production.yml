@@ -10,3 +10,4 @@ monitoring_directory: /opt/monitoring
 
 backend_port: 5000
 frontend_port: 8080
+localdelivery_marker_path: /tmp/localdelivery-role-managed
