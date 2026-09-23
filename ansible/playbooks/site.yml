@@ -41,6 +41,37 @@
     - name: Display Docker Compose version
       ansible.builtin.debug:
         msg: "{{ compose_version.stdout }}"
+    - name: Check LocalDelivery backend health
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ backend_port }}/health"
+        method: GET
+        status_code: 200
+        return_content: true
+      register: backend_health
+      changed_when: false
+      failed_when:
+        - backend_health.status != 200
+    - name: Display backend health
+      ansible.builtin.debug:
+        msg: "Backend health: {{ backend_health.content }}"
+    - name: Verify backend health response
+      ansible.builtin.assert:
+        that:
+          - backend_health.json.status == "ok"
+          - backend_health.json.service == "localdelivery-backend"
+        fail_msg: "Backend health response is invalid."
+        success_msg: "Backend health response is valid."
+    - name: Check LocalDelivery frontend health
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ frontend_port }}"
+        method: GET
+        status_code: 200
+      register: frontend_health
+      changed_when: false
+    - name: Display frontend health
+      ansible.builtin.debug:
+        msg: "Frontend HTTP status: {{ frontend_health.status }}"
+
     - name: Read currently deployed version
       become: true
       ansible.builtin.slurp:
