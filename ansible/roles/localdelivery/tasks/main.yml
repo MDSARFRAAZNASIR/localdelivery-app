@@ -24,6 +24,16 @@
     status_code: 200
   register: frontend_health
   changed_when: false
+- name: Read currently deployed version
+  become: true
+  ansible.builtin.slurp:
+    src: "{{ docker_compose_directory }}/deployed_version"
+  register: deployed_version_file
+  changed_when: false
+
+- name: Set deployed image tag
+  ansible.builtin.set_fact:
+    deployed_image_tag: "{{ deployed_version_file.content | b64decode | trim }}"
 - name: Create LocalDelivery role marker
   become: true
   ansible.builtin.copy:
@@ -32,4 +42,12 @@
     owner: root
     group: root
     mode: "0644"
+- name: Ensure LocalDelivery application is running
+  become: true
+  community.docker.docker_compose_v2:
+    project_src: "{{ docker_compose_directory }}"
+    state: present
+  environment:
+    IMAGE_TAG: "{{ deployed_image_tag }}"
+  register: localdelivery_compose
   notify: LocalDelivery role configuration changed

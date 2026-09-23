@@ -51,16 +51,6 @@
     - name: Display frontend health
       ansible.builtin.debug:
         msg: "Frontend HTTP status: {{ frontend_health.status }}"
-
-    - name: Read currently deployed version
-      become: true
-      ansible.builtin.slurp:
-        src: "{{ docker_compose_directory }}/deployed_version"
-      register: deployed_version_file
-      changed_when: false
-    - name: Set deployed image tag
-      ansible.builtin.set_fact:
-        deployed_image_tag: "{{ deployed_version_file.content | b64decode | trim }}"
     - name: Display LocalDelivery deployment summary
       ansible.builtin.debug:
         msg:
