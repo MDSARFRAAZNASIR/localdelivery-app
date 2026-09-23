@@ -20,6 +20,11 @@ jobs:
           mkdir -p ~/.ssh
           printf '%s\n' '${{ secrets.VPS_SSH_KEY }}' > ~/.ssh/localdelivery_vps
           chmod 600 ~/.ssh/localdelivery_vps
+          
+      - name: Add VPS host key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
 
       - name: Install Ansible
         run: |
