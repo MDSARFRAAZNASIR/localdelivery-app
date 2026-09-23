@@ -120,15 +120,6 @@
       environment:
         IMAGE_TAG: "{{ deployed_image_tag }}"
       register: localdelivery_compose
-    - name: Generate LocalDelivery configuration
-      become: true
-      ansible.builtin.template:
-        src: ../templates/localdelivery.conf.j2
-        dest: "{{ docker_compose_directory }}/localdelivery.conf"
-        owner: deploy
-        group: deploy
-        mode: "0644"
-      notify: Configuration template changed
     - name: Create Ansible managed marker
       become: true
       ansible.builtin.copy:
