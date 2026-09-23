@@ -1,0 +1,19 @@
+---
+# LocalDelivery application role
+
+- name: Check LocalDelivery backend health
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ backend_port }}/health"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: backend_health
+  changed_when: false
+
+- name: Verify backend health response
+  ansible.builtin.assert:
+    that:
+      - backend_health.json.status == "ok"
+      - backend_health.json.service == "localdelivery-backend"
+    fail_msg: "Backend health response is invalid."
+    success_msg: "Backend health response is valid."
