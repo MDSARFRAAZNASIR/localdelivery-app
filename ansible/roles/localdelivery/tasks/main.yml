@@ -3,7 +3,7 @@
 
 - name: Check LocalDelivery backend health
   ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ backend_port }}/health"
+    url: "http://127.0.0.1:{{ backend_port }}{{ localdelivery_health_path }}"
     method: GET
     status_code: 200
     return_content: true
