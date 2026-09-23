@@ -81,6 +81,19 @@
     - name: Set deployed image tag
       ansible.builtin.set_fact:
         deployed_image_tag: "{{ deployed_version_file.content | b64decode | trim }}"
+    - name: Display LocalDelivery deployment summary
+      ansible.builtin.debug:
+        msg:
+          - "======================================"
+          - "LocalDelivery Deployment Summary"
+          - "======================================"
+          - "Application: {{ application_name }}"
+          - "Environment: {{ deployment_environment }}"
+          - "Server: {{ server_hostname }}"
+          - "Deployed version: {{ deployed_image_tag }}"
+          - "Backend: HTTP {{ backend_health.status }}"
+          - "Frontend: HTTP {{ frontend_health.status }}"
+          - "======================================"
 
     - name: Check Docker service status
       ansible.builtin.command: systemctl is-active docker
