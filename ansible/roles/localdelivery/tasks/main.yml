@@ -51,6 +51,7 @@
     owner: root
     group: root
     mode: "0644"
+  notify: LocalDelivery role configuration changed
 - name: Ensure LocalDelivery application is running
   become: true
   community.docker.docker_compose_v2:
