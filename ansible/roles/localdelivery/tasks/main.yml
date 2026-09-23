@@ -21,7 +21,7 @@
   become: true
   ansible.builtin.copy:
     content: "LocalDelivery role managed by Ansible\n"
-    dest: /tmp/localdelivery-role-managed
+    dest: "{{ localdelivery_marker_path }}"
     owner: root
     group: root
     mode: "0644"

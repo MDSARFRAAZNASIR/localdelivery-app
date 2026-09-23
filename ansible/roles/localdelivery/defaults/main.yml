@@ -1,0 +1,4 @@
+---
+# Default variables for the LocalDelivery role
+
+localdelivery_marker_path: /tmp/localdelivery-role-managed
