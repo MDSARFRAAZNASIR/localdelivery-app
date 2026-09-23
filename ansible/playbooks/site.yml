@@ -41,6 +41,15 @@
     - name: Display Docker Compose version
       ansible.builtin.debug:
         msg: "{{ compose_version.stdout }}"
+    - name: Read currently deployed version
+      become: true
+      ansible.builtin.slurp:
+        src: "{{ docker_compose_directory }}/deployed_version"
+      register: deployed_version_file
+      changed_when: false
+    - name: Set deployed image tag
+      ansible.builtin.set_fact:
+        deployed_image_tag: "{{ deployed_version_file.content | b64decode | trim }}"
 
     - name: Check Docker service status
       ansible.builtin.command: systemctl is-active docker
@@ -79,6 +88,24 @@
         owner: deploy
         group: deploy
         mode: "0755"
+    - name: Validate LocalDelivery Docker Compose configuration
+      become: true
+      ansible.builtin.command:
+        cmd: docker compose -f "{{ docker_compose_file }}" config -q
+      register: compose_validation
+      changed_when: false
+    - name: Display Compose validation result
+      ansible.builtin.debug:
+        msg: "Docker Compose configuration is valid."
+      when: compose_validation.rc == 0
+    - name: Ensure LocalDelivery application is running
+      become: true
+      community.docker.docker_compose_v2:
+        project_src: "{{ docker_compose_directory }}"
+        state: present
+      environment:
+        IMAGE_TAG: "{{ deployed_image_tag }}"
+      register: localdelivery_compose
     - name: Generate LocalDelivery configuration
       become: true
       ansible.builtin.template:

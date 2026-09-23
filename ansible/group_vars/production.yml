@@ -4,6 +4,8 @@ application_name: localdelivery
 server_hostname: srv1948884
 
 docker_compose_directory: /opt/localdelivery
+docker_compose_file: "{{ docker_compose_directory }}/compose.yaml"
+
 monitoring_directory: /opt/monitoring
 
 backend_port: 5000
