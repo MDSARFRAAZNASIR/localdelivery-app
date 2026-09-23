@@ -2,6 +2,7 @@ terraform {
   required_version = ">= 1.16.0"
 
   cloud {
+    hostname = "app.terraform.io"
     organization = "localdelivery-devops"
 
     workspaces {
