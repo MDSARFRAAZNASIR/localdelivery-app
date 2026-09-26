@@ -1,0 +1,19 @@
+name: K6 API Performance
+
+on:
+  workflow_dispatch:
+
+jobs:
+  k6-performance:
+    name: K6 API Performance Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup k6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Run k6 products performance test
+        run: k6 run k6/ci-products-performance.js
