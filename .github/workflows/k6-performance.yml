@@ -7,10 +7,6 @@ jobs:
   k6-performance:
     name: K6 API Performance Test
     runs-on: ubuntu-latest
-jobs:
-  k6-performance:
-    name: K6 API Performance Test
-    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
