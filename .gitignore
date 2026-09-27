@@ -1,2 +1,4 @@
 .vercel
 .env*
+# k6 generated test results
+k6/results/

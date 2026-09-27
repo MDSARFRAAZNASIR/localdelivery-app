@@ -7,6 +7,10 @@ jobs:
   k6-performance:
     name: K6 API Performance Test
     runs-on: ubuntu-latest
+jobs:
+  k6-performance:
+    name: K6 API Performance Test
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
@@ -16,4 +20,14 @@ jobs:
         uses: grafana/setup-k6-action@v1
 
       - name: Run k6 products performance test
-        run: k6 run k6/ci-products-performance.js
+        run: |
+          mkdir -p k6/results
+          k6 run \
+            --summary-export=k6/results/products-performance-summary.json \
+            k6/ci-products-performance.js
+
+      - name: Upload k6 results
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-products-performance-results
+          path: k6/results/products-performance-summary.json
