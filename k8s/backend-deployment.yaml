@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: mdsarfraaznasir/localdelivery-backend:latest
+          image: mdsarfraaznasir/localdelivery-backend:3ce166305b2f9a4198ae42d172f08c92addb488e
 
           ports:
             - containerPort: 5000
