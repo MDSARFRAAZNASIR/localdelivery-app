@@ -6,7 +6,7 @@ metadata:
   namespace: localdelivery
 
 spec:
-  replicas: 1
+  replicas: 2
 
   selector:
     matchLabels:
@@ -26,6 +26,8 @@ spec:
             - containerPort: 5000
 
           envFrom:
+            - configMapRef:
+                name: localdelivery-backend-config
             - secretRef:
                 name: localdelivery-backend-secret
 
@@ -52,5 +54,4 @@ spec:
               memory: "64Mi"
             limits:
               cpu: "500m"
-              memory: "512Mi"
-                      
+              memory: "512Mi"                      
