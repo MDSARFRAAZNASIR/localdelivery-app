@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: localdelivery-frontend
+  namespace: localdelivery
+
+spec:
+  selector:
+    app: localdelivery-frontend
+
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+
+  type: ClusterIP

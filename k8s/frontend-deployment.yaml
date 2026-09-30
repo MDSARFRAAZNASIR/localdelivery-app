@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: localdelivery-frontend
+  namespace: localdelivery
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: localdelivery-frontend
+
+  template:
+    metadata:
+      labels:
+        app: localdelivery-frontend
+
+    spec:
+      containers:
+        - name: frontend
+          image: mdsarfraaznasir/localdelivery-frontend:latest
+
+          ports:
+            - containerPort: 80
+
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: localdelivery-frontend-nginx

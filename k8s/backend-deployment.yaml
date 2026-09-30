@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: localdelivery-backend
+  namespace: localdelivery
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: localdelivery-backend
+
+  template:
+    metadata:
+      labels:
+        app: localdelivery-backend
+
+    spec:
+      containers:
+        - name: backend
+          image: mdsarfraaznasir/localdelivery-backend:latest
+
+          ports:
+            - containerPort: 5000
+
+          envFrom:
+            - secretRef:
+                name: localdelivery-backend-secret
