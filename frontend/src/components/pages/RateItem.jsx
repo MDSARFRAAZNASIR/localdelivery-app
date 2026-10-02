@@ -12,11 +12,13 @@ export default function RateItem() {
   const [hover, setHover] = useState(0);
   const [review, setReview] = useState("");
   const [submitting, setSubmitting] = useState(false);
+const REACT_APP_API_BASE = process.env.REACT_APP_API || "/api";
+
 
   useEffect(() => {
     const fetchItemDetails = async () => {
       try {
-        const res = await fetch(`https://localdelivery-app-backend.vercel.app/orders/${orderId}`, {
+        const res = await fetch(`${REACT_APP_API_BASE}/orders/${orderId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -30,7 +32,7 @@ export default function RateItem() {
       }
     };
     fetchItemDetails();
-  }, [orderId, productId, token]);
+  }, [orderId, productId, token,REACT_APP_API_BASE ]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,7 +40,7 @@ export default function RateItem() {
 
     setSubmitting(true);
     try {
-      const res = await fetch(`https://localdelivery-app-backend.vercel.app/rate-product`, {
+      const res = await fetch(`${REACT_APP_API_BASE}/rate-product`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

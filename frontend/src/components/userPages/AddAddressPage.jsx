@@ -15,10 +15,12 @@ export default function AddAddressPage() {
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
+const REACT_APP_API_BASE = process.env.REACT_APP_API || "/api";
+
 
   const submit = async () => {
     const res = await fetch(
-      "https://localdelivery-app-backend.vercel.app/user/addresses",
+      `${REACT_APP_API_BASE}/user/addresses`,
       {
         method: "POST",
         headers: {

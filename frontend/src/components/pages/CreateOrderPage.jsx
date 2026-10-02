@@ -18,6 +18,8 @@ export default function CreateOrderPage() {
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
+const REACT_APP_API_BASE = process.env.REACT_APP_API || "/api";
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,7 +34,7 @@ export default function CreateOrderPage() {
 
     try {
       const res = await fetch(
-        "https://localdelivery-app-backend.vercel.app/orders",
+        `${REACT_APP_API_BASE}/orders`,
         {
           method: "POST",
           headers: {

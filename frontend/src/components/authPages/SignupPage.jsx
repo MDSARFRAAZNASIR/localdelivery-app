@@ -13,6 +13,7 @@ export default function SignupPage() {
   const [forgotEmail, setForgotEmail] = useState("");
   const [showForgot, setShowForgot] = useState(false);
   const { setLoading } = useLoading();
+const REACT_APP_API_BASE = process.env.REACT_APP_API || "/api";
 
   // add another
   const userSignInHandler = async () => {
@@ -26,7 +27,8 @@ export default function SignupPage() {
       setLoading(true);
 
       const resp = await fetch(
-        "https://localdelivery-app-backend.vercel.app/userregister",
+        `${REACT_APP_API_BASE}/userregister`,
+        
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

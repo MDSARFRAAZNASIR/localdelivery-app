@@ -8,11 +8,13 @@ export default function InvoicePage() {
   const [loading, setLoading] = useState(true);
 
   const token = localStorage.getItem("token");
+const REACT_APP_API_BASE = process.env.REACT_APP_API || "/api";
+
 
   useEffect(() => {
     const fetchInvoice = async () => {
       const res = await fetch(
-        `https://localdelivery-app-backend.vercel.app/orders/${orderId}/invoice`,
+        `${REACT_APP_API_BASE}/orders/${orderId}/invoice`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -22,7 +24,7 @@ export default function InvoicePage() {
       setLoading(false);
     };
     fetchInvoice();
-  }, [orderId, token]);
+  }, [orderId, token,REACT_APP_API_BASE]);
 
   if (loading) return <div className="p-6">Loading invoice...</div>;
   if (!invoice) return <div className="p-6">Invoice not found</div>;

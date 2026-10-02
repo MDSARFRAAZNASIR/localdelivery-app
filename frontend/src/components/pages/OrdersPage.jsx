@@ -11,6 +11,8 @@ export default function OrdersPage() {
   
 
   const { t } = useContext(LanguageContext);
+const REACT_APP_API_BASE = process.env.REACT_APP_API || "/api";
+
   
 
   const navigate = useNavigate();
@@ -27,7 +29,7 @@ export default function OrdersPage() {
         setLoading(true);
         setError("");
         const res = await fetch(
-          "https://localdelivery-app-backend.vercel.app/orders",
+          `${REACT_APP_API_BASE}/orders`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
@@ -45,7 +47,7 @@ export default function OrdersPage() {
       }
     };
     fetchOrders();
-  }, [token, navigate]);
+  }, [token, navigate, REACT_APP_API_BASE]);
 
   // --- EXISTING SEARCH & FILTER LOGIC ---
   
@@ -105,7 +107,7 @@ export default function OrdersPage() {
     try {
       // Step 1: Tell backend to generate a NEW Razorpay ID for this OLD order
       const res = await fetch(
-        "https://localdelivery-app-backend.vercel.app/payments/razorpay/create-order",
+        `${REACT_APP_API_BASE}/payments/razorpay/create-order`,
         {
           method: "POST",
           headers: {
@@ -129,7 +131,7 @@ export default function OrdersPage() {
         handler: async (response) => {
           // Step 2: Send the new payment details back for verification
           const verifyRes = await fetch(
-            "https://localdelivery-app-backend.vercel.app/payments/razorpay/verify",
+            `${REACT_APP_API_BASE}/payments/razorpay/verify`,
             {
               method: "POST",
               headers: {
@@ -169,7 +171,7 @@ export default function OrdersPage() {
 
         // Update backend to 'FAILED'
         await fetch(
-          `https://your-backend.vercel.app/payments/razorpay/payment-failed`,
+          `${REACT_APP_API_BASE}/payments/razorpay/payment-failed`,
           {
             method: "POST",
             headers: {
