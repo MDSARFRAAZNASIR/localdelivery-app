@@ -21,6 +21,8 @@ export default function ProductsPage() {
   });
 
       const { t } = useContext(LanguageContext);
+const REACT_APP_API_BASE = process.env.REACT_APP_API || "/api";
+
   
 
   // --- REINSTATED FILTER/SEARCH STATES ---
@@ -62,7 +64,7 @@ export default function ProductsPage() {
         params.append("page", page);
         params.append("limit", limit);
 
-        const url = `https://localdelivery-app-backend.vercel.app/products?${params.toString()}`;
+        const url = `${REACT_APP_API_BASE}/products?${params.toString()}`;
         const res = await fetch(url);
         const data = await res.json();
 
@@ -84,7 +86,7 @@ export default function ProductsPage() {
     return () => {
       alive = false;
     };
-  }, [selectedCategory, query, sort, page]); // All dependencies restored
+  }, [selectedCategory, query, sort, page, REACT_APP_API_BASE]); // All dependencies restored
 
   // --- CART LOGIC ---
   const updateQuantity = (product, delta) => {
@@ -440,11 +442,13 @@ export default function ProductsPage() {
 
 function MobileCategories({ setSelectedCategory, setPage, current }) {
   const [cats, setCats] = useState([]);
+const REACT_APP_API_BASE = process.env.REACT_APP_API || "/api";
+
   useEffect(() => {
     (async () => {
       try {
         const res = await fetch(
-          "https://localdelivery-app-backend.vercel.app/categories",
+          `${REACT_APP_API_BASE}/categories`,
         );
         const data = await res.json();
         if (data.success) setCats(data.categories || []);
@@ -452,7 +456,7 @@ function MobileCategories({ setSelectedCategory, setPage, current }) {
         console.error(e);
       }
     })();
-  }, []);
+  }, [REACT_APP_API_BASE]);
   return (
     <>
       {cats.map((c) => (

@@ -13,6 +13,8 @@ export default function ProfilePage() {
   const [error, setError] = useState("");
   const [isEditing, setIsEditing] = useState(false); // New: Toggle for edit mode
   const { t } = useContext(LanguageContext);
+const REACT_APP_API_BASE = process.env.REACT_APP_API || "/api";
+
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -27,7 +29,7 @@ export default function ProfilePage() {
         setLoading(true);
         setError("");
         const res = await fetch(
-          "https://localdelivery-app-backend.vercel.app/user/profile",
+          `${REACT_APP_API_BASE }/user/profile`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
@@ -55,7 +57,7 @@ export default function ProfilePage() {
     };
 
     fetchProfile();
-  }, [token, navigate]);
+  }, [token, navigate,REACT_APP_API_BASE ]);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -70,7 +72,7 @@ export default function ProfilePage() {
 
     try {
       const res = await fetch(
-        "https://localdelivery-app-backend.vercel.app/user/profile",
+        `${REACT_APP_API_BASE }/user/profile`,
         {
           method: "PUT",
           headers: {

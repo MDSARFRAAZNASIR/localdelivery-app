@@ -24,6 +24,8 @@ export default function AdminOrdersPage() {
   const [statusFilter, setStatusFilter] = useState("ALL"); // 🔍 New: Filter
 
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+const REACT_APP_API_BASE = process.env.REACT_APP_API || "/api";
+  
 
   const requestPermission = async () => {
     try {
@@ -40,9 +42,11 @@ export default function AdminOrdersPage() {
         console.log("Admin Notification Token:", token);
 
         // --- 🔗 LINKING TO YOUR VERCEL BACKEND ---
-        const backendUrl = "https://localdelivery-app-backend.vercel.app";
+        // const backendUrl = "https://localdelivery-app-backend.vercel.app";
+const REACT_APP_API_BASE = process.env.REACT_APP_API || "/api";
 
-        const response = await fetch(`${backendUrl}/api/subscribe-admin`, {
+
+        const response = await fetch(`${REACT_APP_API_BASE}subscribe-admin`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -72,7 +76,7 @@ export default function AdminOrdersPage() {
     try {
       // Don't set loading(true) during auto-refresh to prevent flickering
       const res = await fetch(
-        "https://localdelivery-app-backend.vercel.app/admin/orders",
+        `${REACT_APP_API_BASE}/admin/orders`,
         { headers: { Authorization: `Bearer ${token}` } },
       );
       const data = await res.json();
@@ -83,7 +87,7 @@ export default function AdminOrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [token, REACT_APP_API_BASE]);
 
   useEffect(() => {
     fetchOrders();
@@ -94,7 +98,7 @@ export default function AdminOrdersPage() {
   const updateStatus = async (orderId, status) => {
     try {
       const res = await fetch(
-        `https://localdelivery-app-backend.vercel.app/admin/orders/${orderId}/status`,
+        `${REACT_APP_API_BASE}/admin/orders/${orderId}/status`,
         {
           method: "PUT",
           headers: {

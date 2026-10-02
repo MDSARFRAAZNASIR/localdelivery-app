@@ -5,6 +5,8 @@ import React, { useEffect, useState ,useContext} from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../pages/Navbar";
 import { LanguageContext } from "../../context/LanguageContext";
+const REACT_APP_API_BASE = process.env.REACT_APP_API || "/api";
+
 
 
 export default function UserDashboard() {
@@ -70,7 +72,7 @@ export default function UserDashboard() {
     const fetchProfile = async () => {
       setLoading(true);
       try {
-        const res = await fetch("https://localdelivery-app-backend.vercel.app/user/profile", {
+        const res = await fetch(`${REACT_APP_API_BASE}/user/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -87,7 +89,7 @@ export default function UserDashboard() {
     const fetchOrders = async () => {
       setOrdersLoading(true);
       try {
-        const res = await fetch("https://localdelivery-app-backend.vercel.app/orders", {
+        const res = await fetch(`${REACT_APP_API_BASE}/orders`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();

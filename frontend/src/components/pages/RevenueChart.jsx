@@ -4,14 +4,16 @@ import axios from 'axios';
 
 const RevenueChart = () => {
   const [data, setData] = useState([]);
+const REACT_APP_API_BASE = process.env.REACT_APP_API || "/api";
+
 
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const backendUrl = "https://localdelivery-app-backend.vercel.app";
+        // const backendUrl = `${REACT_APP_API_BASE}`;
 
-        const { data } = await axios.get(`${backendUrl}/admin/stats/revenue`, {
+        const { data } = await axios.get(`${REACT_APP_API_BASE}/admin/stats/revenue`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
         });
         
@@ -28,7 +30,7 @@ const RevenueChart = () => {
       }
     };
     fetchStats();
-  }, []);
+  }, [REACT_APP_API_BASE]);
 
   return (
     <div style={{ width: '100%', height: 300, backgroundColor: '#fff', padding: '20px', borderRadius: '10px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>

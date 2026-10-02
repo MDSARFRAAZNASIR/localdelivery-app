@@ -18,6 +18,8 @@ export default function CartPage() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
    const { t } = useContext(LanguageContext);
+const REACT_APP_API_BASE = process.env.REACT_APP_API || "/api";
+
 
   // ------------------ LOAD CART ------------------
   useEffect(() => {
@@ -36,7 +38,7 @@ export default function CartPage() {
     const fetchAddresses = async () => {
       try {
         const res = await fetch(
-          "https://localdelivery-app-backend.vercel.app/user/addresses",
+          `${REACT_APP_API_BASE}/user/addresses`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
@@ -53,7 +55,7 @@ export default function CartPage() {
       }
     };
     fetchAddresses();
-  }, [token]);
+  }, [token, REACT_APP_API_BASE]);
 
   // ------------------ SERVICE AREA CHECK ------------------
   const selectedAddress = addresses.find((a) => a._id === selectedAddressId);
@@ -66,7 +68,7 @@ export default function CartPage() {
       setCheckingArea(true);
       try {
         const res = await fetch(
-          `https://localdelivery-app-backend.vercel.app/service-area/check?pincode=${selectedAddress.pincode}`,
+          `${REACT_APP_API_BASE}/service-area/check?pincode=${selectedAddress.pincode}`,
         );
         const data = await res.json();
         setServiceArea(data);
@@ -77,7 +79,7 @@ export default function CartPage() {
       }
     };
     checkArea();
-  }, [selectedAddress]);
+  }, [selectedAddress, REACT_APP_API_BASE]);
 
   // ------------------ CART HELPERS ------------------
   const updateCart = (newCart) => {
@@ -145,7 +147,7 @@ export default function CartPage() {
     try {
       // 1. CREATE ORDER IN DATABASE
       const res = await fetch(
-        "https://localdelivery-app-backend.vercel.app/orders",
+        `${REACT_APP_API_BASE}/orders`,
         {
           method: "POST",
           headers: {
@@ -195,7 +197,7 @@ export default function CartPage() {
     try {
       // Fetch the Razorpay Order ID from your backend
       const res = await fetch(
-        "https://localdelivery-app-backend.vercel.app/payments/razorpay/create-order",
+        `${REACT_APP_API_BASE}/payments/razorpay/create-order`,
         {
           method: "POST",
           headers: {
@@ -228,7 +230,7 @@ export default function CartPage() {
           // VERIFY PAYMENT
           
           const verifyRes = await fetch(
-            "https://localdelivery-app-backend.vercel.app/payments/razorpay/verify",
+            `${REACT_APP_API_BASE}/payments/razorpay/verify`,
             {
               method: "POST",
               headers: {
@@ -266,7 +268,7 @@ export default function CartPage() {
   console.log("Payment failed or cancelled");
   
   // Optional: Call your backend to delete the pending order
-  await fetch(`https://localdelivery-app-backend.vercel.app/orders/${orderId}`, {
+  await fetch(`${REACT_APP_API_BASE}/orders/${orderId}`, {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${token}` }
   });

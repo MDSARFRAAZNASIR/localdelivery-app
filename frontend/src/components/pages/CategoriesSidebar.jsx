@@ -5,6 +5,8 @@ export default function CategoriesSidebar({ selected, onSelect }) {
   const [cats, setCats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
+const REACT_APP_API_BASE = process.env.REACT_APP_API || "/api";
+
 
   useEffect(() => {
     let mounted = true;
@@ -12,7 +14,7 @@ export default function CategoriesSidebar({ selected, onSelect }) {
       try {
         setLoading(true);
         setErr("");
-        const res = await fetch("https://localdelivery-app-backend.vercel.app/categories");
+        const res = await fetch(`${REACT_APP_API_BASE}/categories`);
         const data = await res.json();
         if (!res.ok || !data.success) throw new Error(data.message || "Failed to load categories");
         if (mounted) setCats(data.categories || []);
@@ -23,7 +25,7 @@ export default function CategoriesSidebar({ selected, onSelect }) {
     };
     fetchCats();
     return () => { mounted = false; };
-  }, []);
+  }, [REACT_APP_API_BASE]);
 
   return (
     <aside className="w-full md:w-64 p-3 bg-white rounded-md shadow">

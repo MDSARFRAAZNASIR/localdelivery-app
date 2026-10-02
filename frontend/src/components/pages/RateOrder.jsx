@@ -12,12 +12,14 @@ export default function RateOrder() {
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [orderDate, setOrderDate] = useState("");
+const REACT_APP_API_BASE = process.env.REACT_APP_API || "/api";
+
 
   // Optional: Fetch order details to show what they are rating
   useEffect(() => {
     const fetchMinimalOrder = async () => {
       try {
-        const res = await fetch(`https://localdelivery-app-backend.vercel.app/user/orders/${orderId}`, {
+        const res = await fetch(`${REACT_APP_API_BASE}/user/orders/${orderId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -27,7 +29,7 @@ export default function RateOrder() {
       }
     };
     fetchMinimalOrder();
-  }, [orderId, token]);
+  }, [orderId, token, REACT_APP_API_BASE]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,7 +37,7 @@ export default function RateOrder() {
 
     setSubmitting(true);
     try {
-      const res = await fetch(`https://localdelivery-app-backend.vercel.app/user/orders/${orderId}/rate`, {
+      const res = await fetch(`${REACT_APP_API_BASE}/user/orders/${orderId}/rate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -5,10 +5,12 @@ export default function AddressesPage() {
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
+const REACT_APP_API_BASE = process.env.REACT_APP_API || "/api";
+
 
   const fetchAddresses = async () => {
     const res = await fetch(
-      "https://localdelivery-app-backend.vercel.app/user/addresses",
+      `${REACT_APP_API_BASE}/user/addresses`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     const data = await res.json();
@@ -22,7 +24,7 @@ export default function AddressesPage() {
 
   const setDefault = async (id) => {
     await fetch(
-      `https://localdelivery-app-backend.vercel.app/user/addresses/${id}/default`,
+      `${REACT_APP_API_BASE}/user/addresses/${id}/default`,
       { method: "PUT", headers: { Authorization: `Bearer ${token}` } }
     );
     fetchAddresses();
@@ -31,7 +33,7 @@ export default function AddressesPage() {
   const deleteAddress = async (id) => {
     if (!window.confirm("Delete this address?")) return;
     await fetch(
-      `https://localdelivery-app-backend.vercel.app/user/addresses/${id}`,
+      `${REACT_APP_API_BASE}/user/addresses/${id}`,
       { method: "DELETE", headers: { Authorization: `Bearer ${token}` } }
     );
     fetchAddresses();

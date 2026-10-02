@@ -1,153 +1,3 @@
-// import { useEffect, useCallback, useState } from "react";
-// import Navbar from "../pages/Navbar";
-
-// export default function AdminServiceAreas() {
-//   const [areas, setAreas] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [form, setForm] = useState({
-//     pincode: "",
-//     areaName: "",
-//     deliveryFee: 0,
-//     isActive: true,
-//   });
-
-//   const token = localStorage.getItem("token");
-
-//   const fetchAreas = useCallback(async () => {
-//     try {
-//       setLoading(true);
-//       const res = await fetch(
-//         "https://localdelivery-app-backend.vercel.app/admin/service-areas",
-//         {
-//           headers: { Authorization: `Bearer ${token}` },
-//         },
-//       );
-//       const data = await res.json();
-//       if (res.ok) setAreas(data.areas || []);
-//     } finally {
-//       setLoading(false);
-//     }
-//   }, [token]);
-
-//   useEffect(() => {
-//     fetchAreas();
-//   }, [fetchAreas]);
-
-//   const saveArea = async () => {
-//     if (!form.pincode) return alert("Pincode required");
-
-//     const res = await fetch(
-//       "https://localdelivery-app-backend.vercel.app/admin/service-areas",
-//       {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//           Authorization: `Bearer ${token}`,
-//         },
-//         body: JSON.stringify(form),
-//       },
-//     );
-
-//     const data = await res.json();
-//     if (res.ok) {
-//       fetchAreas();
-//       setForm({ pincode: "", areaName: "", deliveryFee: 0, isActive: true });
-//     } else {
-//       alert(data.message);
-//     }
-//   };
-
-//   const deleteArea = async (id) => {
-//     if (!window.confirm("Delete this pincode?")) return;
-
-//     await fetch(
-//       `https://localdelivery-app-backend.vercel.app/admin/service-areas/${id}`,
-//       {
-//         method: "DELETE",
-//         headers: { Authorization: `Bearer ${token}` },
-//       },
-//     );
-//     fetchAreas();
-//   };
-
-//   return (
-//     <>
-//       <Navbar />
-//       <div className="max-w-4xl mx-auto p-4 sm:p-6">
-//         <h1 className="text-2xl font-bold mb-4">📍 Service Areas</h1>
-
-//         {/* ADD / UPDATE */}
-//         <div className="bg-white p-4 rounded shadow mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-//           <input
-//             placeholder="Pincode"
-//             value={form.pincode}
-//             onChange={(e) => setForm({ ...form, pincode: e.target.value })}
-//             className="border p-2 rounded"
-//           />
-//           <input
-//             placeholder="Area Name"
-//             value={form.areaName}
-//             onChange={(e) => setForm({ ...form, areaName: e.target.value })}
-//             className="border p-2 rounded"
-//           />
-//           <input
-//             type="number"
-//             placeholder="Delivery Fee"
-//             value={form.deliveryFee}
-//             onChange={(e) =>
-//               setForm({ ...form, deliveryFee: Number(e.target.value) })
-//             }
-//             className="border p-2 rounded"
-//           />
-//           <button
-//             onClick={saveArea}
-//             className="bg-green-600 text-white rounded px-4 py-2 w-full sm:w-auto"
-//           >
-//             Save
-//           </button>
-//         </div>
-
-//         {/* LIST */}
-//         {loading ? (
-//           <div>Loading...</div>
-//         ) : (
-//           // <table className="w-full border text-sm">
-//           <div className="overflow-x-auto">
-//             <table className="w-full min-w-[640px] border text-sm">
-//               <thead className="bg-gray-100">
-//                 <tr>
-//                   <th className="p-2 border">Pincode</th>
-//                   <th className="p-2 border">Area</th>
-//                   <th className="p-2 border">Fee</th>
-//                   <th className="p-2 border">Active</th>
-//                   <th className="p-2 border">Action</th>
-//                 </tr>
-//               </thead>
-//               <tbody>
-//                 {areas.map((a) => (
-//                   <tr key={a._id} className="text-center hover:bg-gray-50">
-//                     <td className="border p-2">{a.pincode}</td>
-//                     <td className="border p-2">{a.areaName}</td>
-//                     <td className="border p-2">₹{a.deliveryFee}</td>
-//                     <td className="border p-2">{a.isActive ? "✅" : "❌"}</td>
-//                     <td className="border p-2">
-//                       <button
-//                         onClick={() => deleteArea(a._id)}
-//                         className="text-red-600 text-sm px-2 py-1 rounded hover:bg-red-50"
-//                       >
-//                         Delete
-//                       </button>
-//                     </td>
-//                   </tr>
-//                 ))}
-//               </tbody>
-//             </table>
-//           </div>
-//         )}
-//       </div>
-//     </>
-//   );
-// }
 
 
 
@@ -167,12 +17,14 @@ export default function AdminServiceAreas() {
   });
 
   const token = localStorage.getItem("token");
+const REACT_APP_API_BASE = process.env.REACT_APP_API || "/api";
+
 
   const fetchAreas = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch(
-        "https://localdelivery-app-backend.vercel.app/admin/service-areas",
+        `${REACT_APP_API_BASE}/admin/service-areas`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -182,7 +34,7 @@ export default function AdminServiceAreas() {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [token, REACT_APP_API_BASE]);
 
   useEffect(() => {
     fetchAreas();
@@ -195,8 +47,8 @@ export default function AdminServiceAreas() {
     // If editingId exists, use PUT/PATCH (depending on your backend), otherwise POST
     const method = editingId ? "PUT" : "POST"; 
     const url = editingId 
-      ? `https://localdelivery-app-backend.vercel.app/admin/service-areas/${editingId}`
-      : "https://localdelivery-app-backend.vercel.app/admin/service-areas";
+      ? `${REACT_APP_API_BASE}/admin/service-areas/${editingId}`
+      : `${REACT_APP_API_BASE}/admin/service-areas`;
 
     const res = await fetch(url, {
       method: method,
@@ -218,7 +70,7 @@ export default function AdminServiceAreas() {
 
   // --- NEW: TOGGLE ACTIVE STATUS QUICKLY ---
   const toggleStatus = async (area) => {
-    const res = await fetch(`https://localdelivery-app-backend.vercel.app/admin/service-areas/${area._id}`, {
+    const res = await fetch(`${REACT_APP_API_BASE}/admin/service-areas/${area._id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -231,7 +83,7 @@ export default function AdminServiceAreas() {
 
   const deleteArea = async (id) => {
     if (!window.confirm("Delete this pincode?")) return;
-    await fetch(`https://localdelivery-app-backend.vercel.app/admin/service-areas/${id}`, {
+    await fetch(`${REACT_APP_API_BASE}/admin/service-areas/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });

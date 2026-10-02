@@ -43,6 +43,9 @@ const [canResend, setCanResend] = useState(false);
     pincode: "",
   });
 
+const REACT_APP_API_BASE = process.env.REACT_APP_API || "/api";
+
+
   // const token = localStorage.getItem("token");
   // const navigate = useNavigate();
 // ------------------ MOCK OTP FUNCTIONS ------------------
@@ -73,7 +76,7 @@ const [canResend, setCanResend] = useState(false);
   const fetchAddresses = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch("https://localdelivery-app-backend.vercel.app/user/addresses", {
+      const res = await fetch(`${REACT_APP_API_BASE }/user/addresses`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -91,7 +94,7 @@ const [canResend, setCanResend] = useState(false);
     } finally {
       setLoading(false);
     }
-  }, [token, navigate]);
+  }, [token, navigate, REACT_APP_API_BASE ]);
 
   useEffect(() => {
     if (!token) {
@@ -153,8 +156,8 @@ useEffect(() => {
     }
     try {
       const url = editingId
-        ? `https://localdelivery-app-backend.vercel.app/user/addresses/${editingId}`
-        : "https://localdelivery-app-backend.vercel.app/user/addresses";
+        ? `${REACT_APP_API_BASE}/user/addresses/${editingId}`
+        :`${REACT_APP_API_BASE}/user/addresses`;
 
       const method = editingId ? "PUT" : "POST";
 
@@ -179,7 +182,7 @@ useEffect(() => {
 
   const setDefault = async (id) => {
     try {
-      const res = await fetch(`https://localdelivery-app-backend.vercel.app/user/addresses/${id}/default`, {
+      const res = await fetch(`${REACT_APP_API_BASE }/user/addresses/${id}/default`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -194,7 +197,7 @@ useEffect(() => {
   const deleteAddress = async (id) => {
     if (!window.confirm("Delete this address?")) return;
     try {
-      const res = await fetch(`https://localdelivery-app-backend.vercel.app/user/addresses/${id}`, {
+      const res = await fetch(`${REACT_APP_API_BASE }/user/addresses/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
