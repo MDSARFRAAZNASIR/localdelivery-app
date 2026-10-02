@@ -51,6 +51,7 @@ app.use(
       "http://localhost:3000",
       "http://localhost:8081", // 👈 EXPO WEB
       "http://localhost:8080", // 👈 EXPO WEB
+      "https://mayadelivery.online",
       "http://127.0.0.1:8081",
       "https://purnia.store",
       "http://localhost:5173",
