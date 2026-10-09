@@ -9,13 +9,15 @@ export default function LogInPage() {
   const navigate = useNavigate();
   const { setLoading } = useLoading();
 
-const REACT_APP_API_BASE = process.env.REACT_APP_API || "/api";
+// const REACT_APP_API_BASE = process.env.REACT_APP_API || "/api";
 
   // add token
   const userLogInHandler = async () => {
     try {
       setLoading(true);
-        const res = await fetch(`${REACT_APP_API_BASE}/userlogin`,
+        // const res = await fetch(`${REACT_APP_API_BASE}/userlogin`,
+        const res = await fetch("https://localdelivery-app-backend.vercel.app/api/userlogin",
+
         {
           method: "POST",
           headers: {
